@@ -1,36 +1,37 @@
 {
-    "name": "magento/module-inventory-configurable-product",
-    "description": "N/A",
-    "require": {
-        "php": "~8.1.0||~8.2.0||~8.3.0",
-        "magento/framework": "*",
-        "magento/module-catalog": "*",
-        "magento/module-inventory-catalog": "*",
-        "magento/module-inventory-configuration": "*",
-        "magento/module-inventory-sales-api": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-inventory-indexer": "*",
-        "magento/module-store": "*",
-        "magento/module-catalog-inventory": "*",
-        "magento/module-sales": "*",
-        "magento/module-configurable-product": "*",
-        "magento/module-eav": "*"
-    },
-    "suggest": {
-        "magento/module-inventory": "*",
-        "magento/module-inventory-api": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-configurable-product",
+  "description": "N/A",
+  "require": {
+    "php": "~8.1.0||~8.2.0||~8.3.0",
+    "mage-os/framework": "1.0.2",
+    "mage-os/module-catalog": "1.0.2",
+    "mage-os/module-inventory-catalog": "1.0.2",
+    "mage-os/module-inventory-configuration": "1.0.2",
+    "mage-os/module-inventory-sales-api": "1.0.2",
+    "mage-os/module-inventory-catalog-api": "1.0.2",
+    "mage-os/module-inventory-indexer": "1.0.2",
+    "mage-os/module-store": "1.0.2",
+    "mage-os/module-catalog-inventory": "1.0.2",
+    "mage-os/module-sales": "1.0.2",
+    "mage-os/module-configurable-product": "1.0.2",
+    "mage-os/module-eav": "1.0.2"
+  },
+  "suggest": {
+    "mage-os/module-inventory": "1.0.2",
+    "mage-os/module-inventory-api": "1.0.2"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryConfigurableProduct\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryConfigurableProduct\\": ""
     }
+  },
+  "version": "1.0.2"
 }
