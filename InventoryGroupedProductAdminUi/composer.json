@@ -1,30 +1,34 @@
 {
-    "name": "magento/module-inventory-grouped-product-admin-ui",
-    "description": "N/A",
-    "require": {
-        "php": "~8.1.0||~8.2.0||~8.3.0",
-        "magento/framework": "*",
-        "magento/module-catalog": "*",
-        "magento/module-grouped-product": "*",
-        "magento/module-ui": "*",
-        "magento/module-inventory-api": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-inventory-catalog-admin-ui": "*"
-    },
-    "suggest": {
-        "magento/module-inventory-configuration-api": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-grouped-product-admin-ui",
+  "description": "N/A",
+  "require": {
+    "php": "~8.1.0||~8.2.0||~8.3.0",
+    "mage-os/framework": "1.0.3",
+    "mage-os/module-catalog": "1.0.3",
+    "mage-os/module-grouped-product": "1.0.3",
+    "mage-os/module-ui": "1.0.3",
+    "mage-os/module-inventory-api": "1.0.3",
+    "mage-os/module-inventory-catalog-api": "1.0.3",
+    "mage-os/module-inventory-catalog-admin-ui": "1.0.3"
+  },
+  "suggest": {
+    "mage-os/module-inventory-configuration-api": "1.0.3"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryGroupedProductAdminUi\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryGroupedProductAdminUi\\": ""
     }
+  },
+  "version": "1.0.3",
+  "replace": {
+    "magento/module-inventory-grouped-product-admin-ui": "1.2.4"
+  }
 }

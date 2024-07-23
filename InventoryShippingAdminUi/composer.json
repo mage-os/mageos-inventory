@@ -1,29 +1,33 @@
 {
-    "name": "magento/module-inventory-shipping-admin-ui",
-    "description": "N/A",
-    "require": {
-        "php": "~8.1.0||~8.2.0||~8.3.0",
-        "magento/framework": "*",
-        "magento/module-backend": "*",
-        "magento/module-inventory-api": "*",
-        "magento/module-inventory-configuration-api": "*",
-        "magento/module-inventory-sales-api": "*",
-        "magento/module-inventory-source-selection-api": "*",
-        "magento/module-sales": "*",
-        "magento/module-shipping": "*",
-        "magento/module-ui": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-shipping-admin-ui",
+  "description": "N/A",
+  "require": {
+    "php": "~8.1.0||~8.2.0||~8.3.0",
+    "mage-os/framework": "1.0.3",
+    "mage-os/module-backend": "1.0.3",
+    "mage-os/module-inventory-api": "1.0.3",
+    "mage-os/module-inventory-configuration-api": "1.0.3",
+    "mage-os/module-inventory-sales-api": "1.0.3",
+    "mage-os/module-inventory-source-selection-api": "1.0.3",
+    "mage-os/module-sales": "1.0.3",
+    "mage-os/module-shipping": "1.0.3",
+    "mage-os/module-ui": "1.0.3"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryShippingAdminUi\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryShippingAdminUi\\": ""
     }
+  },
+  "version": "1.0.3",
+  "replace": {
+    "magento/module-inventory-shipping-admin-ui": "1.2.5"
+  }
 }
