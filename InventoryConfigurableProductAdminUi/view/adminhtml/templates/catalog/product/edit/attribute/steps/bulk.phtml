@@ -346,8 +346,7 @@
                                     <span><?= $block->escapeHtml(
                                             __('Browse Files...')
                                         ); ?></span>
-                                        <input type="file" name="image" multiple="multiple"
-                                               data-url="<?= /* @noEscape */ $block->getUrl('catalog/product_gallery/upload') ?>" />
+                                        <span class="browse-file" data-url="<?= /* @noEscape */ $block->getUrl('catalog/product_gallery/upload') ?>"></span>
                                     </div>
                                 </div>
                                 <div class="product-image-wrapper">
