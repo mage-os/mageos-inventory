@@ -25,6 +25,7 @@
             <title value="Adding images to configurable not working when MSI is enabled."/>
             <description value="Admin should be able to use Image Uploader to add Gallery Images for Configurable Products."/>
             <useCaseId value="ACP2E-3357"/>
+            <testCaseId value="AC-13228"/>
             <severity value="AVERAGE"/>
         </annotations>
         <before>
