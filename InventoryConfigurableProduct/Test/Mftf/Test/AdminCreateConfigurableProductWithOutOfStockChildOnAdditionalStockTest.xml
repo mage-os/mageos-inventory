@@ -83,12 +83,17 @@
         <click selector="{{AdminProductFormNewAttributeSection.saveAttribute}}" stepKey="saveAttribute"/>
         <switchToIFrame stepKey="switchOutFromIframe"/>
         <!-- Admin create configurations -->
+        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.filters}}" stepKey="waitToClickFilters"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.filters}}" stepKey="clickFilters"/>
         <fillField selector="{{AdminCreateProductConfigurationsPanel.attributeCode}}" userInput="{{sizeAttribute.attribute_code}}" stepKey="fillFilterAttributeCodeField"/>
+        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.applyFilters}}" stepKey="waitToClickApplyFiltersButton"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.applyFilters}}" stepKey="clickApplyFiltersButton"/>
         <checkOption selector="{{AdminCreateProductConfigurationsPanel.firstCheckbox}}" stepKey="clickOnFirstCheckbox"/>
+        <waitForElementClickablelick selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnNextButton1"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="clickOnNextButton1"/>
+        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.selectAll}}" stepKey="waitToClickOnSelectAll"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.selectAll}}" stepKey="clickOnSelectAll"/>
+        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnNextButton2"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="clickOnNextButton2"/>
         <checkOption selector="{{AdminCreateProductConfigurationsPanel.applySingleQuantityToEachSkus}}" stepKey="clickOnApplySingleQuantityToEachSku"/>
         <waitForElementClickable selector="{{AdminConfigurableProductAssignSourcesSlideOut.assignSources}}" stepKey ="waitForAssignSourceButtonToBeClickable"/>
@@ -99,21 +104,29 @@
         <actionGroup ref="SearchAdminDataGridByKeywordActionGroup" stepKey="searchCustomSourceByNameForAssignment">
             <argument name="keyword" value="$$source.source[name]$$"/>
         </actionGroup>
+        <waitForElementClickable selector="{{AdminGridRow.checkboxByValue($$source.source[name]$$)}}" stepKey="waitToSelectCustomSource1"/>
         <click selector="{{AdminGridRow.checkboxByValue($$source.source[name]$$)}}" stepKey="selectCustomSource1"/>
+        <waitForElementClickable selector="{{AdminConfigurableProductAssignSourcesSlideOut.done}}" stepKey="waitToClickOnDone"/>
         <click selector="{{AdminConfigurableProductAssignSourcesSlideOut.done}}" stepKey="doneAssignSources1"/>
+        <waitForElementVisible selector="{{AdminConfigurableProductAssignSourcesSlideOut.quantityPerSource('0')}}" stepKey="waitToInpuBboxForFillQty"/>
         <fillField selector="{{AdminConfigurableProductAssignSourcesSlideOut.quantityPerSource('0')}}" userInput="100" stepKey="fillQuantityForCustomSource1"/>
+        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToNavigateToFourthStep"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="navigateToFourthStep"/>
+        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnDoneGeneratingConfigurableVariations"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="doneGeneratingConfigurableVariations"/>
         <waitForPageLoad stepKey="waitForLoadProductPage"/>
+        <waitForElementClickable selector="{{AdminProductFormActionSection.saveButton}}" stepKey="waitToClickSaveConfigurableProduct"/>
         <click selector="{{AdminProductFormActionSection.saveButton}}" stepKey="saveConfigurableProduct"/>
         <!-- click confirm on popup-->
         <conditionalClick selector="{{AdminChooseAffectedAttributeSetPopup.confirm}}" dependentSelector="{{AdminChooseAffectedAttributeSetPopup.confirm}}" visible="true" stepKey="confirmDefaultAttributeSetForConfigurableProduct"/>
         <waitForElement  selector="{{AdminProductMessagesSection.successMessage}}" stepKey="checkProductSavedMessage"/>
         <!-- Go to child product S and update status as out of stock-->
+        <waitForElementClickable selector="{{AdminProductFormConfigurationsSection.variationProductLinkByName('S')}}" stepKey="waitToClickOnFirstProductLink"/>
         <click selector="{{AdminProductFormConfigurationsSection.variationProductLinkByName('S')}}" stepKey="clickOnFirstProductLink"/>
         <switchToNextTab stepKey="switchToConfigChildProductPage"/>
         <waitForPageLoad stepKey="waitForProductPageLoad"/>
         <selectOption selector="{{AdminProductSourcesGrid.rowStatus('0')}}" userInput="Out of Stock" stepKey="setWhiteConfigurableVariationToOutOfStock"/>
+        <waitForElementClickable selector="{{AdminProductFormActionSection.saveButton}}" stepKey="waitToClickOnSaveSimpleProduct"/>
         <click selector="{{AdminProductFormActionSection.saveButton}}" stepKey="saveSimpleProduct"/>
         <closeTab stepKey="closeConfigChildProductPage"/>
         <!--Reindex and clear cache-->
