@@ -89,7 +89,7 @@
         <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.applyFilters}}" stepKey="waitToClickApplyFiltersButton"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.applyFilters}}" stepKey="clickApplyFiltersButton"/>
         <checkOption selector="{{AdminCreateProductConfigurationsPanel.firstCheckbox}}" stepKey="clickOnFirstCheckbox"/>
-        <waitForElementClickablelick selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnNextButton1"/>
+        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnNextButton1"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="clickOnNextButton1"/>
         <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.selectAll}}" stepKey="waitToClickOnSelectAll"/>
         <click selector="{{AdminCreateProductConfigurationsPanel.selectAll}}" stepKey="clickOnSelectAll"/>
