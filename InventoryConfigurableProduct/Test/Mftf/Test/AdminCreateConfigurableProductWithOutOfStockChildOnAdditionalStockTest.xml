@@ -98,8 +98,7 @@
         <checkOption selector="{{AdminCreateProductConfigurationsPanel.applySingleQuantityToEachSkus}}" stepKey="clickOnApplySingleQuantityToEachSku"/>
         <waitForElementClickable selector="{{AdminConfigurableProductAssignSourcesSlideOut.assignSources}}" stepKey ="waitForAssignSourceButtonToBeClickable"/>
         <click selector="{{AdminConfigurableProductAssignSourcesSlideOut.assignSources}}" stepKey="openSelectSourcesModalWindow1"/>
-        <waitForElementClickable selector="{{AdminDataGridHeaderSection.clearFilters}}" stepKey="waitForClearFilterToBeClicked"/>
-        <click selector="{{AdminDataGridHeaderSection.clearFilters}}" stepKey="clickOnClearFilter"/>
+        <conditionalClick selector="{{AdminDataGridHeaderSection.clearFilters}}" dependentSelector="{{AdminDataGridHeaderSection.clearFilters}}" visible="true" stepKey="waitForClearFilterToBeClicked"/>
         <!-- Select source and fill qty-->
         <actionGroup ref="SearchAdminDataGridByKeywordActionGroup" stepKey="searchCustomSourceByNameForAssignment">
             <argument name="keyword" value="$$source.source[name]$$"/>
