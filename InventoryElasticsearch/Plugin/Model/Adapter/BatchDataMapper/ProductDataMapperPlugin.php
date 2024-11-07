@@ -50,7 +50,7 @@ class ProductDataMapperPlugin
         $store = $this->storeRepository->getById($storeId);
         $stock = $this->stockByWebsiteIdResolver->execute((int)$store->getWebsiteId());
         $skus = $this->getSkusByProductIds->execute(array_keys($documents));
-        $stockItems = $this->getStockItemsData->execute($skus, $stock->getStockId());
+        $stockItems = $this->getStockItemsData->execute(array_values($skus), $stock->getStockId());
         foreach ($documents as $productId => $document) {
             $sku = $skus[$productId];
             $document['is_out_of_stock'] = (int)!($stockItems[$sku][GetStockItemsDataInterface::IS_SALABLE] ?? 0);
