@@ -15,7 +15,6 @@
             <severity value="MAJOR"/>
             <testCaseId value="AC-4359"/>
         </annotations>
-
         <before>
             <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
         </before>
@@ -45,21 +44,7 @@
             <requiredEntity createDataKey="stock"/>
             <requiredEntity createDataKey="source"/>
         </createData>
-        <!--Open product page and start creating configurable product-->
-        <actionGroup ref="AdminOpenProductIndexPageActionGroup" stepKey="openProductIndexPage"/>
-        <actionGroup ref="GoToCreateProductPageActionGroup" stepKey="goToCreateConfigurableProduct">
-            <argument name="product" value="ApiConfigurableProduct"/>
-        </actionGroup>
-        <!-- Fill all the necessary information such as weight, name, SKU etc -->
-        <actionGroup ref="FillMainProductFormActionGroup" stepKey="fillProductForm">
-            <argument name="product" value="ApiConfigurableProduct"/>
-        </actionGroup>
-        <click selector="{{AdminProductFormConfigurationsSection.createConfigurations}}" stepKey="clickCreateConfigurations"/>
-        <waitForElementVisible stepKey="waitForNewAttributePageOpened" selector="{{AdminCreateProductConfigurationsPanel.createNewAttribute}}"/>
-        <click stepKey="clickOnCreateNewAttributeButton" selector="{{NewProduct.createNewAttributeButton}}"/>
-        <waitForPageLoad stepKey="waitForLoadAttributePage"/>
-        <switchToIFrame selector="#create_new_attribute_container" stepKey="switchToIframe"/>
-        <!-- Create size attribute -->
+        <actionGroup ref="AdminNavigateToNewProductAttributePageActionGroup" stepKey="navigateToNewProductAttributePage"/>
         <actionGroup ref="AdminFillProductAttributePropertiesActionGroup" stepKey="fillAttributeProperties">
             <argument name="attributeName" value="{{sizeAttribute.attribute_code}}"/>
             <argument name="attributeType" value="{{sizeAttribute.input_type}}"/>
@@ -67,8 +52,8 @@
         <!--Add option S, M and L to attribute and save-->
         <click selector="{{AdminNewAttributePanel.addOption}}" stepKey="clickAddOptionSSize"/>
         <actionGroup ref="AdminAddOptionsToSizeAttributeActionGroup" stepKey="addSSizeOption">
-        <argument name="position" value="0"/>
-        <argument name="size" value="S"/>
+            <argument name="position" value="0"/>
+            <argument name="size" value="S"/>
         </actionGroup>
         <click selector="{{AdminNewAttributePanel.addOption}}" stepKey="clickAddOptionForMSize"/>
         <actionGroup ref="AdminAddOptionsToSizeAttributeActionGroup" stepKey="addMSizeOption">
@@ -80,53 +65,31 @@
             <argument name="position" value="2"/>
             <argument name="size" value="L"/>
         </actionGroup>
+        <waitForElementClickable selector="{{AdvancedAttributePropertiesSection.AdvancedAttributePropertiesSectionToggle}}" stepKey="waitForAdvancedPropertiesFieldIsVisible"/>
+        <click selector="{{AdvancedAttributePropertiesSection.AdvancedAttributePropertiesSectionToggle}}" stepKey="openAttributeAdvancedSection"/>
+        <selectOption selector="{{AdvancedAttributePropertiesSection.Scope}}" userInput="Global" stepKey="selectScope"/>
         <click selector="{{AdminProductFormNewAttributeSection.saveAttribute}}" stepKey="saveAttribute"/>
-        <switchToIFrame stepKey="switchOutFromIframe"/>
-        <!-- Admin create configurations -->
-        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.filters}}" stepKey="waitToClickFilters"/>
-        <click selector="{{AdminCreateProductConfigurationsPanel.filters}}" stepKey="clickFilters"/>
-        <fillField selector="{{AdminCreateProductConfigurationsPanel.attributeCode}}" userInput="{{sizeAttribute.attribute_code}}" stepKey="fillFilterAttributeCodeField"/>
-        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.applyFilters}}" stepKey="waitToClickApplyFiltersButton"/>
-        <click selector="{{AdminCreateProductConfigurationsPanel.applyFilters}}" stepKey="clickApplyFiltersButton"/>
-        <checkOption selector="{{AdminCreateProductConfigurationsPanel.firstCheckbox}}" stepKey="clickOnFirstCheckbox"/>
-        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnNextButton1"/>
-        <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="clickOnNextButton1"/>
-        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.selectAll}}" stepKey="waitToClickOnSelectAll"/>
-        <click selector="{{AdminCreateProductConfigurationsPanel.selectAll}}" stepKey="clickOnSelectAll"/>
-        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnNextButton2"/>
-        <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="clickOnNextButton2"/>
-        <checkOption selector="{{AdminCreateProductConfigurationsPanel.applySingleQuantityToEachSkus}}" stepKey="clickOnApplySingleQuantityToEachSku"/>
-        <waitForElementClickable selector="{{AdminConfigurableProductAssignSourcesSlideOut.assignSources}}" stepKey ="waitForAssignSourceButtonToBeClickable"/>
-        <click selector="{{AdminConfigurableProductAssignSourcesSlideOut.assignSources}}" stepKey="openSelectSourcesModalWindow1"/>
-        <conditionalClick selector="{{AdminDataGridHeaderSection.clearFilters}}" dependentSelector="{{AdminDataGridHeaderSection.clearFilters}}" visible="true" stepKey="waitForClearFilterToBeClicked"/>
-        <!-- Select source and fill qty-->
-        <actionGroup ref="SearchAdminDataGridByKeywordActionGroup" stepKey="searchCustomSourceByNameForAssignment">
-            <argument name="keyword" value="$$source.source[name]$$"/>
+        <!--Open product page and start creating configurable product-->
+        <actionGroup ref="AdminOpenProductIndexPageActionGroup" stepKey="openProductIndexPage"/>
+        <actionGroup ref="GoToCreateProductPageActionGroup" stepKey="goToCreateConfigurableProduct">
+            <argument name="product" value="ApiConfigurableProduct"/>
         </actionGroup>
-        <waitForElementClickable selector="{{AdminGridRow.checkboxByValue($$source.source[name]$$)}}" stepKey="waitToSelectCustomSource1"/>
-        <click selector="{{AdminGridRow.checkboxByValue($$source.source[name]$$)}}" stepKey="selectCustomSource1"/>
-        <waitForElementClickable selector="{{AdminConfigurableProductAssignSourcesSlideOut.done}}" stepKey="waitToClickOnDone"/>
-        <click selector="{{AdminConfigurableProductAssignSourcesSlideOut.done}}" stepKey="doneAssignSources1"/>
-        <waitForElementVisible selector="{{AdminConfigurableProductAssignSourcesSlideOut.quantityPerSource('0')}}" stepKey="waitToInpuBboxForFillQty"/>
-        <fillField selector="{{AdminConfigurableProductAssignSourcesSlideOut.quantityPerSource('0')}}" userInput="100" stepKey="fillQuantityForCustomSource1"/>
-        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToNavigateToFourthStep"/>
-        <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="navigateToFourthStep"/>
-        <waitForElementClickable selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="waitToClickOnDoneGeneratingConfigurableVariations"/>
-        <click selector="{{AdminCreateProductConfigurationsPanel.next}}" stepKey="doneGeneratingConfigurableVariations"/>
-        <waitForPageLoad stepKey="waitForLoadProductPage"/>
-        <waitForElementClickable selector="{{AdminProductFormActionSection.saveButton}}" stepKey="waitToClickSaveConfigurableProduct"/>
-        <click selector="{{AdminProductFormActionSection.saveButton}}" stepKey="saveConfigurableProduct"/>
-        <!-- click confirm on popup-->
-        <conditionalClick selector="{{AdminChooseAffectedAttributeSetPopup.confirm}}" dependentSelector="{{AdminChooseAffectedAttributeSetPopup.confirm}}" visible="true" stepKey="confirmDefaultAttributeSetForConfigurableProduct"/>
-        <waitForElement  selector="{{AdminProductMessagesSection.successMessage}}" stepKey="checkProductSavedMessage"/>
+        <!-- Fill all the necessary information such as weight, name, SKU etc -->
+        <actionGroup ref="FillMainProductFormActionGroup" stepKey="fillProductForm">
+            <argument name="product" value="ApiConfigurableProduct"/>
+        </actionGroup>
+        <actionGroup ref="AdminCreateOptionsForAttributeMultiStockActionGroup" stepKey="generateVariations">
+            <argument name="attributeCode" value="{{sizeAttribute.attribute_code}}"/>
+            <argument name="sourceCode" value="$source.source[source_code]$"/>
+        </actionGroup>
+        <actionGroup ref="SaveConfigurableProductActionGroup" stepKey="saveConfigurable">
+            <argument name="product" value="ApiConfigurableProduct"/>
+        </actionGroup>
         <!-- Go to child product S and update status as out of stock-->
-        <waitForElementClickable selector="{{AdminProductFormConfigurationsSection.variationProductLinkByName('S')}}" stepKey="waitToClickOnFirstProductLink"/>
-        <click selector="{{AdminProductFormConfigurationsSection.variationProductLinkByName('S')}}" stepKey="clickOnFirstProductLink"/>
+        <actionGroup ref="AdminOpenChildVariationOfConfigurableProductActionGroup" stepKey="OpenChildVariation"/>
         <switchToNextTab stepKey="switchToConfigChildProductPage"/>
         <waitForPageLoad stepKey="waitForProductPageLoad"/>
-        <selectOption selector="{{AdminProductSourcesGrid.rowStatus('0')}}" userInput="Out of Stock" stepKey="setWhiteConfigurableVariationToOutOfStock"/>
-        <waitForElementClickable selector="{{AdminProductFormActionSection.saveButton}}" stepKey="waitToClickOnSaveSimpleProduct"/>
-        <click selector="{{AdminProductFormActionSection.saveButton}}" stepKey="saveSimpleProduct"/>
+        <actionGroup ref="AdminUpdateStatusOfChildVariationOfConfigurableProductActionGroup" stepKey="updateStatusAndSave"/>
         <closeTab stepKey="closeConfigChildProductPage"/>
         <!--Reindex and clear cache-->
         <actionGroup ref="CliIndexerReindexActionGroup" stepKey="reindex">
