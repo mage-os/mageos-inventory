@@ -31,11 +31,11 @@
                 <argument name="sku" value="{{ApiConfigurableProduct.sku}}"/>
             </actionGroup>
             <actionGroup ref="ResetAdminDataGridToDefaultViewActionGroup" stepKey="clearFilters"/>
-            <actionGroup ref="DeleteProductAttributeActionGroup" stepKey="deleteCreatedAttribute">
+            <!--<actionGroup ref="DeleteProductAttributeActionGroup" stepKey="deleteCreatedAttribute">
                 <argument name="ProductAttribute" value="sizeAttribute"/>
-            </actionGroup>
+            </actionGroup>-->
             <!--Clear filter-->
-            <actionGroup ref="ClearFiltersAdminDataGridActionGroup" stepKey="clearFilterInProductAttributePage"/>
+            <actionGroup ref="ClearFiltersAdminDataGridActionGroup" after="deleteCreatedAttribute" stepKey="clearFilterInProductAttributePage"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="adminLogout"/>
         </after>
         <createData entity="FullSource1" stepKey="source"/>
@@ -44,12 +44,12 @@
             <requiredEntity createDataKey="stock"/>
             <requiredEntity createDataKey="source"/>
         </createData>
-        <actionGroup ref="AdminNavigateToNewProductAttributePageActionGroup" stepKey="navigateToNewProductAttributePage"/>
+        <!--<actionGroup ref="AdminNavigateToNewProductAttributePageActionGroup" stepKey="navigateToNewProductAttributePage"/>
         <actionGroup ref="AdminFillProductAttributePropertiesActionGroup" stepKey="fillAttributeProperties">
             <argument name="attributeName" value="{{sizeAttribute.attribute_code}}"/>
             <argument name="attributeType" value="{{sizeAttribute.input_type}}"/>
         </actionGroup>
-        <!--Add option S, M and L to attribute and save-->
+        &lt;!&ndash;Add option S, M and L to attribute and save&ndash;&gt;
         <click selector="{{AdminNewAttributePanel.addOption}}" stepKey="clickAddOptionSSize"/>
         <actionGroup ref="AdminAddOptionsToSizeAttributeActionGroup" stepKey="addSSizeOption">
             <argument name="position" value="0"/>
@@ -68,9 +68,9 @@
         <waitForElementClickable selector="{{AdvancedAttributePropertiesSection.AdvancedAttributePropertiesSectionToggle}}" stepKey="waitForAdvancedPropertiesFieldIsVisible"/>
         <click selector="{{AdvancedAttributePropertiesSection.AdvancedAttributePropertiesSectionToggle}}" stepKey="openAttributeAdvancedSection"/>
         <selectOption selector="{{AdvancedAttributePropertiesSection.Scope}}" userInput="Global" stepKey="selectScope"/>
-        <click selector="{{AdminProductFormNewAttributeSection.saveAttribute}}" stepKey="saveAttribute"/>
+        <click selector="{{AdminProductFormNewAttributeSection.saveAttribute}}" stepKey="saveAttribute"/>-->
         <!--Open product page and start creating configurable product-->
-        <actionGroup ref="AdminOpenProductIndexPageActionGroup" stepKey="openProductIndexPage"/>
+        <actionGroup ref="AdminOpenProductIndexPageActionGroup" after="saveAttribute" stepKey="openProductIndexPage"/>
         <actionGroup ref="GoToCreateProductPageActionGroup" stepKey="goToCreateConfigurableProduct">
             <argument name="product" value="ApiConfigurableProduct"/>
         </actionGroup>
@@ -78,11 +78,11 @@
         <actionGroup ref="FillMainProductFormActionGroup" stepKey="fillProductForm">
             <argument name="product" value="ApiConfigurableProduct"/>
         </actionGroup>
-        <!--<actionGroup ref="AdminCreateOptionsForAttributeMultiStockActionGroup" stepKey="generateVariations">
+        <actionGroup ref="AdminCreateOptionsForAttributeMultiStockActionGroup" stepKey="generateVariations">
             <argument name="attributeCode" value="{{sizeAttribute.attribute_code}}"/>
             <argument name="sourceCode" value="$source.source[source_code]$"/>
-        </actionGroup>-->
-        <actionGroup ref="SaveConfigurableProductActionGroup" stepKey="saveConfigurable" after="generateVariations">
+        </actionGroup>
+        <actionGroup ref="SaveConfigurableProductActionGroup" stepKey="saveConfigurable">
             <argument name="product" value="ApiConfigurableProduct"/>
         </actionGroup>
         <!-- Go to child product S and update status as out of stock-->
