@@ -78,11 +78,11 @@
         <actionGroup ref="FillMainProductFormActionGroup" stepKey="fillProductForm">
             <argument name="product" value="ApiConfigurableProduct"/>
         </actionGroup>
-        <actionGroup ref="AdminCreateOptionsForAttributeMultiStockActionGroup" stepKey="generateVariations">
+        <!--<actionGroup ref="AdminCreateOptionsForAttributeMultiStockActionGroup" stepKey="generateVariations">
             <argument name="attributeCode" value="{{sizeAttribute.attribute_code}}"/>
             <argument name="sourceCode" value="$source.source[source_code]$"/>
-        </actionGroup>
-        <actionGroup ref="SaveConfigurableProductActionGroup" stepKey="saveConfigurable">
+        </actionGroup>-->
+        <actionGroup ref="SaveConfigurableProductActionGroup" stepKey="saveConfigurable" after="generateVariations">
             <argument name="product" value="ApiConfigurableProduct"/>
         </actionGroup>
         <!-- Go to child product S and update status as out of stock-->
