@@ -17,25 +17,6 @@ use Magento\InventoryIndexer\Indexer\InventoryIndexer;
 
 class StockItemRepositoryPlugin
 {
-    /**
-     * @var FullProductIndexer
-     */
-    private $fullProductIndexer;
-
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private $productRepository;
-
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private $inventoryIndexer;
-
-    /**
-     * @var GetSourceItemsBySku
-     */
-    private $getSourceItemsBySku;
 
     /**
      * @param FullProductIndexer $fullProductIndexer
@@ -44,16 +25,11 @@ class StockItemRepositoryPlugin
      * @param GetSourceItemsBySku $getSourceItemsBySku
      */
     public function __construct(
-        FullProductIndexer $fullProductIndexer,
-        InventoryIndexer $inventoryIndexer,
-        ProductRepositoryInterface $productRepository,
-        getSourceItemsBySku $getSourceItemsBySku
-    ) {
-        $this->fullProductIndexer = $fullProductIndexer;
-        $this->inventoryIndexer = $inventoryIndexer;
-        $this->productRepository = $productRepository;
-        $this->getSourceItemsBySku = $getSourceItemsBySku;
-    }
+        private FullProductIndexer $fullProductIndexer,
+        private InventoryIndexer $inventoryIndexer,
+        private ProductRepositoryInterface $productRepository,
+        private getSourceItemsBySku $getSourceItemsBySku
+    ) {}
 
     /**
      * Complex reindex after product stock item has been saved.
