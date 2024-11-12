@@ -10,6 +10,6 @@
         <plugin name="create_source_items" type="Magento\InventoryCatalog\Plugin\Catalog\Model\ResourceModel\Product\CreateSourceItemsPlugin"/>
     </type>
     <type name="Magento\CatalogInventory\Model\Stock\StockItemRepository">
-        <plugin name="reindex_after_save_product_stock_item" type="Magento\InventoryCatalog\Plugin\Model\Stock\StockItemRepository\StockItemRepositoryPlugin"/>
+        <plugin name="reindex_after_save_product_stock_item" type="Magento\InventoryCatalog\Plugin\CatalogInventory\Model\Stock\StockItemRepository\StockItemRepositoryPlugin"/>
     </type>
 </config>
