@@ -29,7 +29,8 @@ class StockItemRepositoryPlugin
         private InventoryIndexer $inventoryIndexer,
         private ProductRepositoryInterface $productRepository,
         private getSourceItemsBySku $getSourceItemsBySku
-    ) {}
+    ) {
+    }
 
     /**
      * Complex reindex after product stock item has been saved.
