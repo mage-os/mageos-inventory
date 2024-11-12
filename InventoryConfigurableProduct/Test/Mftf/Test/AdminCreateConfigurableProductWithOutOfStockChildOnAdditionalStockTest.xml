@@ -78,7 +78,7 @@
         <actionGroup ref="FillMainProductFormActionGroup" stepKey="fillProductForm">
             <argument name="product" value="ApiConfigurableProduct"/>
         </actionGroup>
-        <actionGroup ref="AdminCreateOptionsForAttributeMultiStockActionGroup" stepKey="generateVariations">
+        <actionGroup ref="AdminGeneratesProductsForAttributeWithMultiStockActionGroup" stepKey="generateVariations">
             <argument name="attributeCode" value="{{sizeAttribute.attribute_code}}"/>
             <argument name="sourceCode" value="$source.source[source_code]$"/>
         </actionGroup>
