@@ -16,6 +16,8 @@
             <useCaseId value="ACP2E-3357"/>
             <testCaseId value="AC-13228"/>
             <severity value="AVERAGE"/>
+            <group value="msi"/>
+            <group value="multi_mode"/>
         </annotations>
         <before>
             <createData entity="FullSource1" stepKey="createSource1"/>
