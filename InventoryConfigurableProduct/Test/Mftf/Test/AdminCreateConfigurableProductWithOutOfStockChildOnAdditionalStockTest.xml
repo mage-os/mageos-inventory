@@ -31,11 +31,6 @@
                 <argument name="sku" value="{{ApiConfigurableProduct.sku}}"/>
             </actionGroup>
             <actionGroup ref="ResetAdminDataGridToDefaultViewActionGroup" stepKey="clearFilters"/>
-            <!--<actionGroup ref="DeleteProductAttributeActionGroup" stepKey="deleteCreatedAttribute">
-                <argument name="ProductAttribute" value="sizeAttribute"/>
-            </actionGroup>-->
-            <!--Clear filter-->
-            <actionGroup ref="ClearFiltersAdminDataGridActionGroup" after="deleteCreatedAttribute" stepKey="clearFilterInProductAttributePage"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="adminLogout"/>
         </after>
         <createData entity="FullSource1" stepKey="source"/>
@@ -44,31 +39,6 @@
             <requiredEntity createDataKey="stock"/>
             <requiredEntity createDataKey="source"/>
         </createData>
-        <!--<actionGroup ref="AdminNavigateToNewProductAttributePageActionGroup" stepKey="navigateToNewProductAttributePage"/>
-        <actionGroup ref="AdminFillProductAttributePropertiesActionGroup" stepKey="fillAttributeProperties">
-            <argument name="attributeName" value="{{sizeAttribute.attribute_code}}"/>
-            <argument name="attributeType" value="{{sizeAttribute.input_type}}"/>
-        </actionGroup>
-        &lt;!&ndash;Add option S, M and L to attribute and save&ndash;&gt;
-        <click selector="{{AdminNewAttributePanel.addOption}}" stepKey="clickAddOptionSSize"/>
-        <actionGroup ref="AdminAddOptionsToSizeAttributeActionGroup" stepKey="addSSizeOption">
-            <argument name="position" value="0"/>
-            <argument name="size" value="S"/>
-        </actionGroup>
-        <click selector="{{AdminNewAttributePanel.addOption}}" stepKey="clickAddOptionForMSize"/>
-        <actionGroup ref="AdminAddOptionsToSizeAttributeActionGroup" stepKey="addMSizeOption">
-            <argument name="position" value="1"/>
-            <argument name="size" value="M"/>
-        </actionGroup>
-        <click selector="{{AdminNewAttributePanel.addOption}}" stepKey="clickAddOptionForLSize"/>
-        <actionGroup ref="AdminAddOptionsToSizeAttributeActionGroup" stepKey="addLSizeOption">
-            <argument name="position" value="2"/>
-            <argument name="size" value="L"/>
-        </actionGroup>
-        <waitForElementClickable selector="{{AdvancedAttributePropertiesSection.AdvancedAttributePropertiesSectionToggle}}" stepKey="waitForAdvancedPropertiesFieldIsVisible"/>
-        <click selector="{{AdvancedAttributePropertiesSection.AdvancedAttributePropertiesSectionToggle}}" stepKey="openAttributeAdvancedSection"/>
-        <selectOption selector="{{AdvancedAttributePropertiesSection.Scope}}" userInput="Global" stepKey="selectScope"/>
-        <click selector="{{AdminProductFormNewAttributeSection.saveAttribute}}" stepKey="saveAttribute"/>-->
         <!--Open product page and start creating configurable product-->
         <actionGroup ref="AdminOpenProductIndexPageActionGroup" after="saveAttribute" stepKey="openProductIndexPage"/>
         <actionGroup ref="GoToCreateProductPageActionGroup" stepKey="goToCreateConfigurableProduct">
