@@ -141,7 +141,7 @@ class ProductsTest extends TestCase
             $this->markTestSkipped('VisualMerchandiser module is absent');
         }
 
-        $expectedOrderBy = ['is_in_stock', Select::SQL_DESC];
+        $expectedOrderBy = ['stock', Select::SQL_DESC];
 
         $storeCode = 'default';
         $this->storeManager->setCurrentStore($storeCode);
