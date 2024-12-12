@@ -48,8 +48,8 @@ class GetOrderItemsDataForOrdersInNotFinalState
     public function __construct(
         ResourceConnection $resourceConnection,
         GetCompleteOrderStateList $getCompleteOrderStateList,
-        ?GetAllowedProductTypesForSourceItemManagementInterface $allowedProductTypesForSourceItemManagement = null,
-        Json $json
+        Json $json,
+        ?GetAllowedProductTypesForSourceItemManagementInterface $allowedProductTypesForSourceItemManagement = null
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->getCompleteOrderStateList = $getCompleteOrderStateList;
