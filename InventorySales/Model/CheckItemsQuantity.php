@@ -37,8 +37,8 @@ class CheckItemsQuantity
      */
     public function __construct(
         IsProductSalableForRequestedQtyInterface $isProductSalableForRequestedQty,
-        IsProductSalableForRequestedQtyRequestInterfaceFactory $isProductSalableForRequestedQtyRequestFactory = null,
-        AreProductsSalableForRequestedQtyInterface $areProductsSalableForRequestedQty = null
+        ?IsProductSalableForRequestedQtyRequestInterfaceFactory $isProductSalableForRequestedQtyRequestFactory = null,
+        ?AreProductsSalableForRequestedQtyInterface $areProductsSalableForRequestedQty = null
     ) {
         $this->areProductsSalableForRequestedQty = $areProductsSalableForRequestedQty ?: ObjectManager::getInstance()
             ->get(AreProductsSalableForRequestedQtyInterface::class);

@@ -70,7 +70,7 @@ class GetSourceSelectionResultFromInvoice
         $inventoryRequestFactory,
         GetDefaultSourceSelectionAlgorithmCodeInterface $getDefaultSourceSelectionAlgorithmCode,
         SourceSelectionServiceInterface $sourceSelectionService,
-        GetInventoryRequestFromOrder $getInventoryRequestFromOrder = null
+        ?GetInventoryRequestFromOrder $getInventoryRequestFromOrder = null
     ) {
         $this->itemRequestFactory = $itemRequestFactory;
         $this->getDefaultSourceSelectionAlgorithmCode = $getDefaultSourceSelectionAlgorithmCode;

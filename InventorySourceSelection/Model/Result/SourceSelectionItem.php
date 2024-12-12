@@ -61,8 +61,8 @@ class SourceSelectionItem extends AbstractExtensibleModel implements SourceSelec
         string $sku,
         float $qtyToDeduct,
         float $qtyAvailable,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         parent::__construct(

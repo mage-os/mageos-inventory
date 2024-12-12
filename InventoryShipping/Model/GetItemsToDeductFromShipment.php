@@ -53,7 +53,7 @@ class GetItemsToDeductFromShipment
         GetSkuFromOrderItemInterface $getSkuFromOrderItem,
         Json $jsonSerializer,
         ItemToDeductInterfaceFactory $itemToDeduct,
-        IsItemCouldBeDeductedByTypes $itemCouldBeDeducted = null
+        ?IsItemCouldBeDeductedByTypes $itemCouldBeDeducted = null
     ) {
         $this->jsonSerializer = $jsonSerializer;
         $this->itemToDeduct = $itemToDeduct;

@@ -53,8 +53,8 @@ class StockItemConfiguration extends AbstractExtensibleModel implements StockIte
         AttributeValueFactory $customAttributeFactory,
         StockItemInterface $stockItem,
         ScopeConfigInterface $scopeConfig,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         parent::__construct(

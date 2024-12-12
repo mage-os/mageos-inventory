@@ -75,9 +75,9 @@ class QuantityPerSource extends AbstractModifier
         $isSourceItemManagementAllowedForProductType,
         SourceRepositoryInterface $sourceRepository,
         GetSourceItemsBySkuInterface $getSourceItemsBySku,
-        SearchCriteriaBuilder $searchCriteriaBuilder = null,
-        SourceItemRepositoryInterface $sourceItemRepository = null,
-        GetAllowedProductTypesForSourceItemManagementInterface $getAllowedProductTypesForSourceItemManagement = null
+        ?SearchCriteriaBuilder $searchCriteriaBuilder = null,
+        ?SourceItemRepositoryInterface $sourceItemRepository = null,
+        ?GetAllowedProductTypesForSourceItemManagementInterface $getAllowedProductTypesForSourceItemManagement = null
     ) {
         $objectManager = ObjectManager::getInstance();
         $this->isSingleSourceMode = $isSingleSourceMode;

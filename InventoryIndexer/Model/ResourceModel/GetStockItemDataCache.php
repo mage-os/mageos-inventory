@@ -32,7 +32,7 @@ class GetStockItemDataCache implements GetStockItemDataInterface
      */
     public function __construct(
         GetStockItemData $getStockItemData,
-        CacheStorage $cacheStorage = null
+        ?CacheStorage $cacheStorage = null
     ) {
         $this->getStockItemData = $getStockItemData;
         $this->cacheStorage = $cacheStorage ?: ObjectManager::getInstance()

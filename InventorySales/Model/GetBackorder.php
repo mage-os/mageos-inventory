@@ -96,7 +96,7 @@ class GetBackorder
         StockResolverInterface $stockResolver,
         StoreManagerInterface $storeManager,
         BackOrderNotifyCustomerCondition $backOrderNotifyCustomerCondition,
-        GetBackorderQty $getBackorderQty = null
+        ?GetBackorderQty $getBackorderQty = null
     ) {
         $this->objectFactory = $objectFactory;
         $this->format = $format;

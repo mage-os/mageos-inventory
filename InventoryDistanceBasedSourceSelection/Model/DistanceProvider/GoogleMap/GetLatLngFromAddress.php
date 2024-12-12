@@ -62,7 +62,7 @@ class GetLatLngFromAddress implements GetLatLngFromAddressInterface
         AddressToComponentsString $addressToComponentsString,
         AddressToQueryString $addressToQueryString,
         AddressToString $addressToString,
-        GetGeoCodesForAddress $getGeoCodesForAddress = null
+        ?GetGeoCodesForAddress $getGeoCodesForAddress = null
     ) {
         $this->latLngInterfaceFactory = $latLngInterfaceFactory;
         $this->addressToString = $addressToString;

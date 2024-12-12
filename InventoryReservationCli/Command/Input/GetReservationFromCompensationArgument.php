@@ -51,7 +51,7 @@ class GetReservationFromCompensationArgument
         OrderRepositoryInterface $orderRepository,
         ReservationBuilderInterface $reservationBuilder,
         SerializerInterface $serializer,
-        SearchCriteriaBuilder $searchCriteriaBuilder = null
+        ?SearchCriteriaBuilder $searchCriteriaBuilder = null
     ) {
         $this->orderRepository = $orderRepository;
         $this->reservationBuilder = $reservationBuilder;

@@ -41,7 +41,7 @@ class PickupLocationsNegativeCasesTest extends GraphQlAbstract
     public function testPickupLocationsEndpoint(
         string $body,
         string $storeCode,
-        string $expectedExceptionMessage = null
+        ?string $expectedExceptionMessage = null
     ) {
         $responseTemplate = <<<QUERY
 {

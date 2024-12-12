@@ -80,7 +80,7 @@ class ProcessAlgorithm extends Action implements HttpPostActionInterface
         SourceSelectionServiceInterface $sourceSelectionService,
         GetDefaultSourceSelectionAlgorithmCodeInterface $getDefaultSourceSelectionAlgorithmCode,
         SourceRepositoryInterface $sourceRepository,
-        GetInventoryRequestFromOrder $getInventoryRequestFromOrder = null
+        ?GetInventoryRequestFromOrder $getInventoryRequestFromOrder = null
     ) {
         parent::__construct($context);
         $this->sourceSelectionService = $sourceSelectionService;

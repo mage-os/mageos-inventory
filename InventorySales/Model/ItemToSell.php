@@ -45,8 +45,8 @@ class ItemToSell extends AbstractExtensibleModel implements ItemToSellInterface
         \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
         string $sku,
         float $qty,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         parent::__construct(

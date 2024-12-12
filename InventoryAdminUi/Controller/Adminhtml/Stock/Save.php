@@ -139,7 +139,7 @@ class Save extends Action implements HttpPostActionInterface
      *
      * @return void
      */
-    private function processRedirectAfterFailureSave(Redirect $resultRedirect, int $stockId = null)
+    private function processRedirectAfterFailureSave(Redirect $resultRedirect, ?int $stockId = null)
     {
         if (null === $stockId) {
             $resultRedirect->setPath('*/*/new');

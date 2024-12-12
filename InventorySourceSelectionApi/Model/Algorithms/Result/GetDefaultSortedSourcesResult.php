@@ -57,8 +57,8 @@ class GetDefaultSortedSourcesResult
         SourceSelectionResultInterfaceFactory $sourceSelectionResultFactory,
         $searchCriteriaBuilder,
         $sourceItemRepository,
-        GetInStockSourceItemsBySkusAndSortedSource $getInStockSourceItemsBySkusAndSortedSource = null,
-        GetSourceItemQtyAvailableInterface $getSourceItemQtyAvailable = null
+        ?GetInStockSourceItemsBySkusAndSortedSource $getInStockSourceItemsBySkusAndSortedSource = null,
+        ?GetSourceItemQtyAvailableInterface $getSourceItemQtyAvailable = null
     ) {
         $this->sourceSelectionItemFactory = $sourceSelectionItemFactory;
         $this->sourceSelectionResultFactory = $sourceSelectionResultFactory;

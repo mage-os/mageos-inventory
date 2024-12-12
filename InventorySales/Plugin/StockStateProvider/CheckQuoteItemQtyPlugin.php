@@ -52,10 +52,10 @@ class CheckQuoteItemQtyPlugin
      * @param GetBackorder|null $getBackorder
      */
     public function __construct(
-        ObjectFactory $objectFactory = null,
-        GetProductTypesBySkusInterface $getProductTypesBySkus = null,
-        GetSkusByProductIdsInterface $getSkusByProductIds = null,
-        GetBackorder $getBackorder = null
+        ?ObjectFactory $objectFactory = null,
+        ?GetProductTypesBySkusInterface $getProductTypesBySkus = null,
+        ?GetSkusByProductIdsInterface $getSkusByProductIds = null,
+        ?GetBackorder $getBackorder = null
     ) {
         $this->objectFactory = $objectFactory
             ?? ObjectManager::getInstance()->get(ObjectFactory::class);

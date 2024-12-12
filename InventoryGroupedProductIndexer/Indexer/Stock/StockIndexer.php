@@ -87,7 +87,7 @@ class StockIndexer
         IndexDataByStockIdProvider $indexDataByStockIdProvider,
         IndexTableSwitcherInterface $indexTableSwitcher,
         DefaultStockProviderInterface $defaultStockProvider,
-        PrepareIndexDataForClearingIndex $prepareIndexDataForClearingIndex = null
+        ?PrepareIndexDataForClearingIndex $prepareIndexDataForClearingIndex = null
     ) {
         $this->getAllStockIds = $getAllStockIds;
         $this->indexStructure = $indexStructure;

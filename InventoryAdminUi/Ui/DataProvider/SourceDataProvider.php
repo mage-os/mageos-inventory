@@ -90,7 +90,7 @@ class SourceDataProvider extends DataProvider
         Session $session,
         array $meta = [],
         array $data = [],
-        PoolInterface $pool = null
+        ?PoolInterface $pool = null
     ) {
         parent::__construct(
             $name,

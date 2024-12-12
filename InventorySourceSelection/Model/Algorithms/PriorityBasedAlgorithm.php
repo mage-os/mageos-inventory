@@ -53,7 +53,7 @@ class PriorityBasedAlgorithm implements SourceSelectionInterface
         SourceSelectionResultInterfaceFactory $sourceSelectionResultFactory,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         SourceItemRepositoryInterface $sourceItemRepository,
-        GetDefaultSortedSourcesResult $getDefaultSortedSourcesResult = null
+        ?GetDefaultSortedSourcesResult $getDefaultSortedSourcesResult = null
     ) {
         $this->getSourcesAssignedToStockOrderedByPriority = $getSourcesAssignedToStockOrderedByPriority;
         $this->getDefaultSortedSourcesResult = $getDefaultSortedSourcesResult ?:

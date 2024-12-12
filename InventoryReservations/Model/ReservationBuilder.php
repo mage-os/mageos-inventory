@@ -99,7 +99,7 @@ class ReservationBuilder implements ReservationBuilderInterface
     /**
      * @inheritdoc
      */
-    public function setMetadata(string $metadata = null): ReservationBuilderInterface
+    public function setMetadata(?string $metadata = null): ReservationBuilderInterface
     {
         $this->metadata = $metadata;
         return $this;

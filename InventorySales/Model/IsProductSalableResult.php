@@ -45,7 +45,7 @@ class IsProductSalableResult implements IsProductSalableResultInterface
         string $sku,
         int $stockId,
         bool $isSalable,
-        IsProductSalableResultExtensionInterface $extensionAttributes = null
+        ?IsProductSalableResultExtensionInterface $extensionAttributes = null
     ) {
         $this->sku = $sku;
         $this->stockId = $stockId;

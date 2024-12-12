@@ -60,8 +60,8 @@ class IsSalableOptionSelectBuilder
         StoreManagerInterface $storeManager,
         StockResolverInterface $stockResolver,
         StockIndexTableNameResolverInterface $stockIndexTableNameResolver,
-        DefaultStockProviderInterface $defaultStockProvider = null,
-        StockConfigurationInterface $stockConfig = null
+        ?DefaultStockProviderInterface $defaultStockProvider = null,
+        ?StockConfigurationInterface $stockConfig = null
     ) {
         $this->storeManager = $storeManager;
         $this->stockResolver = $stockResolver;

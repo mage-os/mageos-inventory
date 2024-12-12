@@ -53,7 +53,7 @@ class IsProductSalableForRequestedQtyResult implements IsProductSalableForReques
         int $stockId,
         bool $isSalable,
         array $errors = [],
-        IsProductSalableForRequestedQtyResultExtensionInterface $extensionAttributes = null
+        ?IsProductSalableForRequestedQtyResultExtensionInterface $extensionAttributes = null
     ) {
         $this->sku = $sku;
         $this->isSalable = $isSalable;

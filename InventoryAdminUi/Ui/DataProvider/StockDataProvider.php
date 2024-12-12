@@ -129,7 +129,7 @@ class StockDataProvider extends DataProvider
         GetSourcesAssignedToStockOrderedByPriorityInterface $getSourcesAssignedToStockOrderedByPriority,
         array $meta = [],
         array $data = [],
-        PoolInterface $pool = null,
+        ?PoolInterface $pool = null,
         ?LoggerInterface $logger = null,
         ?StockSourceLinksExtensionAttributes $stockSourceLinksExtensionAttributes = null,
         ?int $assignedSourcesLimit = 100

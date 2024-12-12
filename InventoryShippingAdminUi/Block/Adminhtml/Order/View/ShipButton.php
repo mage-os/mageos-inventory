@@ -48,7 +48,7 @@ class ShipButton extends Container
         Registry $registry,
         IsWebsiteInMultiSourceMode $isWebsiteInMultiSourceMode,
         array $data = [],
-        IsOrderSourceManageable $isOrderSourceManageable = null
+        ?IsOrderSourceManageable $isOrderSourceManageable = null
     ) {
         parent::__construct($context, $data);
         $this->registry = $registry;

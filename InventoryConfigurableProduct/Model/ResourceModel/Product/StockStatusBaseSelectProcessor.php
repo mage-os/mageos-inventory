@@ -68,8 +68,8 @@ class StockStatusBaseSelectProcessor implements BaseSelectProcessorInterface
         StockConfigurationInterface $stockConfig,
         StoreManagerInterface $storeManager,
         StockResolverInterface $stockResolver,
-        ResourceConnection $resourceConnection = null,
-        DefaultStockProviderInterface $defaultStockProvider = null
+        ?ResourceConnection $resourceConnection = null,
+        ?DefaultStockProviderInterface $defaultStockProvider = null
     ) {
         $this->stockIndexTableNameResolver = $stockIndexTableNameResolver;
         $this->stockConfig = $stockConfig;

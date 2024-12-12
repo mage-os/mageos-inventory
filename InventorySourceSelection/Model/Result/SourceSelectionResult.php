@@ -48,8 +48,8 @@ class SourceSelectionResult extends AbstractExtensibleModel implements SourceSel
         \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory,
         array $sourceItemSelections,
         bool $isShippable,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         parent::__construct(

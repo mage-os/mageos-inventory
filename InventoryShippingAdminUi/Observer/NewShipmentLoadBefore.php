@@ -52,7 +52,7 @@ class NewShipmentLoadBefore implements ObserverInterface
         OrderRepositoryInterface $orderRepository,
         IsWebsiteInMultiSourceMode $isWebsiteInMultiSourceMode,
         RedirectInterface $redirect,
-        IsOrderSourceManageable $isOrderSourceManageable = null
+        ?IsOrderSourceManageable $isOrderSourceManageable = null
     ) {
         $this->orderRepository = $orderRepository;
         $this->isWebsiteInMultiSourceMode = $isWebsiteInMultiSourceMode;

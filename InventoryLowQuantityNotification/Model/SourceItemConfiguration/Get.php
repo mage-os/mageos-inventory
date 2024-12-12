@@ -58,9 +58,9 @@ class Get implements GetSourceItemConfigurationInterface
         $sourceItemConfigurationFactory,
         $dataObjectHelper,
         LoggerInterface $logger,
-        ProductRepositoryInterface $productRepository = null,
-        SourceRepositoryInterface $sourceRepository = null,
-        GetConfiguration $getConfiguration = null
+        ?ProductRepositoryInterface $productRepository = null,
+        ?SourceRepositoryInterface $sourceRepository = null,
+        ?GetConfiguration $getConfiguration = null
     ) {
         $this->logger = $logger;
         $this->productRepository = $productRepository ??

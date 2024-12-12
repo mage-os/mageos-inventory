@@ -82,8 +82,8 @@ class LowQuantityCollection extends AbstractCollection
         StockConfigurationInterface $stockConfiguration,
         GetAllowedProductTypesForSourceItemManagementInterface $getAllowedProductTypesForSourceItemManagement,
         MetadataPool $metadataPool,
-        AdapterInterface $connection = null,
-        AbstractDb $resource = null
+        ?AdapterInterface $connection = null,
+        ?AbstractDb $resource = null
     ) {
         parent::__construct(
             $entityFactory,

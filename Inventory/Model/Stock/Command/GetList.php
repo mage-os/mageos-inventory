@@ -61,7 +61,7 @@ class GetList implements GetListInterface
     /**
      * @inheritdoc
      */
-    public function execute(SearchCriteriaInterface $searchCriteria = null): StockSearchResultsInterface
+    public function execute(?SearchCriteriaInterface $searchCriteria = null): StockSearchResultsInterface
     {
         /** @var Collection $collection */
         $collection = $this->stockCollectionFactory->create();

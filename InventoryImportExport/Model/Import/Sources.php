@@ -72,7 +72,7 @@ class Sources extends AbstractEntity
         ImportData $importData,
         ValidatorInterface $validator,
         array $commands = [],
-        GetSourceCodesBySkusInterface $getSourceCodesBySkus = null,
+        ?GetSourceCodesBySkusInterface $getSourceCodesBySkus = null,
     ) {
         $this->jsonHelper = $jsonHelper;
         $this->errorAggregator = $errorAggregator;

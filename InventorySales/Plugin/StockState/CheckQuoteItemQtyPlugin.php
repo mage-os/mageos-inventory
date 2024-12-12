@@ -29,7 +29,7 @@ class CheckQuoteItemQtyPlugin
      * @param GetBackorder|null $getBackorder
      */
     public function __construct(
-        GetBackorder $getBackorder = null
+        ?GetBackorder $getBackorder = null
     ) {
         $this->getBackorder = $getBackorder
             ?? ObjectManager::getInstance()->get(GetBackorder::class);

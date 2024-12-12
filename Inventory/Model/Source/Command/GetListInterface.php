@@ -29,5 +29,5 @@ interface GetListInterface
      * @param SearchCriteriaInterface|null $searchCriteria
      * @return SourceSearchResultsInterface
      */
-    public function execute(SearchCriteriaInterface $searchCriteria = null): SourceSearchResultsInterface;
+    public function execute(?SearchCriteriaInterface $searchCriteria = null): SourceSearchResultsInterface;
 }

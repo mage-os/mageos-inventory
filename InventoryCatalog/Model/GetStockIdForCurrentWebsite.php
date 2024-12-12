@@ -41,7 +41,7 @@ class GetStockIdForCurrentWebsite
     public function __construct(
         StoreManagerInterface $storeManager,
         StockResolverInterface $stockResolver,
-        Request $request = null
+        ?Request $request = null
     ) {
         $this->storeManager = $storeManager;
         $this->stockResolver = $stockResolver;

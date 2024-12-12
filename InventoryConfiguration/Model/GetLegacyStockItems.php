@@ -60,7 +60,7 @@ class GetLegacyStockItems implements GetLegacyStockItemsInterface
         StockItemCriteriaInterfaceFactory $legacyStockItemCriteriaFactory,
         StockItemRepositoryInterface $legacyStockItemRepository,
         GetProductIdsBySkusInterface $getProductIdsBySkus,
-        CacheStorage $cacheStorage = null
+        ?CacheStorage $cacheStorage = null
     ) {
         $this->stockItemFactory = $stockItemFactory;
         $this->legacyStockItemCriteriaFactory = $legacyStockItemCriteriaFactory;

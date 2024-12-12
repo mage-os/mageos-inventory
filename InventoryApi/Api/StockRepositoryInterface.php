@@ -53,7 +53,7 @@ interface StockRepositoryInterface
      * @return \Magento\InventoryApi\Api\Data\StockSearchResultsInterface
      */
     public function getList(
-        \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria = null
+        ?\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria = null
     ): \Magento\InventoryApi\Api\Data\StockSearchResultsInterface;
 
     /**

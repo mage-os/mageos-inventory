@@ -65,7 +65,7 @@ class SelectBuilder
         IndexNameBuilder $indexNameBuilder,
         IndexNameResolverInterface $indexNameResolver,
         MetadataPool $metadataPool,
-        DefaultStockProviderInterface $defaultStockProvider = null
+        ?DefaultStockProviderInterface $defaultStockProvider = null
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->indexNameBuilder = $indexNameBuilder;

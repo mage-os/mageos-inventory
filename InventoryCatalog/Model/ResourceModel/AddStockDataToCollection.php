@@ -34,7 +34,7 @@ class AddStockDataToCollection
      */
     public function __construct(
         StockIndexTableNameResolverInterface $stockIndexTableNameResolver,
-        DefaultStockProviderInterface $defaultStockProvider = null
+        ?DefaultStockProviderInterface $defaultStockProvider = null
     ) {
         $this->stockIndexTableNameResolver = $stockIndexTableNameResolver;
         $this->defaultStockProvider = $defaultStockProvider ?: ObjectManager::getInstance()

@@ -73,7 +73,7 @@ class SourceItemConfiguration extends AbstractModifier
         ScopeConfigInterface $scopeConfig,
         ArrayManager $arrayManager,
         IsSingleSourceModeInterface $isSingleSourceMode,
-        GetDataModel $getDataResourceModel = null
+        ?GetDataModel $getDataResourceModel = null
     ) {
         $this->isSourceItemManagementAllowedForProductType = $isSourceItemManagementAllowedForProductType;
         $this->locator = $locator;

@@ -83,7 +83,7 @@ class SourceSelectionDataProvider extends AbstractDataProvider
         GetStockItemConfigurationInterface $getStockItemConfiguration,
         $getSourcesByStockIdSkuAndQty,
         GetSkuFromOrderItemInterface $getSkuFromOrderItem,
-        GetSourcesByOrderIdSkuAndQty $getSourcesByOrderIdSkuAndQty = null,
+        ?GetSourcesByOrderIdSkuAndQty $getSourcesByOrderIdSkuAndQty = null,
         array $meta = [],
         array $data = []
     ) {
