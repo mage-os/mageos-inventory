@@ -1,6 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
+ * Copyright 2024 Adobe
+ * All rights reserved.
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
@@ -125,7 +126,7 @@ class CacheFlushProcessorTest extends TestCase
     /**
      * @return array
      */
-    public function processDataProvider(): array
+    public static function processDataProvider(): array
     {
         return [
             [[1], ['sku1' => [1 => true]], ['sku1' => [1 => true]], [], 0],
