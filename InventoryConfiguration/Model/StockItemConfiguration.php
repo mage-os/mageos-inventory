@@ -389,6 +389,7 @@ class StockItemConfiguration extends AbstractExtensibleModel implements StockIte
 
     /**
      * @inheritdoc
+     * @SuppressWarnings(PHPMD.BooleanGetMethodName)
      */
     public function getStockStatusChangedAuto(): bool
     {

@@ -111,6 +111,7 @@ class StockDataProvider extends DataProvider
      * @param StockSourceLinksExtensionAttributes $stockSourceLinksExtensionAttributes
      * @param int|null $assignedSourcesLimit
      * @SuppressWarnings(PHPMD.ExcessiveParameterList) All parameters are needed for backward compatibility
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function __construct(
         $name,

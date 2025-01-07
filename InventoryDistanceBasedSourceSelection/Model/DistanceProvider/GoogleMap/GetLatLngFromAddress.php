@@ -53,6 +53,8 @@ class GetLatLngFromAddress implements GetLatLngFromAddressInterface
      * @param AddressToQueryString $addressToQueryString @deprecated
      * @param AddressToString $addressToString
      * @param GetGeoCodesForAddress $getGeoCodesForAddress
+     * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function __construct(
         ClientInterface $client,
@@ -74,6 +76,7 @@ class GetLatLngFromAddress implements GetLatLngFromAddressInterface
      * @inheritdoc
      *
      * @throws LocalizedException
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      */
     public function execute(AddressInterface $address): LatLngInterface
     {
