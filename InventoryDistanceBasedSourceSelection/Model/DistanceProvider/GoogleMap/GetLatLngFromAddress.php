@@ -21,6 +21,7 @@ use Magento\InventorySourceSelectionApi\Api\Data\AddressInterface;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class GetLatLngFromAddress implements GetLatLngFromAddressInterface
 {
