@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -42,7 +41,7 @@ class PickupLocationsNegativeCasesTest extends GraphQlAbstract
     public function testPickupLocationsEndpoint(
         string $body,
         string $storeCode,
-        string $expectedExceptionMessage = null
+        ?string $expectedExceptionMessage = null
     ) {
         $responseTemplate = <<<QUERY
 {
