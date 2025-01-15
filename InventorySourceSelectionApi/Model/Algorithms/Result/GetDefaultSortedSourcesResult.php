@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 /** @noinspection PhpUnusedParameterInspection */
 declare(strict_types=1);
@@ -57,8 +57,8 @@ class GetDefaultSortedSourcesResult
         SourceSelectionResultInterfaceFactory $sourceSelectionResultFactory,
         $searchCriteriaBuilder,
         $sourceItemRepository,
-        GetInStockSourceItemsBySkusAndSortedSource $getInStockSourceItemsBySkusAndSortedSource = null,
-        GetSourceItemQtyAvailableInterface $getSourceItemQtyAvailable = null
+        ?GetInStockSourceItemsBySkusAndSortedSource $getInStockSourceItemsBySkusAndSortedSource = null,
+        ?GetSourceItemQtyAvailableInterface $getSourceItemQtyAvailable = null
     ) {
         $this->sourceSelectionItemFactory = $sourceSelectionItemFactory;
         $this->sourceSelectionResultFactory = $sourceSelectionResultFactory;

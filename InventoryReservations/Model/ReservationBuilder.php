@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2017 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -99,7 +99,7 @@ class ReservationBuilder implements ReservationBuilderInterface
     /**
      * @inheritdoc
      */
-    public function setMetadata(string $metadata = null): ReservationBuilderInterface
+    public function setMetadata(?string $metadata = null): ReservationBuilderInterface
     {
         $this->metadata = $metadata;
         return $this;
