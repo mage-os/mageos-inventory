@@ -138,7 +138,7 @@
         <actionGroup ref="AdminNavigateToNewOrderPageExistingCustomerActionGroup" stepKey="CreateNewOrder">
             <argument name="customer" value="Simple_US_Customer"/>
         </actionGroup>
-
+        <actionGroup ref="AdminSelectStoreDuringOrderCreationActionGroup" stepKey="selectDefaultStoreView"/>
         <!--Add product to order-->
         <actionGroup ref="AddSimpleProductToOrderActionGroup" stepKey="addSimpleProductToOrder">
             <argument name="product" value="$createSimpleProduct$"/>
