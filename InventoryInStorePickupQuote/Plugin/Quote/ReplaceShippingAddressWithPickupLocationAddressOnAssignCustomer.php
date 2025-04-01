@@ -19,7 +19,11 @@ use Magento\InventoryInStorePickupShippingApi\Model\IsInStorePickupDeliveryCartI
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\Quote\Address;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class ReplaceShippingAddressWithPickupLocationAddressOnAssignCustomer
 {
     /**
@@ -49,16 +53,19 @@ class ReplaceShippingAddressWithPickupLocationAddressOnAssignCustomer
      * removing the pickup location address.
      *
      * @param Quote $quote
-     * @param callable $proceed
      * @param CustomerInterface $customer
-     * @return Quote
+     * @param Address|null $billingAddress
+     * @param Address|null $shippingAddress
+     * @return array
      */
-    public function aroundAssignCustomer(
+    public function beforeAssignCustomerWithAddressChange(
         Quote $quote,
-        callable $proceed,
-        CustomerInterface $customer
-    ): Quote {
-        if ($this->isInStorePickupDeliveryCart->execute($quote)
+        CustomerInterface $customer,
+        ?Address $billingAddress = null,
+        ?Address $shippingAddress = null
+    ): array {
+        if (null === $shippingAddress
+            && $this->isInStorePickupDeliveryCart->execute($quote)
             && $quote->getShippingAddress()?->getExtensionAttributes()?->getPickupLocationCode()
         ) {
             try {
@@ -82,9 +89,8 @@ class ReplaceShippingAddressWithPickupLocationAddressOnAssignCustomer
                         AddressInterface::class
                     );
                 }
-                return $quote->assignCustomerWithAddressChange($customer, null, $shippingAddress);
             }
         }
-        return $proceed($customer);
+        return [$customer, $billingAddress, $shippingAddress];
     }
 }

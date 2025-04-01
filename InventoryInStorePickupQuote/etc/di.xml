@@ -35,6 +35,6 @@
         <plugin name="in-store-pickup-set-shipping-description" type="Magento\InventoryInStorePickupQuote\Plugin\Quote\Address\SetShippingDescription" />
     </type>
     <type name="Magento\Quote\Model\Quote">
-        <plugin name="inventory_in_store_pickup_quote_replace_shipping_address_on_assign_customer" type="Magento\InventoryInStorePickupQuote\Plugin\Quote\ReplaceShippingAddressWithPickupLocationAddressOnAssignCustomer" />
+        <plugin name="inventory_in_store_pickup_quote_replace_shipping_address_on_assign_customer" sortOrder="20" type="Magento\InventoryInStorePickupQuote\Plugin\Quote\ReplaceShippingAddressWithPickupLocationAddressOnAssignCustomer" />
     </type>
 </config>
