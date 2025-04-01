@@ -96,7 +96,8 @@
         <!--Navigate to checkout-->
         <actionGroup ref="GoToCheckoutFromMinicartActionGroup" stepKey="goToCheckoutFromMinicart"/>
         <!-- Verify that selected address is NY address -->
-        <actionGroup ref="CheckSelectedShippingAddressInCheckoutActionGroup" stepKey="assertSelectedShippingAddressIsNY">
+        <comment userInput="Comment is added to preserve the step key for backward compatibility" stepKey="assertSelectedShippingAddressIsLA"/>
+        <actionGroup ref="CheckSelectedShippingAddressInCheckoutActionGroup" stepKey="assertSelectedShippingAddressIsNYAsDefaultAddress">
             <argument name="customerVar" value="$customer$" />
             <argument name="customerAddressVar" value="US_Address_NY" />
         </actionGroup>
@@ -126,7 +127,7 @@
         <!--Click 'Shipping'-->
         <actionGroup ref="StorefrontSelectShippingActionGroup" stepKey="switchToShipping"/>
         <!--Verify that selected address is CA address-->
-        <actionGroup ref="CheckSelectedShippingAddressInCheckoutActionGroup" stepKey="assertSelectedShippingAddressIsCAAfterPageRefresh">
+        <actionGroup ref="CheckSelectedShippingAddressInCheckoutActionGroup" stepKey="assertSelectedShippingAddressIsLAAfterPageRefresh">
             <argument name="customerVar" value="$customer$" />
             <argument name="customerAddressVar" value="US_Address_CA" />
         </actionGroup>
@@ -149,7 +150,7 @@
         <waitForElementVisible selector="{{CheckoutShippingSection.shipHereButton(US_Address_NY.postcode)}}" stepKey="waitForShipHereVisible"/>
         <click selector="{{CheckoutShippingSection.shipHereButton(US_Address_NY.postcode)}}" stepKey="clickShipHere"/>
         <!-- Verify that selected address is NY address -->
-        <actionGroup ref="CheckSelectedShippingAddressInCheckoutActionGroup" stepKey="assertSelectedShippingAddressIsNYAfterAddressChange">
+        <actionGroup ref="CheckSelectedShippingAddressInCheckoutActionGroup" stepKey="assertSelectedShippingAddressIsNY">
             <argument name="customerVar" value="$customer$" />
             <argument name="customerAddressVar" value="US_Address_NY" />
         </actionGroup>
