@@ -95,7 +95,7 @@ class GetDefaultSortedSourcesResult
 
         $itemsTdDeliver = [];
         foreach ($inventoryRequest->getItems() as $item) {
-            $normalizedSku = $this->normalizeSku($item->getSku());
+            $normalizedSku = $this->normalizeSku(trim($item->getSku()));
             $itemsTdDeliver[$normalizedSku] = $item->getQty();
         }
 
@@ -111,14 +111,14 @@ class GetDefaultSortedSourcesResult
             );
 
         foreach ($sourceItems as $sourceItem) {
-            $normalizedSku = $this->normalizeSku($sourceItem->getSku());
+            $normalizedSku = $this->normalizeSku(trim($sourceItem->getSku()));
             $sourceItemQtyAvailable = $this->getSourceItemQtyAvailable->execute($sourceItem);
             $qtyToDeduct = min(max($sourceItemQtyAvailable, 0.0), $itemsTdDeliver[$normalizedSku] ?? 0.0);
 
             $sourceItemSelections[] = $this->sourceSelectionItemFactory->create(
                 [
                     'sourceCode' => $sourceItem->getSourceCode(),
-                    'sku' => $sourceItem->getSku(),
+                    'sku' => trim($sourceItem->getSku()),
                     'qtyToDeduct' => $qtyToDeduct,
                     'qtyAvailable' => $sourceItemQtyAvailable
                 ]
