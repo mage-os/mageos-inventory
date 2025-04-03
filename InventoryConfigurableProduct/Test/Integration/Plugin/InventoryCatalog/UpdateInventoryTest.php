@@ -1,6 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
+ * Copyright 2024 Adobe
+ * All rights reserved.
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
@@ -119,7 +120,7 @@ class UpdateInventoryTest extends TestCase
     /**
      * @return array[]
      */
-    public function massUpdateConfigurableProductsStockStatusDataProvider(): array
+    public static function massUpdateConfigurableProductsStockStatusDataProvider(): array
     {
         return [
             [['sp1', 'sp2', 'sp3', 'sp4', 'cp1', 'cp2']],
