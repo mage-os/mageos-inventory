@@ -90,7 +90,7 @@ class StockStatusBaseSelectProcessor implements BaseSelectProcessorInterface
      */
     public function process(Select $select)
     {
-        if (!$this->stockConfig->isShowOutOfStock()) {
+        if ($this->stockConfig->isShowOutOfStock()) {
             $websiteCode = $this->storeManager->getWebsite()->getCode();
             $stock = $this->stockResolver->execute(SalesChannelInterface::TYPE_WEBSITE, $websiteCode);
             $stockId = (int)$stock->getStockId();
