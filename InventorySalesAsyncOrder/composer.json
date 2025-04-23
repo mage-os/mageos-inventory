@@ -1,30 +1,34 @@
 {
-    "name": "magento/module-inventory-sales-async-order",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": "*",
-        "magento/module-inventory-sales": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-inventory-configuration-api": "*",
-        "magento/module-inventory-sales-api": "*",
-        "magento/module-quote": "*",
-        "magento/module-sales": "*"
-    },
-    "suggest": {
-        "magento/module-async-order": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-sales-async-order",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/framework": "1.1.1",
+    "mage-os/module-inventory-sales": "1.1.1",
+    "mage-os/module-inventory-catalog-api": "1.1.1",
+    "mage-os/module-inventory-configuration-api": "1.1.1",
+    "mage-os/module-inventory-sales-api": "1.1.1",
+    "mage-os/module-quote": "1.1.1",
+    "mage-os/module-sales": "1.1.1"
+  },
+  "suggest": {
+    "mage-os/module-async-order": "1.1.1"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventorySalesAsyncOrder\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventorySalesAsyncOrder\\": ""
     }
+  },
+  "version": "1.1.1",
+  "replace": {
+    "magento/module-inventory-sales-async-order": "100.2.2"
+  }
 }
