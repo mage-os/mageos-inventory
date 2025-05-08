@@ -11,8 +11,9 @@ define([
     'use strict';
 
     /**
-     * Provide possibility to make field required by dependency on other field value.
-     */
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
+ */
     return uiElement.extend(
         {
             /**
