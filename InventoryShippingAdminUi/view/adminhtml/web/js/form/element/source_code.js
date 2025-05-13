@@ -6,8 +6,9 @@ define([
 
     return select.extend({
         /**
-         * @inheritdoc
-         */
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
+ */
         setOptions: function (data) {
             var result = this._super(data);
 

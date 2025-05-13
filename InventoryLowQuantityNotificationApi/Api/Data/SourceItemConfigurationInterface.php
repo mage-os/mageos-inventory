@@ -1,11 +1,13 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
 namespace Magento\InventoryLowQuantityNotificationApi\Api\Data;
+
+use Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationExtensionInterface;
 
 /**
  * Represents a Source Item Configuration object
@@ -19,9 +21,9 @@ interface SourceItemConfigurationInterface extends \Magento\Framework\Api\Extens
     /**
      * Constant for fields in data array
      */
-    const SOURCE_CODE = 'source_code';
-    const SKU = 'sku';
-    const INVENTORY_NOTIFY_QTY = 'notify_stock_qty';
+    public const SOURCE_CODE = 'source_code';
+    public const SKU = 'sku';
+    public const INVENTORY_NOTIFY_QTY = 'notify_stock_qty';
 
     /**
      * Get source code
@@ -71,15 +73,14 @@ interface SourceItemConfigurationInterface extends \Magento\Framework\Api\Extens
     /**
      * Retrieve existing extension attributes object
      *
-     * @return \Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationExtensionInterface|null
+     * @return SourceItemConfigurationExtensionInterface|null
      */
     public function getExtensionAttributes(): ?SourceItemConfigurationExtensionInterface;
 
     /**
      * Set an extension attributes object
      *
-     * @param \Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationExtensionInterface
-     *      $extensionAttributes
+     * @param SourceItemConfigurationExtensionInterface $extensionAttributes
      * @return void
      */
     public function setExtensionAttributes(SourceItemConfigurationExtensionInterface $extensionAttributes): void;
