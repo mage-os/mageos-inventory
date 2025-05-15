@@ -102,7 +102,7 @@ class GetSourceSelectionResultFromCreditMemoItems
     /**
      * Calculates the total deducted quantity for an item by summing matching SKUs from deducted items.
      *
-     * @param $item
+     * @param float $item
      * @param array $deductedItems
      * @return float
      */
