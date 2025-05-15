@@ -20,11 +20,9 @@ define(
                 IN_STORE_PICKUP_CHECKBOX_SELECTOR = '#s_method_instore_pickup';
 
             /**
-             * Display sources dropdown field;
-             * And vice-versa
-             *
-             * @param {Boolean} isStorePickup
-             */
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
+ */
             function setStorePickupMethod(isStorePickup) {
                 var sourcesInput = jQuery(SOURCES_FIELD_SELECTOR),
                     shippingAddressSaveInAddressBook = jQuery(CUSTOMER_ADDRESS_SAVE_IN_ADDRESS_BOOK_SELECTOR);
