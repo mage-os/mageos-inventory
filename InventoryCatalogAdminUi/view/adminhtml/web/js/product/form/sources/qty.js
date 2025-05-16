@@ -6,7 +6,7 @@
 define([
     'Magento_CatalogInventory/js/components/qty-validator-changer'
 ], function (Validator) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Validator.extend({
 

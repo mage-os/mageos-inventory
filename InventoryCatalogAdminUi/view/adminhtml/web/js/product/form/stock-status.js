@@ -6,7 +6,7 @@
 define([
     'Magento_Ui/js/form/element/select'
 ], function (Select) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Select.extend({
         defaults: {

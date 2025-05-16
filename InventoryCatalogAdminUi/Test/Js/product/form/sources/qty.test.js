@@ -7,7 +7,7 @@
 define([
     'Magento_InventoryCatalogAdminUi/js/product/form/sources/qty'
 ], function (Qty) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     describe('Magento_InventoryCatalogAdminUi/js/product/form/sources/qty', function () {
         var model,

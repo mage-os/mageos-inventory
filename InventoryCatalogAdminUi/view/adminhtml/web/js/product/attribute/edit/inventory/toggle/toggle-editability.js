@@ -6,7 +6,7 @@
 define([
     'jquery'
 ], function ($) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     $('[data-role=toggle-editability]').on('change', function () {
         var useConfigSettings = $(this),

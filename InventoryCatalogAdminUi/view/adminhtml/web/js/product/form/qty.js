@@ -6,7 +6,7 @@
 define([
     'Magento_CatalogInventory/js/components/qty-validator-changer'
 ], function (Abstract) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Abstract.extend({
         defaults: {

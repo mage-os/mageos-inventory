@@ -5,7 +5,7 @@
 define([
     'Magento_Ui/js/grid/columns/column'
 ], function (Column) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Column.extend({
         defaults: {

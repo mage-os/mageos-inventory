@@ -8,7 +8,7 @@ define([
     'uiRegistry',
     'underscore'
 ], function (Fieldset, registry, _) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Fieldset.extend({
         defaults: {
