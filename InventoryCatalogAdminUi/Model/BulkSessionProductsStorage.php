@@ -26,6 +26,7 @@ class BulkSessionProductsStorage
 
     /**
      * @param Proxy $session
+     * @phpstan-ignore-next-line
      */
     public function __construct(
         Proxy $session
