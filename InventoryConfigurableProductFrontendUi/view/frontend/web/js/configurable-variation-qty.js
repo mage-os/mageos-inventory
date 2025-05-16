@@ -11,7 +11,7 @@ define([
     'underscore',
     'mage/url'
 ], function ($, _, urlBuilder) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return function (productSku, salesChannel, salesChannelCode) {
         var selectorInfoStockSkuQty = '.availability.only',
