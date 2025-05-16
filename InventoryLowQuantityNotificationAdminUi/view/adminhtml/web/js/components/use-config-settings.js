@@ -6,7 +6,7 @@
 define([
     'Magento_Ui/js/form/element/single-checkbox'
 ], function (checkbox) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return checkbox.extend({
         defaults: {

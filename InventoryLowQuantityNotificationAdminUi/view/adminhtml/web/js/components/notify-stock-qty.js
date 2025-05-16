@@ -6,7 +6,7 @@
 define([
     'Magento_Ui/js/form/element/abstract'
 ], function (AbstractField) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return AbstractField.extend({
         defaults: {
