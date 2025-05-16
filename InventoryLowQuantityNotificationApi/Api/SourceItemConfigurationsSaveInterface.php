@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\InventoryLowQuantityNotificationApi\Api;
 
-use Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationInterface;
-
 /**
  * Save the source item configuration
  *
@@ -19,9 +17,8 @@ use Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfiguration
 interface SourceItemConfigurationsSaveInterface
 {
     /**
-     * Saves source item configurations via WebAPI, validates input, and ensures data consistency for inventory updates.
-     *
-     * @param SourceItemConfigurationInterface[] $sourceItemConfigurations
+     * @param \Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationInterface[]
+     *      $sourceItemConfigurations
      * @return void
      */
     public function execute(array $sourceItemConfigurations): void;

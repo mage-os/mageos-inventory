@@ -1,3 +1,7 @@
+/**
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
+ */
 define([
     'underscore',
     'Magento_Ui/js/form/element/select'
@@ -6,9 +10,8 @@ define([
 
     return select.extend({
         /**
- * Copyright 2019 Adobe
- * All Rights Reserved.
- */
+         * @inheritdoc
+         */
         setOptions: function (data) {
             var result = this._super(data);
 
