@@ -111,10 +111,13 @@ class Sources extends AbstractEntity
      * @inheritdoc
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
+    // phpcs:disable
     public function exportItem($item)
     {
+        // @phpstan-ignore-next-line
         // will not implement this method as it is legacy interface
     }
+    // phpcs:enable
 
     /**
      * @inheritdoc
@@ -127,8 +130,11 @@ class Sources extends AbstractEntity
     /**
      * @inheritdoc
      */
+    // phpcs:disable
     protected function _getEntityCollection()
     {
+        // @phpstan-ignore-next-line
         // will not implement this method as it is legacy interface
     }
+    // phpcs:enable
 }
