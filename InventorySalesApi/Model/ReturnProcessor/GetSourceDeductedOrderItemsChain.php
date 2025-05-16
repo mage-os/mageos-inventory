@@ -71,11 +71,13 @@ class GetSourceDeductedOrderItemsChain implements GetSourceDeductedOrderItemsInt
         $groupedItems = $result = [];
         foreach ($sourceDeductedItems as $resultItems) {
             foreach ($resultItems as $resultItem) {
-                $sourceCode = $resultItem->getSourceCode();
-                if (!isset($groupedItems[$sourceCode])) {
-                    $groupedItems[$sourceCode] = [];
+                if (!empty($groupedItems[$resultItem->getSourceCode()])) {
+                    //phpcs:ignore Magento2.Performance.ForeachArrayMerge
+                    $resultArray = array_merge($groupedItems[$resultItem->getSourceCode()], $resultItem->getItems());
+                    $groupedItems[$resultItem->getSourceCode()] = $resultArray;
+                } else {
+                    $groupedItems[$resultItem->getSourceCode()] = $resultItem->getItems();
                 }
-                $groupedItems[$sourceCode] = [...$groupedItems[$sourceCode], ...$resultItem->getItems()];
             }
         }
 
