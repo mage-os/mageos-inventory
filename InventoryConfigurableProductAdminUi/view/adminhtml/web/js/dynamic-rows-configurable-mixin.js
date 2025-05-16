@@ -4,7 +4,7 @@
  */
 
 define([], function () {
-        'use strict';
+        'use strict'; //eslint-disable-line
 
         var mixin = {
 

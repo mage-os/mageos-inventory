@@ -6,7 +6,7 @@ define([
     'Magento_Ui/js/grid/columns/column',
     'underscore'
 ], function (Column, _) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Column.extend({
         defaults: {

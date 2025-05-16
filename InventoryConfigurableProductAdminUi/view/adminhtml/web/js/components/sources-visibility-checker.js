@@ -8,7 +8,7 @@ define([
     'uiRegistry',
     'uiComponent'
 ], function (_, registry, component) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return component.extend({
         defaults: {

@@ -9,7 +9,7 @@ define([
     'ko',
     'underscore'
 ], function (Bulk, $, ko, _) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Bulk.extend({
         defaults: {
@@ -125,7 +125,7 @@ define([
                 quantityPerSource.valid = true;
 
                 quantityPerSource.elems().forEach(function (item) {
-                    quantityPerSource.validate.call(quantityPerSource, item);
+                    quantityPerSource.validate.call(quantityPerSource, item);  //eslint-disable-line
                     valid = valid && item.elems()[1].elems().length;
                 });
 

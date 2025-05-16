@@ -9,7 +9,7 @@ define([
     'underscore',
     'mage/translate'
 ], function (Summary, $, _) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Summary.extend({
         defaults: {

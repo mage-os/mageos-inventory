@@ -6,7 +6,7 @@
 define([
     'Magento_ConfigurableProduct/js/components/dynamic-rows-configurable'
 ], function (dynamicRowsConfigurable) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return dynamicRowsConfigurable.extend({
         defaults: {

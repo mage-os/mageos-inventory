@@ -12,7 +12,7 @@ define([
     'underscore',
     'mage/translate'
 ], function (Collection, $, ko, layout, utils, _, $t) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Collection.extend({
         defaults: {
