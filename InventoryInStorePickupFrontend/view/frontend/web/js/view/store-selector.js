@@ -128,7 +128,7 @@ define([
         openPopup: function () {
             var shippingAddress = quote.shippingAddress(),
                 country = shippingAddress.countryId ? shippingAddress.countryId :
-                this.defaultCountryId,
+                    this.defaultCountryId,
                 searchTerm = '';
 
             this.getPopup().openModal();
