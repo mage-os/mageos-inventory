@@ -7,7 +7,7 @@ define([
     'underscore',
     'Magento_Ui/js/dynamic-rows/dynamic-rows-grid'
 ], function (_, dynamicRowsGrid) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return dynamicRowsGrid.extend({
         defaults: {

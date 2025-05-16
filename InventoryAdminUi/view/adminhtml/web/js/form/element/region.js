@@ -6,7 +6,7 @@
 define([
     'Magento_Ui/js/form/element/region'
 ], function (Region) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Region.extend({
         defaults: {
