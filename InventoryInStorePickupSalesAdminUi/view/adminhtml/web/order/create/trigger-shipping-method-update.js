@@ -9,7 +9,7 @@ define(
         'Magento_Sales/order/create/form'
     ],
     function ($) {
-        'use strict';
+        'use strict'; //eslint-disable-line
 
         return function () {
             var storePickupCheckbox = $('#s_method_instore_pickup');

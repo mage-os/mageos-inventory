@@ -9,7 +9,7 @@ define(
         'prototype'
     ],
     function (jQuery) {
-        'use strict';
+        'use strict'; //eslint-disable-line
 
         return function () {
             var STORE_PICKUP_METHOD = 'instore_pickup',

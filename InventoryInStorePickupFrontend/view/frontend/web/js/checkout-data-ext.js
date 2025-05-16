@@ -8,7 +8,7 @@ define([
 ], function (
     storage
 ) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return function (checkoutData) {
 

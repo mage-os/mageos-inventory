@@ -7,7 +7,7 @@ define([
     'ko',
     'Magento_InventoryInStorePickupFrontend/js/model/pickup-address-converter'
 ], function (ko, pickupAddressConverter) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return function (quote) {
         var shippingAddress = quote.shippingAddress;

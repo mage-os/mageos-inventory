@@ -7,7 +7,7 @@ define(['jquery', 'Magento_Checkout/js/model/resource-url-manager'], function (
     $,
     resourceUrlManager
 ) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return {
         /**

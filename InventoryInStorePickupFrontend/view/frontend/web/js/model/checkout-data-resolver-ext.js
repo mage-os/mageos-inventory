@@ -16,7 +16,7 @@ define([
     addressConverter,
     pickupAddressConverter
 ) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return function (checkoutDataResolver) {
         checkoutDataResolver.resolveShippingAddress = wrapper.wrapSuper(

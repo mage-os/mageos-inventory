@@ -7,7 +7,7 @@ define([
     'configurableVariationQty',
     'jquery-ui-modules/widget'
 ], function ($, configurableVariationQty) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return function (SwatchRenderer) {
         $.widget('mage.SwatchRenderer', SwatchRenderer, {

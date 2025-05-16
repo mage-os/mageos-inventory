@@ -7,7 +7,7 @@ define(['jquery', 'Magento_Checkout/js/view/form/element/email'], function (
     $,
     Component
 ) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Component.extend({
         defaults: {

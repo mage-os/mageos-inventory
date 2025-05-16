@@ -4,7 +4,7 @@
  */
 
 define([], function () {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return {
         /*eslint-disable no-unused-vars*/

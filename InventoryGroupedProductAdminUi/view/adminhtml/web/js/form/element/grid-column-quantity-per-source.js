@@ -6,7 +6,7 @@ define([
     'mage/translate',
     'Magento_Ui/js/grid/columns/column'
 ], function ($t, Column) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Column.extend({
         defaults: {

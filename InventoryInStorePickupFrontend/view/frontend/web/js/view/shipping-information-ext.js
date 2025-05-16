@@ -6,7 +6,7 @@
 define([
     'Magento_Checkout/js/model/quote'
 ], function (quote) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     var storePickupShippingInformation = {
         defaults: {
