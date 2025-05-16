@@ -1,17 +1,17 @@
-/*
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+/**
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
  */
 define([
     'Magento_Ui/js/form/components/fieldset',
     'ko'
 ], function (Fieldset, ko) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     /**
- * Copyright 2019 Adobe
- * All Rights Reserved.
- */
+     * TODO Remove when issue is resolved in core.
+     * @see Please check issue in core for more details: https://github.com/magento/magento2/issues/22067.
+     */
     return Fieldset.extend(ko).extend(
         {
             /**
