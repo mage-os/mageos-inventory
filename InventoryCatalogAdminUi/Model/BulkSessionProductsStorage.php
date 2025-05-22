@@ -26,6 +26,7 @@ class BulkSessionProductsStorage
      * @param \Magento\Backend\Model\Session\Proxy $session
      */
     public function __construct(
+        // @phpstan-ignore-next-line
         \Magento\Backend\Model\Session\Proxy $session
     ) {
         $this->session = $session;
