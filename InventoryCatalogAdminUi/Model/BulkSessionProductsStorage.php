@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\InventoryCatalogAdminUi\Model;
 
-use Magento\Backend\Model\Session\Proxy;
-
 /**
  * Mass assign session storage
  * @see \Magento\InventoryCatalogAdminUi\Controller\Adminhtml\Source\BulkAssign
@@ -20,16 +18,15 @@ use Magento\Backend\Model\Session\Proxy;
 class BulkSessionProductsStorage
 {
     /**
-     * @var Proxy
+     * @var \Magento\Backend\Model\Session\Proxy
      */
     private $session;
 
     /**
-     * @param Proxy $session
-     * @phpstan-ignore-next-line
+     * @param \Magento\Backend\Model\Session\Proxy $session
      */
     public function __construct(
-        Proxy $session
+        \Magento\Backend\Model\Session\Proxy $session
     ) {
         $this->session = $session;
     }
