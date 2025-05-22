@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\InventoryLowQuantityNotificationApi\Api\Data;
 
+use Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationExtensionInterface;
+
 /**
  * Represents a Source Item Configuration object
  *
@@ -71,15 +73,14 @@ interface SourceItemConfigurationInterface extends \Magento\Framework\Api\Extens
     /**
      * Retrieve existing extension attributes object
      *
-     * @return \Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationExtensionInterface|null
+     * @return SourceItemConfigurationExtensionInterface|null
      */
     public function getExtensionAttributes(): ?SourceItemConfigurationExtensionInterface;
 
     /**
      * Set an extension attributes object
      *
-     * @param \Magento\InventoryLowQuantityNotificationApi\Api\Data\SourceItemConfigurationExtensionInterface
-     *      $extensionAttributes
+     * @param SourceItemConfigurationExtensionInterface $extensionAttributes
      * @return void
      */
     public function setExtensionAttributes(SourceItemConfigurationExtensionInterface $extensionAttributes): void;
