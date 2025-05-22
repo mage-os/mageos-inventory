@@ -8,7 +8,7 @@ define([
     'underscore',
     'mageUtils'
 ], function ($, Form, _, utils) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Form.extend({
         defaults: {

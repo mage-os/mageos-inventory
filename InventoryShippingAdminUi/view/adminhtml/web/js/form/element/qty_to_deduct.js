@@ -6,7 +6,7 @@ define([
     'Magento_Ui/js/form/element/abstract',
     'mageUtils'
 ], function (Abstract, utils) {
-    'use strict';
+    'use strict'; //eslint-disable-line
 
     return Abstract.extend({
         defaults: {
