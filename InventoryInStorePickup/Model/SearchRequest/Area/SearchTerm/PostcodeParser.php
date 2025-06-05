@@ -45,7 +45,12 @@ class PostcodeParser implements ParserInterface
     public function execute(string $searchTerm, DataObject $dataObject): void
     {
         $searchQuery = $this->getSearchQuery($searchTerm);
-        if ($this->validator->validate($searchQuery, $dataObject->getData(self::COUNTRY))) {
+        try {
+            $isValid = $this->validator->validate($searchQuery, $dataObject->getData(self::COUNTRY));
+        } catch (\InvalidArgumentException) {
+            $isValid = false;
+        }
+        if ($isValid) {
             $dataObject->setData(self::POSTCODE, $searchQuery);
         } else {
             $dataObject->setData(self::POSTCODE, '');
