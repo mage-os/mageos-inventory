@@ -28,7 +28,7 @@ class ReindexAfterSourceItemsDeletePlugin
         private readonly GetSourceItemIds $getSourceItemIds,
         private readonly GetSkuListInStock $getSkuListInStock,
         private readonly SkuListsProcessor $skuListsProcessor,
-    ){
+    ) {
     }
 
     /**
