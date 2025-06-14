@@ -19,13 +19,13 @@ class IndexDataFiller
     /**
      * @param ResourceConnection $resourceConnection
      * @param SelectBuilder $selectBuilder
-     * @param IndexHandlerInterface $indexHandler
+     * @param IndexHandlerInterface $indexStructureHandler
      * @param SiblingProductsProviderInterface[] $siblingProductsProviders
      */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly SelectBuilder $selectBuilder,
-        private readonly IndexHandlerInterface $indexHandler,
+        private readonly IndexHandlerInterface $indexStructureHandler,
         private readonly array $siblingProductsProviders = [],
     ) {
         (fn (SiblingProductsProviderInterface ...$siblingProductsProviders) => $siblingProductsProviders)(
@@ -46,13 +46,13 @@ class IndexDataFiller
         $select = $this->selectBuilder->getSelect($stockId, $skuList);
         $data = $this->resourceConnection->getConnection()->fetchAll($select);
         if ($skuList) {
-            $this->indexHandler->cleanIndex(
+            $this->indexStructureHandler->cleanIndex(
                 $indexName,
                 new ArrayIterator($skuList),
                 ResourceConnection::DEFAULT_CONNECTION
             );
         }
-        $this->indexHandler->saveIndex(
+        $this->indexStructureHandler->saveIndex(
             $indexName,
             new ArrayIterator($data),
             ResourceConnection::DEFAULT_CONNECTION
@@ -72,13 +72,13 @@ class IndexDataFiller
 
             $data = $siblingProductsProvider->getData($indexName, $siblingSkus);
             if ($siblingSkus) {
-                $this->indexHandler->cleanIndex(
+                $this->indexStructureHandler->cleanIndex(
                     $indexName,
                     new ArrayIterator($siblingSkus),
                     ResourceConnection::DEFAULT_CONNECTION
                 );
             }
-            $this->indexHandler->saveIndex(
+            $this->indexStructureHandler->saveIndex(
                 $indexName,
                 new ArrayIterator($data),
                 ResourceConnection::DEFAULT_CONNECTION
