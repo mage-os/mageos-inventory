@@ -1,26 +1,30 @@
 {
-    "name": "magento/module-inventory-catalog-search",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": "*",
-        "magento/module-catalog-inventory": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-inventory-indexer": "*",
-        "magento/module-store": "*",
-        "magento/module-catalog-search": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-catalog-search",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/framework": "1.2.0",
+    "mage-os/module-catalog-inventory": "1.2.0",
+    "mage-os/module-inventory-catalog-api": "1.2.0",
+    "mage-os/module-inventory-indexer": "1.2.0",
+    "mage-os/module-store": "1.2.0",
+    "mage-os/module-catalog-search": "1.2.0"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryCatalogSearch\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryCatalogSearch\\": ""
     }
+  },
+  "version": "1.2.0",
+  "replace": {
+    "magento/module-inventory-catalog-search": "1.2.6"
+  }
 }
