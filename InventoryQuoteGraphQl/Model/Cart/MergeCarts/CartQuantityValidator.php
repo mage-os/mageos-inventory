@@ -21,13 +21,14 @@ use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Quote\Model\Quote\Item;
 use Magento\QuoteGraphQl\Model\Cart\MergeCarts\CartQuantityValidatorInterface;
 use Magento\Checkout\Model\Config;
+use Psr\Log\LoggerInterface;
 
 class CartQuantityValidator implements CartQuantityValidatorInterface
 {
     /**
      * @var array
      */
-    private $cumulativeQty = [];
+    private array $cumulativeQty = [];
 
     /**
      * CartQuantityValidator Constructor
@@ -37,13 +38,15 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      * @param GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
      * @param Config $config
      * @param ProductRepositoryInterface $productRepository
+     * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly CartItemRepositoryInterface   $cartItemRepository,
         private readonly GetProductSalableQtyInterface $getProductSalableQty,
         private readonly GetStockIdForCurrentWebsite   $getStockIdForCurrentWebsite,
         private readonly Config                        $config,
-        private readonly ProductRepositoryInterface    $productRepository
+        private readonly ProductRepositoryInterface    $productRepository,
+        private readonly LoggerInterface               $logger
     ) {
     }
 
@@ -210,8 +213,8 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
     {
         try {
             $this->cartItemRepository->deleteById($cartId, $itemId);
-        } catch (NoSuchEntityException | CouldNotSaveException $e) { // phpcs:ignore
-            // Optionally log the error here
+        } catch (NoSuchEntityException | CouldNotSaveException $e) {
+            $this->logger->error($e);
         }
     }
 }
