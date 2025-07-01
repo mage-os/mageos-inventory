@@ -10,8 +10,6 @@ namespace Magento\InventoryQuoteGraphQl\Model\Cart\MergeCarts;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\InputException;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
 use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
@@ -56,8 +54,6 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      * @param CartInterface $customerCart
      * @param CartInterface $guestCart
      * @return bool
-     * @throws InputException
-     * @throws LocalizedException
      */
     public function validateFinalCartQuantities(CartInterface $customerCart, CartInterface $guestCart): bool
     {
@@ -116,8 +112,6 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      * @param float $guestItemQty
      * @param float $customerItemQty
      * @return bool
-     * @throws InputException
-     * @throws LocalizedException
      */
     private function validateProductQty(int $stockId, string $sku, float $guestItemQty, float $customerItemQty): bool
     {
@@ -136,8 +130,6 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      * @param Item $guestCartItem
      * @param Item $customerCartItem
      * @return bool
-     * @throws InputException
-     * @throws LocalizedException
      */
     private function validateCompositeProductQty(int $stockId, Item $guestCartItem, Item $customerCartItem): bool
     {
