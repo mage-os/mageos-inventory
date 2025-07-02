@@ -11,6 +11,7 @@
             <argument name="configProviders" xsi:type="array">
                 <item name="website_code_config_provider" xsi:type="object">Magento\InventoryInStorePickupFrontend\Model\Ui\WebsiteCodeConfigProvider</item>
                 <item name="in_store_pickup_checkout_config_provider" xsi:type="object">Magento\InventoryInStorePickupFrontend\Model\Ui\DelimiterConfigProvider</item>
+                <item name="inventory_in_store_pickup_frontend_selected_pickup_location_code_checkout_config_provider" xsi:type="object">Magento\InventoryInStorePickupFrontend\Model\Ui\SelectedPickupLocationCodeProvider</item>
             </argument>
         </arguments>
     </type>
