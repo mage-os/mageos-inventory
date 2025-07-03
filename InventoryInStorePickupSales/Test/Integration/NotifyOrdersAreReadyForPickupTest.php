@@ -24,6 +24,7 @@ use Magento\TestFramework\Mail\Template\TransportBuilderMock;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class NotifyOrdersAreReadyForPickupTest extends \PHPUnit\Framework\TestCase
 {
