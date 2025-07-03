@@ -18,6 +18,7 @@ use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\VisualMerchandiser\Model\Resolver\QuantityAndStock;
+use Magento\Inventory\Model\ResourceModel\SourceItem;
 
 /**
  * This plugin adds multi-source stock calculation capabilities to the Visual Merchandiser feature.
@@ -160,7 +161,7 @@ class QuantityAndStockPlugin
 
         $select = $connection->select()
             ->from(
-                $this->resource->getTableName('inventory_source_item'),
+                $this->resource->getTableName(SourceItem::TABLE_NAME_SOURCE_ITEM),
                 ['sku', 'parent_qty' => new \Zend_Db_Expr('SUM(quantity)')]
             )
             ->group('sku');
@@ -197,7 +198,9 @@ class QuantityAndStockPlugin
                 'r.child_id = c.entity_id',
                 ['child_sku' => 'c.sku']
             );
-        $connection->query($connection->insertFromSelect($select, $childRelationsTableName, ['parent_id', 'child_sku']));
+        $connection->query(
+            $connection->insertFromSelect($select, $childRelationsTableName, ['parent_id', 'child_sku'])
+        );
 
         return $childRelationsTableName;
     }
@@ -225,7 +228,7 @@ class QuantityAndStockPlugin
         $select = $connection->select()
             ->from(['cr' => $childRelationsTableName], ['parent_id'])
             ->join(
-                ['isi' => $this->resource->getTableName('inventory_source_item')],
+                ['isi' => $this->resource->getTableName(SourceItem::TABLE_NAME_SOURCE_ITEM)],
                 'cr.child_sku = isi.sku',
                 ['child_qty' => new \Zend_Db_Expr('SUM(isi.quantity)')]
             )
