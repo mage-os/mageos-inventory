@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\InventoryVisualMerchandiser\Plugin\Model\Resolver;
 
-use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Ddl\Table;
@@ -36,32 +35,32 @@ class QuantityAndStockPlugin
     /**
      * @var ResourceConnection
      */
-    private $resource;
+    private ResourceConnection $resource;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    private StoreManagerInterface $storeManager;
 
     /**
      * @var StockResolverInterface
      */
-    private $stockResolver;
+    private StockResolverInterface $stockResolver;
 
     /**
      * @var StockIndexTableNameResolverInterface
      */
-    private $stockIndexTableNameResolver;
+    private StockIndexTableNameResolverInterface $stockIndexTableNameResolver;
 
     /**
      * @var DefaultStockProviderInterface
      */
-    private $defaultStockProvider;
+    private DefaultStockProviderInterface $defaultStockProvider;
 
     /**
      * @var MetadataPool
      */
-    private $metadataPool;
+    private MetadataPool $metadataPool;
 
     /**
      * @param ResourceConnection $resource
@@ -78,8 +77,7 @@ class QuantityAndStockPlugin
         StockIndexTableNameResolverInterface $stockIndexTableNameResolver,
         DefaultStockProviderInterface        $defaultStockProvider,
         MetadataPool                         $metadataPool
-    )
-    {
+    ) {
         $this->resource = $resource;
         $this->storeManager = $storeManager;
         $this->stockResolver = $stockResolver;
@@ -95,7 +93,7 @@ class QuantityAndStockPlugin
      * @param callable $proceed
      * @param Collection $collection
      * @return Collection
-     * @throws LocalizedException|\Zend_Db_Select_Exception
+     * @throws LocalizedException|\Zend_Db_Select_Exception|\Zend_Db_Exception
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function aroundJoinStock(QuantityAndStock $subject, callable $proceed, Collection $collection): Collection
@@ -115,11 +113,13 @@ class QuantityAndStockPlugin
             $collection->getSelect()
                 ->joinLeft(
                     ['ps' => $parentStockTableName],
-                    'e.sku = ps.sku', ['parent_stock' => 'COALESCE(ps.parent_qty, 0)']
+                    'e.sku = ps.sku',
+                    ['parent_stock' => 'COALESCE(ps.parent_qty, 0)']
                 )
                 ->joinLeft(
                     ['cs' => $childStockTableName],
-                    'e.row_id = cs.parent_id', ['child_stock' => 'COALESCE(cs.child_qty, 0)']
+                    'e.row_id = cs.parent_id',
+                    ['child_stock' => 'COALESCE(cs.child_qty, 0)']
                 )
                 ->columns([
                     'stock' => new \Zend_Db_Expr(
@@ -139,8 +139,9 @@ class QuantityAndStockPlugin
         return $collection;
     }
 
-
     /**
+     * Create temporary table for parent product stock
+     *
      * @return string
      * @throws \Zend_Db_Exception
      */
@@ -155,26 +156,28 @@ class QuantityAndStockPlugin
             ->addColumn('parent_qty', Table::TYPE_DECIMAL, '12,4', ['nullable' => false])
             ->addIndex('IDX_TMP_PARENT_STOCK_SKU', ['sku'])
             ->setOption('temporary', true);
-        $connection->createTable($parentStockTable);
+        $connection->createTemporaryTable($parentStockTable);
 
         $select = $connection->select()
-            ->from('inventory_source_item', ['sku', 'parent_qty' => new \Zend_Db_Expr('SUM(quantity)')])
+            ->from(
+                $this->resource->getTableName('inventory_source_item'),
+                ['sku', 'parent_qty' => new \Zend_Db_Expr('SUM(quantity)')]
+            )
             ->group('sku');
-
         $connection->query($connection->insertFromSelect($select, $parentStockTableName, ['sku', 'parent_qty']));
 
         return $parentStockTableName;
     }
 
     /**
+     * Create temporary table for determining child products
+     *
      * @return string
      * @throws \Zend_Db_Exception
      */
     private function createChildRelationsTemporaryTable(): string
     {
         $connection = $this->resource->getConnection();
-        $productLinkField = $this->metadataPool->getMetadata(ProductInterface::class)
-            ->getLinkField();
         $childRelationsTableName = $this->resource->getTableName(
             str_replace('.', '_', uniqid(self::CHILD_RELATIONS, true))
         );
@@ -185,22 +188,23 @@ class QuantityAndStockPlugin
             ->addIndex('IDX_TMP_CHILD_REL_PARENT_ID', ['parent_id'])
             ->addIndex('IDX_TMP_CHILD_REL_CHILD_SKU', ['child_sku'])
             ->setOption('temporary', true);
-        $connection->createTable($childRelationsTable);
+        $connection->createTemporaryTable($childRelationsTable);
 
         $select = $connection->select()
-            ->from(['r' => 'catalog_product_relation'], ['parent_id'])
+            ->from(['r' => $this->resource->getTableName('catalog_product_relation')], ['parent_id'])
             ->join(
-                ['c' => 'catalog_product_entity'],
-                'r.child_id = c.' . $productLinkField,
+                ['c' => $this->resource->getTableName('catalog_product_entity')],
+                'r.child_id = c.entity_id',
                 ['child_sku' => 'c.sku']
             );
-
         $connection->query($connection->insertFromSelect($select, $childRelationsTableName, ['parent_id', 'child_sku']));
 
         return $childRelationsTableName;
     }
 
     /**
+     * Create temporary table for child product stock
+     *
      * @param string $childRelationsTableName
      * @return string
      * @throws \Zend_Db_Exception
@@ -216,17 +220,16 @@ class QuantityAndStockPlugin
             ->addColumn('child_qty', Table::TYPE_DECIMAL, '12,4', ['nullable' => false])
             ->addIndex('IDX_TMP_CHILD_STOCK_PARENT_ID', ['parent_id'])
             ->setOption('temporary', true);
-        $connection->createTable($childStockTable);
+        $connection->createTemporaryTable($childStockTable);
 
         $select = $connection->select()
             ->from(['cr' => $childRelationsTableName], ['parent_id'])
             ->join(
-                ['isi' => 'inventory_source_item'],
+                ['isi' => $this->resource->getTableName('inventory_source_item')],
                 'cr.child_sku = isi.sku',
                 ['child_qty' => new \Zend_Db_Expr('SUM(isi.quantity)')]
             )
             ->group('cr.parent_id');
-
         $connection->query($connection->insertFromSelect($select, $childStockTableName, ['parent_id', 'child_qty']));
 
         return $childStockTableName;
