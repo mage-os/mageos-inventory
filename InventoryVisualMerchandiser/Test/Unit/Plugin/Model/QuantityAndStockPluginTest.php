@@ -23,6 +23,9 @@ use PHPUnit\Framework\TestCase;
 use Magento\Framework\DB\Ddl\Table;
 use Magento\InventoryVisualMerchandiser\Plugin\Model\Resolver\QuantityAndStockPlugin;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class QuantityAndStockPluginTest extends TestCase
 {
     /**
