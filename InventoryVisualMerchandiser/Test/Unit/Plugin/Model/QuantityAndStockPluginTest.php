@@ -17,7 +17,6 @@ use Magento\InventoryIndexer\Model\StockIndexTableNameResolverInterface;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\VisualMerchandiser\Model\Resolver\QuantityAndStock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\Framework\DB\Ddl\Table;
@@ -80,7 +79,7 @@ class QuantityAndStockPluginTest extends TestCase
     public function testAroundJoinStockWebsiteAdminCode(): void
     {
         $websiteCode = 'admin';
-        $subject = $this->createMock(QuantityAndStock::class);
+        $subject = $this->createMock(\Magento\VisualMerchandiser\Model\Resolver\QuantityAndStock::class);
         $callable = $this->getMockBuilder(\stdClass::class)
             ->addMethods(['callbackMethod'])
             ->getMock();
