@@ -15,6 +15,9 @@
         "magento/module-inventory-api": "*",
         "magento/module-inventory-configuration-api": "*"
     },
+    "suggest": {
+        "magento/module-visual-merchandiser": "*"
+    },
     "type": "magento2-module",
     "license": [
         "OSL-3.0",

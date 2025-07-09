@@ -78,6 +78,9 @@ class QuantityAndStockPluginTest extends TestCase
      */
     public function testAroundJoinStockWebsiteAdminCode(): void
     {
+        if (!class_exists(\Magento\VisualMerchandiser\Model\Resolver\QuantityAndStock::class)) {
+            $this->markTestSkipped('VisualMerchandiser module is absent');
+        }
         $websiteCode = 'admin';
         $subject = $this->createMock(\Magento\VisualMerchandiser\Model\Resolver\QuantityAndStock::class);
         $callable = $this->getMockBuilder(\stdClass::class)
