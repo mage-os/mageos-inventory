@@ -140,7 +140,7 @@ class NotifyOrdersAreReadyForPickupTest extends \PHPUnit\Framework\TestCase
      * @param string|null $errorMessage
      * @throws
      */
-    public function testExecuteForNotReadyForPickupAsyncOrders(string $sourceId, ?string $errorMessage)
+    public function testExecuteForNotReadyForPickupAsyncSending(string $sourceId, ?string $errorMessage)
     {
         // Set up configuration values
         $this->config->setValue('sales_email/general/async_sending', true);
