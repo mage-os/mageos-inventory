@@ -115,7 +115,9 @@
     - [
       ['modifiedLabel.name', 'eq', 'Priority: P0'],
       ['modifiedLabel.name', 'eq', 'Priority: P1'],
-      ['modifiedLabel.name', 'eq', 'Priority: P2']
+      ['modifiedLabel.name', 'eq', 'Priority: P2'],
+      ['modifiedLabel.name', 'eq', 'Priority: P3'],
+      ['modifiedLabel.name', 'eq', 'Priority: P4']
     ]
   actions:
     - removeFromProject: [39] #['Issues Confirmation and Triage Board']
@@ -123,3 +125,4 @@
 - trigger: issues.closed
   actions:
     - removeFromProject: [39]
+    
