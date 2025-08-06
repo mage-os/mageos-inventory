@@ -2,7 +2,7 @@
 # All Rights Reserved.
 automations:
   ############################################################################################################
-  # Issues Automation                                                                                        #
+  # Issues Automation #
   ############################################################################################################
   # 1. Whenever a new issue is created and has no priority label on it (e.g., P1, P2, etc.):
   #   a. it must be added to the "Issues Confirmation and Triage Board" project
