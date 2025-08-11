@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\InventoryQuoteGraphQl\Model\Cart\MergeCarts;
 
-use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -24,6 +23,8 @@ use Psr\Log\LoggerInterface;
 class CartQuantityValidator implements CartQuantityValidatorInterface
 {
     /**
+     * Array to hold cumulative quantities for each SKU
+     *
      * @var array
      */
     private array $cumulativeQty = [];
@@ -49,63 +50,64 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
     }
 
     /**
-     * Validate combined cart quantities to make sure they are within available stock
+     * Validate combined cart quantities to ensure they are within available stock
      *
      * @param CartInterface $customerCart
      * @param CartInterface $guestCart
      * @return bool
+     * @throws NoSuchEntityException
      */
     public function validateFinalCartQuantities(CartInterface $customerCart, CartInterface $guestCart): bool
     {
         $modified = false;
-        $stockId = $this->getStockIdForCurrentWebsite->execute();
         $this->cumulativeQty = [];
+        $stockId = $this->getStockIdForCurrentWebsite->execute();
+        $mergePreference = $this->config->getCartMergePreference();
 
-        /** @var CartItemInterface $guestCartItem */
-        foreach ($guestCart->getAllVisibleItems() as $guestCartItem) {
-            foreach ($customerCart->getAllItems() as $customerCartItem) {
-                if ($customerCartItem->compare($guestCartItem)) {
-                    // Delete guest cart item if customer cart has priority
-                    if ($this->config->getCartMergePreference() === Config::CART_PREFERENCE_CUSTOMER) {
-                        $this->safeDeleteCartItem((int)$guestCart->getId(), (int)$guestCartItem->getItemId());
-                        $modified = true;
-                        continue;
-                    }
-                    $sku = $customerCartItem->getProduct()->getSku();
-                    if ($customerCartItem->getProduct()->getOptions()) {
-                        $product = $this->getProduct((int)$customerCartItem->getProduct()->getId());
-                        $sku = $product->getSku();
-                    }
-                    $stockCurrentQty = $customerCartItem->getChildren()
-                        ? $this->validateCompositeProductQty($stockId, $guestCartItem, $customerCartItem)
-                        : $this->validateProductQty(
-                            $stockId,
-                            $sku,
-                            $guestCartItem->getQty(),
-                            $customerCartItem->getQty()
-                        );
-
-                    // Delete customer cart item if guest cart has priority
-                    if ($this->config->getCartMergePreference() === Config::CART_PREFERENCE_GUEST) {
-                        $this->safeDeleteCartItem((int)$customerCart->getId(), (int)$customerCartItem->getItemId());
-                        $modified = true;
-                    }
-
-                    // If cart merge has priority or after guest priority, validate stock quantity
-                    if (!$stockCurrentQty) {
-                        $this->safeDeleteCartItem((int)$guestCart->getId(), (int)$guestCartItem->getItemId());
-                        $modified = true;
-                    }
+        foreach ($guestCart->getAllVisibleItems() as $guestItem) {
+            foreach ($customerCart->getAllItems() as $customerItem) {
+                if (!$customerItem->compare($guestItem)) {
+                    continue;
                 }
+
+                if ($mergePreference === Config::CART_PREFERENCE_CUSTOMER) {
+                    $this->safeDeleteCartItem((int)$guestCart->getId(), (int)$guestItem->getItemId());
+                    $modified = true;
+                    break;
+                }
+
+                $sku = $this->resolveSku($customerItem);
+
+                $isQtyValid = $customerItem->getChildren()
+                    ? $this->validateCompositeProductQty($stockId, $guestItem, $customerItem)
+                    : $this->validateProductQty(
+                        $stockId,
+                        $sku,
+                        $guestItem->getQty(),
+                        $customerItem->getQty(),
+                    );
+
+                if ($mergePreference === Config::CART_PREFERENCE_GUEST) {
+                    $this->safeDeleteCartItem((int)$customerCart->getId(), (int)$customerItem->getItemId());
+                    $modified = true;
+                }
+
+                if (!$isQtyValid) {
+                    $this->safeDeleteCartItem((int)$guestCart->getId(), (int)$guestItem->getItemId());
+                    $modified = true;
+                }
+
+                break;
             }
         }
+
         $this->cumulativeQty = [];
 
         return $modified;
     }
 
     /**
-     * Validate product stock availability
+     * Validate product quantity against available stock
      *
      * @param int $stockId
      * @param string $sku
@@ -116,33 +118,36 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
     private function validateProductQty(int $stockId, string $sku, float $guestItemQty, float $customerItemQty): bool
     {
         $salableQty = $this->getProductSalableQty->execute($sku, $stockId);
+
         $this->cumulativeQty[$sku] ??= 0;
-        // Validate cart item quantity as per selected cart merge preference store config
         $this->cumulativeQty[$sku] += $this->getCurrentCartItemQty($guestItemQty, $customerItemQty);
 
         return $salableQty >= $this->cumulativeQty[$sku];
     }
 
     /**
-     * Validate composite product stock availability
+     * Validate composite product quantities against available stock
      *
      * @param int $stockId
-     * @param Item $guestCartItem
-     * @param Item $customerCartItem
+     * @param Item $guestItem
+     * @param Item $customerItem
      * @return bool
+     * @throws NoSuchEntityException
      */
-    private function validateCompositeProductQty(int $stockId, Item $guestCartItem, Item $customerCartItem): bool
+    private function validateCompositeProductQty(int $stockId, Item $guestItem, Item $customerItem): bool
     {
-        $guestChildItems = $this->retrieveChildItems($guestCartItem);
-        foreach ($customerCartItem->getChildren() as $customerChildItem) {
-            $sku = $customerChildItem->getProduct()->getSku();
-            if ($customerChildItem->getProduct()->getOptions()) {
-                $product = $this->getProduct((int)$customerChildItem->getProduct()->getId());
-                $sku = $product->getSku();
-            }
-            $customerItemQty = $customerCartItem->getQty() * $customerChildItem->getQty();
-            $guestItemQty = $guestCartItem->getQty() * $guestChildItems[$sku]->getQty();
-            if (!$this->validateProductQty($stockId, $sku, $guestItemQty, $customerItemQty)) {
+        $guestChildren = $guestItem->getChildren();
+        $customerChildren = $customerItem->getChildren();
+
+        /** @var CartItemInterface $customerChild */
+        foreach ($customerChildren as $customerChild) {
+            $sku = $this->resolveSku($customerChild);
+            $guestChild = $this->retrieveChildItems($guestChildren, $sku);
+
+            $guestQty = $guestChild ? $guestItem->getQty() * $guestChild->getQty() : 0;
+            $customerQty = $customerItem->getQty() * $customerChild->getQty();
+
+            if (!$this->validateProductQty($stockId, $sku, $guestQty, $customerQty)) {
                 return false;
             }
         }
@@ -151,35 +156,42 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
     }
 
     /**
-     * Retrieve product by ID
+     * Resolve SKU for a cart item, handling products with options
      *
-     * @param int $productId
-     * @return ProductInterface
+     * @param CartItemInterface $item
+     * @return string
      * @throws NoSuchEntityException
      */
-    private function getProduct(int $productId): ProductInterface
+    private function resolveSku(CartItemInterface $item): string
     {
-        return $this->productRepository->getById($productId);
-    }
-
-    /**
-     * Retrieve child quote items mapped by sku
-     *
-     * @param Item $quoteItem
-     * @return array
-     */
-    private function retrieveChildItems(Item $quoteItem): array
-    {
-        $childItems = [];
-        foreach ($quoteItem->getChildren() as $childItem) {
-            $childItems[$childItem->getProduct()->getSku()] = $childItem;
+        $product = $item->getProduct();
+        if ($product->getOptions()) {
+            return $this->productRepository->getById($product->getId())->getSku();
         }
 
-        return $childItems;
+        return $product->getSku();
     }
 
     /**
-     * Get current cart item qty for guest cart merge
+     * Find a child item by SKU in the list of children
+     *
+     * @param CartItemInterface[]|array $children
+     * @param string $sku
+     * @return CartItemInterface|null
+     */
+    private function retrieveChildItems(array $children, string $sku): ?CartItemInterface
+    {
+        foreach ($children as $child) {
+            if ($child->getProduct()->getSku() === $sku) {
+                return $child;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the current cart item quantity based on the merge preference
      *
      * @param float $guestCartItemQty
      * @param float $customerCartItemQty
@@ -195,7 +207,7 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
     }
 
     /**
-     * Safely delete item from cart using cart id and cart item id
+     * Safely delete a cart item by ID, logging any exceptions
      *
      * @param int $cartId
      * @param int $itemId
@@ -206,7 +218,7 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
         try {
             $this->cartItemRepository->deleteById($cartId, $itemId);
         } catch (NoSuchEntityException | CouldNotSaveException $e) {
-            $this->logger->error($e);
+            $this->logger->error($e->getMessage());
         }
     }
 }
