@@ -43,10 +43,6 @@ class ExtractQuoteAddressShippingAddressData
             'shipping_address_data',
             $address
         );
-
-        // TODO: temporary solution to avoid issue with config merge.
-        $data['customer_address_id'] = $address->getCustomerAddressId();
-
         if (isset($data[AddressInterface::KEY_STREET]) && is_array($data[AddressInterface::KEY_STREET])) {
             $data[AddressInterface::KEY_STREET] = implode("\n", $data[AddressInterface::KEY_STREET]);
         }
