@@ -142,15 +142,31 @@ class ProcessSourceItemsObserver implements ObserverInterface
                 $source['status'] = (int) $source['source_status'];
                 $assignedSources[$key] = $source;
             }
-            if ($stockItem &&
-                $stockItem->getManageStock() &&
-                $source['status'] == SourceItemInterface::STATUS_IN_STOCK &&
-                $source['quantity'] < $stockItem->getMinQty()
-            ) {
-                $source['status'] = SourceItemInterface::STATUS_OUT_OF_STOCK;
-                $assignedSources[$key] = $source;
-            }
+            $assignedSources[$key] = $this->adjustStockItemStatus(
+                $stockItem,
+                $source
+            );
         }
         return $assignedSources;
+    }
+
+    /**
+     * Adjust stock item status based on the stock item and source item data.
+     *
+     * @param StockItemInterface $stockItem
+     * @param array $sourceItem
+     * @return array
+     */
+    private function adjustStockItemStatus(StockItemInterface $stockItem, array $sourceItem): array
+    {
+        if ($stockItem &&
+            $stockItem->getManageStock() &&
+            $sourceItem[SourceItemInterface::STATUS] == SourceItemInterface::STATUS_IN_STOCK &&
+            $sourceItem[SourceItemInterface::QUANTITY] < $stockItem->getMinQty()
+        ) {
+            $sourceItem[SourceItemInterface::STATUS] = SourceItemInterface::STATUS_OUT_OF_STOCK;
+        }
+
+        return $sourceItem;
     }
 }
