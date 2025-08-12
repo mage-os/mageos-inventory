@@ -74,7 +74,7 @@ class ProcessSourceItemsObserver implements ObserverInterface
             $assignedSources =
                 isset($sources['assigned_sources'])
                 && is_array($sources['assigned_sources'])
-                    ? $this->prepareAssignedSources($sources['assigned_sources'])
+                    ? $this->prepareAssignedSources($sources['assigned_sources'], $product)
                     : [];
             $this->sourceItemsProcessor->execute((string)$productData['sku'], $assignedSources);
         } else {
@@ -127,10 +127,12 @@ class ProcessSourceItemsObserver implements ObserverInterface
      * Convert built-in UI component property qty into quantity and source_status into status
      *
      * @param array $assignedSources
+     * @param ProductInterface $product
      * @return array
      */
-    private function prepareAssignedSources(array $assignedSources): array
+    private function prepareAssignedSources(array $assignedSources, ProductInterface $product): array
     {
+        $stockItem = $product->getExtensionAttributes()?->getStockItem();
         foreach ($assignedSources as $key => $source) {
             if (!key_exists('quantity', $source) && isset($source['qty'])) {
                 $source['quantity'] = (int) $source['qty'];
@@ -138,6 +140,13 @@ class ProcessSourceItemsObserver implements ObserverInterface
             }
             if (!key_exists('status', $source) && isset($source['source_status'])) {
                 $source['status'] = (int) $source['source_status'];
+                $assignedSources[$key] = $source;
+            }
+            if ($stockItem->getManageStock() &&
+                $source['status'] == SourceItemInterface::STATUS_IN_STOCK &&
+                $source['quantity'] < $stockItem->getMinQty()
+            ) {
+                $source['status'] = SourceItemInterface::STATUS_OUT_OF_STOCK;
                 $assignedSources[$key] = $source;
             }
         }
