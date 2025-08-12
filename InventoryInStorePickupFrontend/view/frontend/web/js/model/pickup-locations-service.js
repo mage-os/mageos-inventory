@@ -12,6 +12,9 @@ define([
     'Magento_Checkout/js/checkout-data',
     'Magento_Checkout/js/model/address-converter',
     'Magento_Checkout/js/action/select-shipping-address',
+    'Magento_Checkout/js/action/select-billing-address',
+    'Magento_Checkout/js/model/checkout-data-resolver',
+    'Magento_Checkout/js/model/quote',
     'underscore',
     'mage/translate',
     'mage/url',
@@ -25,6 +28,9 @@ define([
     checkoutData,
     addressConverter,
     selectShippingAddressAction,
+    selectBillingAddressAction,
+    checkoutDataResolver,
+    quote,
     _,
     $t,
     url,
@@ -104,7 +110,7 @@ define([
         },
 
         /**
-         * Select location for sipping.
+         * Select location for shipping.
          *
          * @param {Object} location
          * @param {Boolean} [persist=true]
@@ -136,6 +142,11 @@ define([
                 checkoutData.setSelectedPickupAddress(
                     addressConverter.quoteAddressToFormAddressData(address)
                 );
+            }
+            var billingAddress = quote.billingAddress();
+            if (!billingAddress || this.isBillingAddressIncomplete(billingAddress)) {
+                selectBillingAddressAction(address);
+                checkoutDataResolver.resolveBillingAddress();
             }
         },
 
@@ -189,6 +200,42 @@ define([
                 : null;
 
             return regions && regions[regionId] ? regions[regionId].name : '';
+        },
+
+        /**
+         * Check if billing address is incomplete (missing required fields)
+         *
+         * @param {Object} billingAddress
+         * @returns {Boolean}
+         */
+        isBillingAddressIncomplete: function (billingAddress) {
+            if (!billingAddress) {
+                return true;
+            }
+            var requiredFields = [
+                'firstname',
+                'lastname',
+                'street',
+                'city',
+                'postcode',
+                'telephone',
+                'regionId',
+                'countryId'
+            ];
+            for (var i = 0; i < requiredFields.length; i++) {
+                var field = requiredFields[i];
+                var value = billingAddress[field];
+                if (field === 'street') {
+                    if (!value || !Array.isArray(value) || value.length === 0 || !value[0]) {
+                        return true;
+                    }
+                } else {
+                    if (!value || value === '' || value === null || value === undefined) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         },
 
         /**

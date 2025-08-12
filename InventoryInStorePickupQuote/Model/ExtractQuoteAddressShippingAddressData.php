@@ -9,6 +9,7 @@ namespace Magento\InventoryInStorePickupQuote\Model;
 
 use Magento\Framework\DataObject\Copy;
 use Magento\Quote\Api\Data\AddressInterface;
+use Magento\InventoryInStorePickupShippingApi\Model\Carrier\InStorePickup;
 
 /**
  * Extract quote address details according to fieldset config.
@@ -49,6 +50,10 @@ class ExtractQuoteAddressShippingAddressData
         if (isset($data[AddressInterface::KEY_STREET]) && is_array($data[AddressInterface::KEY_STREET])) {
             $data[AddressInterface::KEY_STREET] = implode("\n", $data[AddressInterface::KEY_STREET]);
         }
+        $data[AddressInterface::SAME_AS_BILLING] = false;
+        $data[AddressInterface::SAVE_IN_ADDRESS_BOOK] = false;
+        $data[AddressInterface::CUSTOMER_ADDRESS_ID] = null;
+        $data['shipping_method'] = InStorePickup::DELIVERY_METHOD;
 
         return $data;
     }
