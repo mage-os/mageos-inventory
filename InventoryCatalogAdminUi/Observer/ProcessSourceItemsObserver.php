@@ -153,11 +153,11 @@ class ProcessSourceItemsObserver implements ObserverInterface
     /**
      * Adjust stock item status based on the stock item and source item data.
      *
-     * @param StockItemInterface $stockItem
+     * @param StockItemInterface|null $stockItem
      * @param array $sourceItem
      * @return array
      */
-    private function adjustStockItemStatus(StockItemInterface $stockItem, array $sourceItem): array
+    private function adjustStockItemStatus(?StockItemInterface $stockItem, array $sourceItem): array
     {
         if ($stockItem &&
             $stockItem->getManageStock() &&
