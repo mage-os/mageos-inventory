@@ -47,6 +47,9 @@
         <after>
             <magentoCLI command="config:set {{TurnOnManageStockConfig.path}} {{TurnOnManageStockConfig.value}}" stepKey="reenableManageStock"/>
             <deleteData createDataKey="category" stepKey="deleteCategory"/>
+            <!-- Delete all products created via UI using bulk action -->
+            <actionGroup ref="AdminClearFiltersActionGroup" stepKey="clearProductFilters"/>
+            <actionGroup ref="AdminDeleteAllProductsFromGridActionGroup" stepKey="deleteAllProducts"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutFromAdminArea"/>
             <magentoCLI command="config:set {{MediaGalleryConfigDataEnabled.path}} {{MediaGalleryConfigDataEnabled.value}}" stepKey="disabledOldMediaGallery"/>
         </after>

@@ -41,6 +41,9 @@
                 <argument name="websiteName" value="{{_defaultWebsite.name}}"/>
             </actionGroup>
             <deleteData createDataKey="category" stepKey="deleteCategory"/>
+            <!-- Delete all products created via UI using bulk action -->
+            <actionGroup ref="AdminClearFiltersActionGroup" stepKey="clearProductFilters"/>
+            <actionGroup ref="AdminDeleteAllProductsFromGridActionGroup" stepKey="deleteAllProducts"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutFromAdminArea"/>
         </after>
 

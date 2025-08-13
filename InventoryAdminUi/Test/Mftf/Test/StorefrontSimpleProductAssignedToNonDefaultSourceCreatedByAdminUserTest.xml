@@ -37,6 +37,10 @@
         </before>
         <after>
             <deleteData createDataKey="createSimpleSubCategory" stepKey="deleteSimpleSubCategory"/>
+            <!-- Delete product created via UI -->
+            <actionGroup ref="DeleteProductBySkuActionGroup" stepKey="deleteCreatedProduct">
+                <argument name="sku" value="{{SimpleMsiProduct.sku}}"/>
+            </actionGroup>
             <!--Assign Default Stock to Default Website.-->
             <actionGroup ref="AssignWebsiteToStockActionGroup" stepKey="assignMainWebsiteToDefaultStock">
                 <argument name="stockName" value="{{_defaultStock.name}}"/>

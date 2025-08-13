@@ -48,6 +48,10 @@
         </before>
         <after>
             <deleteData createDataKey="category" stepKey="deleteCategory"/>
+            <!-- Delete product created via UI -->
+            <actionGroup ref="DeleteProductBySkuActionGroup" stepKey="deleteCreatedProduct">
+                <argument name="sku" value="{{SimpleMsiProduct.sku}}"/>
+            </actionGroup>
 
             <comment userInput=" Disable source, as it can brake single source mode tests." stepKey="disableCustomSourceComment"/>
             <amOnPage url="{{AdminManageSourcePage.url}}" stepKey="navigateToSourceGridPage"/>
