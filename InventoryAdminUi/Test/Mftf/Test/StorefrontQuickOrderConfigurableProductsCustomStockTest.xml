@@ -105,7 +105,6 @@
             <actionGroup ref="StorefrontCustomerLogoutActionGroup" stepKey="logoutCustomer" />
             <deleteData createDataKey="customer" stepKey="deleteCustomer"/>
             <deleteData createDataKey="product" stepKey="deleteProduct"/>
-            <deleteData createDataKey="category" stepKey="deleteCategory"/>
             <deleteData createDataKey="configurableChildProduct1" stepKey="deleteConfigurableChildProduct1"/>
             <deleteData createDataKey="configurableProduct1" stepKey="deleteConfigurableProduct1"/>
             <deleteData createDataKey="configurableChildProduct2" stepKey="deleteConfigurableChildProduct2"/>
