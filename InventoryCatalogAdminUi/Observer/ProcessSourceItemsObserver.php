@@ -136,11 +136,9 @@ class ProcessSourceItemsObserver implements ObserverInterface
         foreach ($assignedSources as $key => $source) {
             if (!key_exists('quantity', $source) && isset($source['qty'])) {
                 $source['quantity'] = (int) $source['qty'];
-                $assignedSources[$key] = $source;
             }
             if (!key_exists('status', $source) && isset($source['source_status'])) {
                 $source['status'] = (int) $source['source_status'];
-                $assignedSources[$key] = $source;
             }
             $assignedSources[$key] = $this->adjustStockItemStatus(
                 $stockItem,
