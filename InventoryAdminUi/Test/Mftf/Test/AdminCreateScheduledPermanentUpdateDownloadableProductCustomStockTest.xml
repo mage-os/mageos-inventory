@@ -54,11 +54,14 @@
             </actionGroup>
         </before>
         <after>
+            <deleteData createDataKey="downloadableLink" stepKey="deleteDownloadableLink" before="deleteProduct"/>
             <deleteData createDataKey="product" stepKey="deleteProduct" before="disableSource"/>
             <!--Disable additional source.-->
             <actionGroup ref="DisableSourceActionGroup" stepKey="disableSource" before="assignMainWebsiteToDefaultStock">
                 <argument name="sourceCode" value="$source.source[source_code]$"/>
             </actionGroup>
+            <deleteData createDataKey="sourceStockLink" stepKey="deleteSourceStockLink" before="deleteSource"/>
+            <deleteData createDataKey="source" stepKey="deleteSource" before="assignMainWebsiteToDefaultStock"/>
             <!--Assign Default Stock to Default Website.-->
             <actionGroup ref="AssignWebsiteToStockActionGroup" stepKey="assignMainWebsiteToDefaultStock" before="deleteStock">
                 <argument name="stockName" value="{{_defaultStock.name}}"/>

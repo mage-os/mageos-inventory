@@ -64,9 +64,14 @@
             <actionGroup ref="DisableSourceActionGroup" stepKey="disableCreatedSource" before="assignMainWebsiteToDefaultStock">
                 <argument name="sourceCode" value="$$additionalSource.source[source_code]$$"/>
             </actionGroup>
-            <!--Delete stock.-->
+            <!--Delete all created entities.-->
+            <deleteData createDataKey="stockSourceLink" stepKey="deleteStockSourceLink" before="deleteAdditionalSource"/>
+            <deleteData createDataKey="additionalSource" stepKey="deleteAdditionalSource" before="assignMainWebsiteToDefaultStock"/>
             <deleteData createDataKey="additionalStock" stepKey="deleteStock" after="assignMainWebsiteToDefaultStock"/>
-            <deleteData createDataKey="simpleProduct" stepKey="deleteBundleOption" after="deleteStock"/>
+            <deleteData createDataKey="bundleLink" stepKey="deleteBundleLink" after="deleteStock"/>
+            <deleteData createDataKey="bundleOption" stepKey="deleteBundleOption" after="deleteBundleLink"/>
+            <deleteData createDataKey="createProduct" stepKey="deleteBundleProduct" after="deleteBundleOption"/>
+            <deleteData createDataKey="simpleProduct" stepKey="deleteSimpleProduct" after="deleteBundleProduct"/>
         </after>
     </test>
 </tests>

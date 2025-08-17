@@ -32,7 +32,9 @@
             <actionGroup ref="AdminGoToConfigurationPageEnableDisableManageStock" stepKey="enableManageStockBackToYes">
                 <argument name="manageStockValue" value="Yes"/>
             </actionGroup>
-            <deleteData createDataKey="createConfigurableProduct" stepKey="deleteBundleProduct"/>
+            <!-- Clear grid filters and delete all products created via UI using bulk action -->
+            <actionGroup ref="AdminClearFiltersActionGroup" stepKey="clearProductFilters"/>
+            <actionGroup ref="AdminDeleteAllProductsFromGridActionGroup" stepKey="deleteAllProducts"/>
             <deleteData createDataKey="createSubCategory" stepKey="deleteSubCategory"/>
 
             <actionGroup ref="DisableSourceActionGroup" stepKey="disableSource">
