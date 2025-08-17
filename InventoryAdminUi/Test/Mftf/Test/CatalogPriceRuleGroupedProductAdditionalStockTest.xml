@@ -67,6 +67,7 @@
             </actionGroup>
             <!--Delete stock.-->
             <deleteData createDataKey="additionalStock" stepKey="deleteStock" after="assignMainWebsiteToDefaultStock"/>
+        
         </after>
     </test>
 </tests>

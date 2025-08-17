@@ -25,6 +25,7 @@
         <after>
             <actionGroup ref="StorefrontCustomerLogoutActionGroup" stepKey="logoutCustomer" />
             <deleteData createDataKey="customer" stepKey="deleteCustomer" after="deleteCustomStock"/>
+        
         </after>
 
         <!-- Login as customer -->
