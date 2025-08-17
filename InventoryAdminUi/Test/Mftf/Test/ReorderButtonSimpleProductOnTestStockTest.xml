@@ -35,7 +35,6 @@
             </actionGroup>
             <!--Clean up created data.-->
             <deleteData createDataKey="additionalStock" stepKey="deleteStock" after="deleteProduct"/>
-        
         </after>
 
         <!--Assign source to product.-->
