@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\InventoryCatalogApi\Model;
+namespace Magento\InventoryImportExport\Model\Import;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
@@ -15,15 +15,21 @@ use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface
 
 class SourceResolver
 {
+    /**
+     * @param StoreManagerInterface $storeManager
+     * @param StockResolverInterface $stockResolver
+     * @param GetSourcesAssignedToStockOrderedByPriorityInterface $getSourcesAssignedToStock
+     */
     public function __construct(
         private readonly StoreManagerInterface $storeManager,
         private readonly StockResolverInterface $stockResolver,
         private readonly GetSourcesAssignedToStockOrderedByPriorityInterface $getSourcesAssignedToStock
-    )
-    {
+    ) {
     }
 
     /**
+     * Get sources assigned to stock for a given store.
+     *
      * @param int $storeId
      * @return array
      * @throws NoSuchEntityException
@@ -44,4 +50,3 @@ class SourceResolver
         return array_map(fn($source) => $source->getSourceCode(), $sources);
     }
 }
-

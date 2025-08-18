@@ -17,9 +17,7 @@ use Magento\Framework\Validation\ValidationException;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\GetSourceItemsBySkuInterface;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
-use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
-use Magento\InventoryCatalogApi\Model\IsSingleSourceModeInterface;
-use Magento\InventoryCatalogApi\Model\SourceResolver;
+use Magento\InventoryImportExport\Model\Import\SourceResolver;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 
 /**
@@ -48,17 +46,6 @@ class SourceItemImporter
      */
     private SourceResolver $sourceResolver;
 
-    /**
-     * Default Source Provider
-     *
-     * @var DefaultSourceProviderInterface $defaultSource
-     */
-    private $defaultSource;
-
-    /**
-     * @var IsSingleSourceModeInterface
-     */
-    private IsSingleSourceModeInterface $isSingleSourceMode;
 
     /**
      * @var ResourceConnection
@@ -86,38 +73,33 @@ class SourceItemImporter
     private GetSourceItemsBySkuInterface $sourceItemsBySku;
 
     /**
-     * StockItemImporter constructor
-     *
      * @param SourceItemsSaveInterface $sourceItemsSave
      * @param SourceItemInterfaceFactory $sourceItemFactory
-     * @param SourceResolver $sourceResolver
-     * @param IsSingleSourceModeInterface $isSingleSourceMode
      * @param ResourceConnection $resourceConnection
      * @param SkuProcessor $skuProcessor
      * @param SkuStorage $skuStorage
      * @param StockResolverInterface $stockResolver
      * @param GetSourceItemsBySkuInterface $sourceItemsBySku
+     * @param SourceResolver $sourceResolver
      */
     public function __construct(
         SourceItemsSaveInterface $sourceItemsSave,
         SourceItemInterfaceFactory $sourceItemFactory,
-        SourceResolver $sourceResolver,
-        IsSingleSourceModeInterface $isSingleSourceMode,
         ResourceConnection $resourceConnection,
         SkuProcessor $skuProcessor,
         SkuStorage $skuStorage,
         StockResolverInterface $stockResolver,
-        GetSourceItemsBySkuInterface $sourceItemsBySku
+        GetSourceItemsBySkuInterface $sourceItemsBySku,
+        SourceResolver $sourceResolver
     ) {
         $this->sourceItemsSave = $sourceItemsSave;
         $this->sourceItemFactory = $sourceItemFactory;
-        $this->sourceResolver = $sourceResolver;
-        $this->isSingleSourceMode = $isSingleSourceMode;
         $this->resourceConnection = $resourceConnection;
         $this->skuProcessor = $skuProcessor;
         $this->skuStorage = $skuStorage;
         $this->stockResolver = $stockResolver;
         $this->sourceItemsBySku = $sourceItemsBySku;
+        $this->sourceResolver = $sourceResolver;
     }
 
     /**
