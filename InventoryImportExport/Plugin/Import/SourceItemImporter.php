@@ -14,12 +14,13 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Validation\ValidationException;
-use Magento\Inventory\Model\ResourceModel\SourceItem;
-use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
+use Magento\InventoryApi\Api\GetSourceItemsBySkuInterface;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
 use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
 use Magento\InventoryCatalogApi\Model\IsSingleSourceModeInterface;
+use Magento\InventoryCatalogApi\Model\SourceResolver;
+use Magento\InventorySalesApi\Api\StockResolverInterface;
 
 /**
  * Assigning products to default source
@@ -33,14 +34,19 @@ class SourceItemImporter
      *
      * @var SourceItemsSaveInterface $sourceItemsSave
      */
-    private $sourceItemsSave;
+    private SourceItemsSaveInterface $sourceItemsSave;
 
     /**
      * Source Item Interface Factory
      *
      * @var SourceItemInterfaceFactory $sourceItemFactory
      */
-    private $sourceItemFactory;
+    private SourceItemInterfaceFactory $sourceItemFactory;
+
+    /**
+     * @var SourceResolver $sourceResolver
+     */
+    private SourceResolver $sourceResolver;
 
     /**
      * Default Source Provider
@@ -52,17 +58,17 @@ class SourceItemImporter
     /**
      * @var IsSingleSourceModeInterface
      */
-    private $isSingleSourceMode;
+    private IsSingleSourceModeInterface $isSingleSourceMode;
 
     /**
      * @var ResourceConnection
      */
-    private $resourceConnection;
+    private ResourceConnection $resourceConnection;
 
     /**
      * @var SkuProcessor
      */
-    private $skuProcessor;
+    private SkuProcessor $skuProcessor;
 
     /**
      * @var SkuStorage
@@ -70,32 +76,48 @@ class SourceItemImporter
     private SkuStorage $skuStorage;
 
     /**
+     * @var StockResolverInterface
+     */
+    private StockResolverInterface $stockResolver;
+
+    /**
+     * @var GetSourceItemsBySkuInterface
+     */
+    private GetSourceItemsBySkuInterface $sourceItemsBySku;
+
+    /**
      * StockItemImporter constructor
      *
      * @param SourceItemsSaveInterface $sourceItemsSave
      * @param SourceItemInterfaceFactory $sourceItemFactory
-     * @param DefaultSourceProviderInterface $defaultSourceProvider
+     * @param SourceResolver $sourceResolver
      * @param IsSingleSourceModeInterface $isSingleSourceMode
      * @param ResourceConnection $resourceConnection
      * @param SkuProcessor $skuProcessor
      * @param SkuStorage $skuStorage
+     * @param StockResolverInterface $stockResolver
+     * @param GetSourceItemsBySkuInterface $sourceItemsBySku
      */
     public function __construct(
         SourceItemsSaveInterface $sourceItemsSave,
         SourceItemInterfaceFactory $sourceItemFactory,
-        DefaultSourceProviderInterface $defaultSourceProvider,
+        SourceResolver $sourceResolver,
         IsSingleSourceModeInterface $isSingleSourceMode,
         ResourceConnection $resourceConnection,
         SkuProcessor $skuProcessor,
-        SkuStorage $skuStorage
+        SkuStorage $skuStorage,
+        StockResolverInterface $stockResolver,
+        GetSourceItemsBySkuInterface $sourceItemsBySku
     ) {
         $this->sourceItemsSave = $sourceItemsSave;
         $this->sourceItemFactory = $sourceItemFactory;
-        $this->defaultSource = $defaultSourceProvider;
+        $this->sourceResolver = $sourceResolver;
         $this->isSingleSourceMode = $isSingleSourceMode;
         $this->resourceConnection = $resourceConnection;
         $this->skuProcessor = $skuProcessor;
         $this->skuStorage = $skuStorage;
+        $this->stockResolver = $stockResolver;
+        $this->sourceItemsBySku = $sourceItemsBySku;
     }
 
     /**
@@ -119,54 +141,42 @@ class SourceItemImporter
         array $importedData
     ): void {
         $sourceItems = [];
-        $skusHavingDefaultSource = $this->getSkusHavingDefaultSource(array_keys($stockData));
 
         foreach ($stockData as $sku => $stockDatum) {
-            $isNewSku = !$this->skuStorage->has((string)$sku);
-            $isQtyExplicitlySet = $importedData[$sku]['qty'] ?? false;
+            foreach ($stockDatum as $storeId => $stockDataItem) {
+                $isQtyExplicitlySet = $importedData[$sku][$storeId]['qty'] ?? false;
 
-            $inStock = $stockDatum['is_in_stock'] ?? 0;
-            $qty = $stockDatum['qty'] ?? 0;
-            $sourceItem = $this->sourceItemFactory->create();
-            $sourceItem->setSku((string)$sku);
-            $sourceItem->setSourceCode($this->defaultSource->getCode());
-            $sourceItem->setQuantity((float)$qty);
-            $sourceItem->setStatus((int)$inStock);
+                $sources = $this->sourceResolver->getSourcesForStore($storeId);
+                $currentSource = reset($sources);
+                $qty = 0;
+                if ($isQtyExplicitlySet) {
+                    $qty = $importedData[$sku][$storeId]['qty'];
+                } else {
+                    $items = $this->sourceItemsBySku->execute($sku);
+                    foreach ($items as $item) {
+                        if ($item->getSourceCode() == $currentSource) {
+                            $qty = $item->getQuantity();
+                            break;
+                        }
+                    }
+                }
 
-            //Prevent existing products to be assigned to `default` source, when `qty` is not explicitly set.
-            if ($isNewSku
-                || $isQtyExplicitlySet
-                || $this->isSingleSourceMode->execute()
-                || in_array($sourceItem->getSku(), $skusHavingDefaultSource, true)) {
+                $minQty  = $stockDataItem['min_qty'] ?? 0;
+                $inStock = $qty >= $minQty ? 1 : 0;
+
+                $sourceItem = $this->sourceItemFactory->create();
+                $sourceItem->setSku((string)$sku);
+                $sourceItem->setSourceCode($currentSource);
+                $sourceItem->setQuantity((float)$qty);
+                $sourceItem->setStatus($inStock);
+
                 $sourceItems[] = $sourceItem;
             }
         }
+
         if (count($sourceItems) > 0) {
             /** SourceItemInterface[] $sourceItems */
             $this->sourceItemsSave->execute($sourceItems);
         }
-    }
-
-    /**
-     * Fetch product's skus having assigned to `default` source.
-     *
-     * @param array $listSku
-     * @return array
-     */
-    private function getSkusHavingDefaultSource(array $listSku): array
-    {
-        $connection = $this->resourceConnection->getConnection();
-        $select = $connection->select()->from(
-            $this->resourceConnection->getTableName(SourceItem::TABLE_NAME_SOURCE_ITEM),
-            [SourceItemInterface::SKU]
-        )->where(
-            SourceItemInterface::SKU . ' IN (?)',
-            $listSku
-        )->where(
-            SourceItemInterface::SOURCE_CODE . ' = ?',
-            $this->defaultSource->getCode()
-        );
-
-        return $connection->fetchCol($select);
     }
 }
