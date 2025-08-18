@@ -259,7 +259,7 @@ define([
 
             try {
                 error = JSON.parse(response.responseText);
-            } catch {
+            } catch (exception) { // eslint-disable-line no-unused-vars
                 error = $t(
                     'Something went wrong with your request. Please try again later.'
                 );
