@@ -117,6 +117,8 @@ define([
          * @returns void
          */
         selectForShipping: function (location, persist) {
+            var billingAddress = quote.billingAddress();
+
             var address = $.extend(
                 {},
                 addressConverter.formAddressDataToQuoteAddress({
@@ -143,7 +145,6 @@ define([
                     addressConverter.quoteAddressToFormAddressData(address)
                 );
             }
-            var billingAddress = quote.billingAddress();
             if (!billingAddress || this.isBillingAddressIncomplete(billingAddress)) {
                 selectBillingAddressAction(address);
                 checkoutDataResolver.resolveBillingAddress();
@@ -209,10 +210,10 @@ define([
          * @returns {Boolean}
          */
         isBillingAddressIncomplete: function (billingAddress) {
-            if (!billingAddress) {
-                return true;
-            }
-            var requiredFields = [
+            var field,
+                value,
+                counter,
+                requiredFields = [
                 'firstname',
                 'lastname',
                 'street',
@@ -222,17 +223,18 @@ define([
                 'regionId',
                 'countryId'
             ];
-            for (var i = 0; i < requiredFields.length; i++) {
-                var field = requiredFields[i];
-                var value = billingAddress[field];
-                if (field === 'street') {
-                    if (!value || !Array.isArray(value) || value.length === 0 || !value[0]) {
-                        return true;
-                    }
-                } else {
-                    if (!value || value === '' || value === null || value === undefined) {
-                        return true;
-                    }
+
+            if (!billingAddress) {
+                return true;
+            }
+            for (counter = 0; counter < requiredFields.length; counter++) {
+                field = requiredFields[counter];
+                value = billingAddress[field];
+                if (field === 'street' && (!value || !Array.isArray(value) || value.length === 0 || !value[0])) {
+                    return true;
+                }
+                if (field !== 'street' && (!value || value === '' || value === null || value === undefined)) {
+                    return true;
                 }
             }
             return false;
@@ -257,7 +259,7 @@ define([
 
             try {
                 error = JSON.parse(response.responseText);
-            } catch (exception) {
+            } catch {
                 error = $t(
                     'Something went wrong with your request. Please try again later.'
                 );
