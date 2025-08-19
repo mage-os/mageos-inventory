@@ -95,11 +95,7 @@ class SourceItemImporter
                     $importedData
                 );
 
-                $minQty  = $stockDataItem['min_qty'] ?? 0;
-                $inStock = $qty > 0 && $qty >= $minQty ? 1 : 0;
-                if (!$inStock && $qty >= $minQty && $stockDataItem['backorders'] == 1) {
-                    $inStock = 1;
-                }
+                $inStock = $this->determineStatus($sku, $storeId, $qty, $importedData, $stockDataItem);
 
                 $sourceItem = $this->sourceItemFactory->create();
                 $sourceItem->setSku((string)$sku);
@@ -115,6 +111,35 @@ class SourceItemImporter
             /** SourceItemInterface[] $sourceItems */
             $this->sourceItemsSave->execute($sourceItems);
         }
+    }
+
+    /**
+     * Determine the stock status for a given SKU and store.
+     *
+     * @param string $sku
+     * @param int $storeId
+     * @param float $qty
+     * @param array $importedData
+     * @param array $stockDataItem
+     * @return int
+     */
+    private function determineStatus(
+        string $sku,
+        int $storeId,
+        float $qty,
+        array $importedData,
+        array $stockDataItem
+    ): int {
+        if (isset($importedData[$sku][$storeId]['is_in_stock'])) {
+            return (int)$importedData[$sku][$storeId]['is_in_stock'];
+        }
+
+        $minQty  = $stockDataItem['min_qty'] ?? 0;
+        $inStock = $qty > 0 && $qty >= $minQty ? 1 : 0;
+        if (!$inStock && $qty >= $minQty && $stockDataItem['backorders'] == 1) {
+            $inStock = 1;
+        }
+        return $inStock;
     }
 
     /**
