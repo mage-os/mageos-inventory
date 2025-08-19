@@ -103,7 +103,10 @@ class SourceItemImporter
                 }
 
                 $minQty  = $stockDataItem['min_qty'] ?? 0;
-                $inStock = $qty >= $minQty ? 1 : 0;
+                $inStock = $qty > 0 && $qty >= $minQty ? 1 : 0;
+                if (!$inStock && $qty >= $minQty && $stockDataItem['backorders'] == 1) {
+                    $inStock = 1;
+                }
 
                 $sourceItem = $this->sourceItemFactory->create();
                 $sourceItem->setSku((string)$sku);
