@@ -213,14 +213,14 @@ define([
                 value,
                 counter,
                 requiredFields = [
-                'firstname',
-                'lastname',
-                'street',
-                'city',
-                'postcode',
-                'telephone',
-                'regionId',
-                'countryId'
+                    'firstname',
+                    'lastname',
+                    'street',
+                    'city',
+                    'postcode',
+                    'telephone',
+                    'regionId',
+                    'countryId'
                 ];
 
             if (!billingAddress) {
