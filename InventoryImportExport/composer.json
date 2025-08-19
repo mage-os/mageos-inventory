@@ -10,7 +10,8 @@
         "magento/module-inventory": "*",
         "magento/module-inventory-catalog-api": "*",
         "magento/module-store": "*",
-        "magento/module-inventory-sales-api": "*"
+        "magento/module-inventory-sales-api": "*",
+        "magento/module-inventory-configuration": "*"
     },
     "suggest": {
         "magento/module-catalog-import-export": "*"

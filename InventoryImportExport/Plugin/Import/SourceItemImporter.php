@@ -89,17 +89,10 @@ class SourceItemImporter
 
                 $sources = $this->sourceResolver->getSourcesForStore($storeId);
                 $currentSource = reset($sources);
-                $qty = 0;
                 if ($isQtyExplicitlySet) {
                     $qty = $importedData[$sku][$storeId]['qty'];
                 } else {
-                    $items = $this->sourceItemsBySku->execute($sku);
-                    foreach ($items as $item) {
-                        if ($item->getSourceCode() == $currentSource) {
-                            $qty = $item->getQuantity();
-                            break;
-                        }
-                    }
+                    $qty = $this->getSourceQuantity($sku, $stockDataItem);
                 }
 
                 $minQty  = $stockDataItem['min_qty'] ?? 0;
@@ -122,5 +115,26 @@ class SourceItemImporter
             /** SourceItemInterface[] $sourceItems */
             $this->sourceItemsSave->execute($sourceItems);
         }
+    }
+
+    /**
+     * Get the quantity of the source item for a given SKU and source
+     *
+     * @param string $sku
+     * @param string $currentSource
+     * @return float
+     */
+    private function getSourceQuantity(string $sku, string $currentSource): float
+    {
+        $qty = 0;
+        $items = $this->sourceItemsBySku->execute($sku);
+        foreach ($items as $item) {
+            if ($item->getSourceCode() == $currentSource) {
+                $qty = $item->getQuantity();
+                break;
+            }
+        }
+
+        return $qty;
     }
 }
