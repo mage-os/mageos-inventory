@@ -85,15 +85,15 @@ class SourceItemImporter
 
         foreach ($stockData as $sku => $stockDatum) {
             foreach ($stockDatum as $storeId => $stockDataItem) {
-                $isQtyExplicitlySet = isset($importedData[$sku][$storeId]['qty']) ?? false;
-
                 $sources = $this->sourceResolver->getSourcesForStore($storeId);
                 $currentSource = reset($sources);
-                if ($isQtyExplicitlySet) {
-                    $qty = $importedData[$sku][$storeId]['qty'];
-                } else {
-                    $qty = $this->getSourceQuantity($sku, $stockDataItem);
-                }
+
+                $qty = $this->determineSourceQuantity(
+                    $sku,
+                    $storeId,
+                    $currentSource,
+                    $importedData
+                );
 
                 $minQty  = $stockDataItem['min_qty'] ?? 0;
                 $inStock = $qty > 0 && $qty >= $minQty ? 1 : 0;
@@ -104,7 +104,7 @@ class SourceItemImporter
                 $sourceItem = $this->sourceItemFactory->create();
                 $sourceItem->setSku((string)$sku);
                 $sourceItem->setSourceCode($currentSource);
-                $sourceItem->setQuantity((float)$qty);
+                $sourceItem->setQuantity($qty);
                 $sourceItem->setStatus($inStock);
 
                 $sourceItems[] = $sourceItem;
@@ -118,23 +118,35 @@ class SourceItemImporter
     }
 
     /**
-     * Get the quantity of the source item for a given SKU and source
+     * Determine the source quantity for a given SKU and store.
      *
      * @param string $sku
+     * @param int $storeId
      * @param string $currentSource
+     * @param array $importedData
      * @return float
      */
-    private function getSourceQuantity(string $sku, string $currentSource): float
-    {
+    private function determineSourceQuantity(
+        string $sku,
+        int $storeId,
+        string $currentSource,
+        array $importedData
+    ): float {
+        $isQtyExplicitlySet = isset($importedData[$sku][$storeId]['qty']) ?? false;
+
         $qty = 0;
-        $items = $this->sourceItemsBySku->execute($sku);
-        foreach ($items as $item) {
-            if ($item->getSourceCode() == $currentSource) {
-                $qty = $item->getQuantity();
-                break;
+        if ($isQtyExplicitlySet) {
+            $qty = $importedData[$sku][$storeId]['qty'];
+        } else {
+            $items = $this->sourceItemsBySku->execute($sku);
+            foreach ($items as $item) {
+                if ($item->getSourceCode() == $currentSource) {
+                    $qty = $item->getQuantity();
+                    break;
+                }
             }
         }
 
-        return $qty;
+        return (float)$qty;
     }
 }
