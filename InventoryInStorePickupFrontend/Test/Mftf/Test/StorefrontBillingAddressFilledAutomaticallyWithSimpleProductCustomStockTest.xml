@@ -103,7 +103,7 @@
             <argument name="sourceName" value="$culverSource.source[name]$"/>
         </actionGroup>
         <actionGroup ref="StorefrontPickInStoreNavigateToPaymentActionGroup" stepKey="navigateToPaymentStep"/>
-        <actionGroup name="StorefrontAssertPaymentInformationActionGroup" stepKey="assertPaymentInformation">
+        <actionGroup ref="StorefrontAssertPaymentInformationActionGroup" stepKey="verifyPaymentInformation">
             <argument name="address" value="{{US_Address_California.street[0]}}"/>
         </actionGroup>
     </test>
