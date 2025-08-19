@@ -119,21 +119,21 @@ define([
         selectForShipping: function (location, persist) {
             var billingAddress = quote.billingAddress(),
                 address = $.extend(
-                {},
-                addressConverter.formAddressDataToQuoteAddress({
-                    firstname: location.name,
-                    lastname: 'Store',
-                    street: location.street,
-                    city: location.city,
-                    postcode: location.postcode,
-                    'country_id': location['country_id'],
-                    telephone: location.telephone,
-                    'region_id': location['region_id'],
-                    'save_in_address_book': 0,
-                    'extension_attributes': {
-                        'pickup_location_code': location['pickup_location_code']
-                    }
-                }));
+                    {},
+                    addressConverter.formAddressDataToQuoteAddress({
+                        firstname: location.name,
+                        lastname: 'Store',
+                        street: location.street,
+                        city: location.city,
+                        postcode: location.postcode,
+                        'country_id': location['country_id'],
+                        telephone: location.telephone,
+                        'region_id': location['region_id'],
+                        'save_in_address_book': 0,
+                        'extension_attributes': {
+                            'pickup_location_code': location['pickup_location_code']
+                        }
+                    }));
 
             address = pickupAddressConverter.formatAddressToPickupAddress(address);
             this.selectedLocation(location);
