@@ -117,9 +117,8 @@ define([
          * @returns void
          */
         selectForShipping: function (location, persist) {
-            var billingAddress = quote.billingAddress();
-
-            var address = $.extend(
+            var billingAddress = quote.billingAddress(),
+                address = $.extend(
                 {},
                 addressConverter.formAddressDataToQuoteAddress({
                     firstname: location.name,
@@ -222,7 +221,7 @@ define([
                 'telephone',
                 'regionId',
                 'countryId'
-            ];
+                ];
 
             if (!billingAddress) {
                 return true;
