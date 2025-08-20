@@ -89,7 +89,7 @@ class SourceItemImporter
                 $currentSource = reset($sources);
 
                 $qty = $this->determineSourceQuantity(
-                    $sku,
+                    (string)$sku,
                     $storeId,
                     $currentSource,
                     $importedData
