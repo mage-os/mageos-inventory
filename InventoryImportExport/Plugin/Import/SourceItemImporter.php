@@ -136,7 +136,7 @@ class SourceItemImporter
 
         $minQty  = $stockDataItem['min_qty'] ?? 0;
         $inStock = $qty > 0 && $qty >= $minQty ? 1 : 0;
-        if (!$inStock && $qty >= $minQty && $stockDataItem['backorders'] == 1) {
+        if (!$inStock && $qty >= $minQty && isset($stockDataItem['backorders']) && $stockDataItem['backorders'] == 1) {
             $inStock = 1;
         }
         return $inStock;
