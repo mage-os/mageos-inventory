@@ -11,4 +11,7 @@
         <observer name="delete_source_items_observer" instance="Magento\InventoryImportExport\Observer\DeleteSourceItemsAfterProductDeleteObserver" />
         <observer name="process_reservations" instance="Magento\InventoryImportExport\Observer\ProcessReservationsAfterProductImportObserver" />
     </event>
+    <event name="before_import_source_items_save">
+        <observer name="purge_cached_legacy_source_items" instance="Magento\InventoryImportExport\Observer\PurgeCachedLegacySourceItemsObserver" />
+    </event>
 </config>

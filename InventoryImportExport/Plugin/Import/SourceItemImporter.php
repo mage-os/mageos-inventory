@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\InventoryImportExport\Plugin\Import;
 
 use Magento\CatalogImportExport\Model\StockItemProcessorInterface;
+use Magento\Framework\EntityManager\EventManager;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Validation\ValidationException;
@@ -44,21 +45,29 @@ class SourceItemImporter
     private GetSourceItemsBySkuInterface $sourceItemsBySku;
 
     /**
+     * @var EventManager
+     */
+    private EventManager $eventManager;
+
+    /**
      * @param SourceItemsSaveInterface $sourceItemsSave
      * @param SourceItemInterfaceFactory $sourceItemFactory
      * @param GetSourceItemsBySkuInterface $sourceItemsBySku
      * @param SourceResolver $sourceResolver
+     * @param EventManager $eventManager
      */
     public function __construct(
         SourceItemsSaveInterface $sourceItemsSave,
         SourceItemInterfaceFactory $sourceItemFactory,
         GetSourceItemsBySkuInterface $sourceItemsBySku,
-        SourceResolver $sourceResolver
+        SourceResolver $sourceResolver,
+        EventManager $eventManager
     ) {
         $this->sourceItemsSave = $sourceItemsSave;
         $this->sourceItemFactory = $sourceItemFactory;
         $this->sourceItemsBySku = $sourceItemsBySku;
         $this->sourceResolver = $sourceResolver;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -108,6 +117,11 @@ class SourceItemImporter
         }
 
         if (count($sourceItems) > 0) {
+            $this->eventManager->dispatch(
+                'before_import_source_items_save',
+                ['source_items' => $sourceItems]
+            );
+
             /** SourceItemInterface[] $sourceItems */
             $this->sourceItemsSave->execute($sourceItems);
         }
