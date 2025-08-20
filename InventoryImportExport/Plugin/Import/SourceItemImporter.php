@@ -95,7 +95,7 @@ class SourceItemImporter
                     $importedData
                 );
 
-                $inStock = $this->determineStatus($sku, $storeId, $qty, $importedData, $stockDataItem);
+                $inStock = $this->determineStatus((string)$sku, $storeId, $qty, $importedData, $stockDataItem);
 
                 $sourceItem = $this->sourceItemFactory->create();
                 $sourceItem->setSku((string)$sku);
