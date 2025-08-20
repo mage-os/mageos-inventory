@@ -22,6 +22,8 @@ class PurgeCachedLegacySourceItemsObserver implements ObserverInterface
     }
 
     /**
+     * Purge cached legacy source items when source items are saved.
+     *
      * @param Observer $observer
      * @return void
      */

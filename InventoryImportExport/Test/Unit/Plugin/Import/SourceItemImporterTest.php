@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\InventoryImportExport\Test\Unit\Plugin\Import;
 
 use Magento\CatalogImportExport\Model\StockItemProcessorInterface;
+use Magento\Framework\EntityManager\EventManager;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Validation\ValidationException;
@@ -46,6 +47,11 @@ class SourceItemImporterTest extends TestCase
     private SourceResolver $sourceResolver;
 
     /**
+     * @var EventManager|MockObject
+     */
+    private EventManager $eventManager;
+
+    /**
      * @var SourceItemImporter
      */
     private SourceItemImporter $plugin;
@@ -61,12 +67,14 @@ class SourceItemImporterTest extends TestCase
         $this->sourceItemFactoryMock = $this->createMock(SourceItemInterfaceFactory::class);
         $this->sourceItemsBySku = $this->createMock(GetSourceItemsBySkuInterface::class);
         $this->sourceResolver = $this->createMock(SourceResolver::class);
+        $this->eventManager = $this->createMock(EventManager::class);
 
         $this->plugin = new SourceItemImporter(
             $this->sourceItemsSaveMock,
             $this->sourceItemFactoryMock,
             $this->sourceItemsBySku,
-            $this->sourceResolver
+            $this->sourceResolver,
+            $this->eventManager
         );
     }
 
@@ -118,6 +126,13 @@ class SourceItemImporterTest extends TestCase
             ->method('create')
             ->willReturn($savedSourceItem);
 
+        $this->eventManager->expects($this->once())
+            ->method('dispatch')
+            ->with(
+                'before_import_source_items_save',
+                ['source_items' => [$savedSourceItem]]
+            );
+        $this->sourceItemsSaveMock->expects($this->once())->method('execute')->with([$savedSourceItem]);
         $this->plugin->afterProcess(
             $this->createMock(StockItemProcessorInterface::class),
             '',
