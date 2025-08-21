@@ -61,7 +61,7 @@ class SourceResolver implements ResetAfterRequestInterface
     }
 
     /**
-     * @inheirtDoc
+     * @inheritDoc
      */
     public function _resetState(): void
     {
