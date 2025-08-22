@@ -12,6 +12,7 @@ use Magento\Framework\Webapi\Rest\Request;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventorySales\Model\ResourceModel\DeleteReservationsBySkus;
 use Magento\InventorySales\Test\Api\OrderPlacementBase;
+use Magento\TestFramework\Fixture\DataFixture;
 use Magento\TestFramework\Helper\Bootstrap;
 
 /**
@@ -756,5 +757,108 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
     {
         $deleteReservations = Bootstrap::getObjectManager()->get(DeleteReservationsBySkus::class);
         $deleteReservations->execute($skus);
+    }
+
+    /**
+     * Verify that total_count reflects actual total products regardless of page_size.
+     */
+    #[DataFixture('Magento_InventoryApi::Test/_files/sources.php')]
+    #[DataFixture('Magento_InventoryApi::Test/_files/products.php')]
+    #[DataFixture('Magento_InventoryCatalog::Test/_files/source_items_on_default_source.php')]
+    #[DataFixture('Magento_InventoryIndexer::Test/_files/reindex_inventory.php')]
+    public function testPaginationTotalCountBehavior(): void
+    {
+        $this->_markTestAsRestOnly();
+        $this->assignStockToWebsite(1, 'base');
+
+        // Use SKU-1 and SKU-2 which have inventory from the fixture
+        $filters = [
+            [
+                'field' => SourceItemInterface::SKU,
+                'value' => 'SKU-1',
+                'condition_type' => 'eq',
+            ],
+            [
+                'field' => SourceItemInterface::SKU,
+                'value' => 'SKU-2',
+                'condition_type' => 'eq',
+            ],
+        ];
+
+        // First request: Get baseline without page_size
+        $requestDataBaseline = [
+            'searchCriteria' => [
+                SearchCriteria::FILTER_GROUPS => [['filters' => $filters]]
+            ]
+        ];
+        $resultBaseline = $this->_webApiCall([
+            'rest' => [
+                'resourcePath' => sprintf(
+                    "%s/%s/%s?%s",
+                    self::API_PATH,
+                    'website',
+                    'base',
+                    http_build_query($requestDataBaseline)
+                ),
+                'httpMethod' => Request::HTTP_METHOD_GET
+            ],
+        ]);
+        $expectedTotalCount = $resultBaseline['total_count'];
+
+        // Test with page_size=1 (smaller than total)
+        $requestDataSmallPage = [
+            'searchCriteria' => [
+                SearchCriteria::FILTER_GROUPS => [['filters' => $filters]],
+                'page_size' => 1
+            ]
+        ];
+        $resultSmallPage = $this->_webApiCall([
+            'rest' => [
+                'resourcePath' => sprintf(
+                    "%s/%s/%s?%s",
+                    self::API_PATH,
+                    'website',
+                    'base',
+                    http_build_query($requestDataSmallPage)
+                ),
+                'httpMethod' => Request::HTTP_METHOD_GET
+            ],
+        ]);
+
+        // Test with page_size=50 (larger than total)
+        $requestDataLargePage = [
+            'searchCriteria' => [
+                SearchCriteria::FILTER_GROUPS => [['filters' => $filters]],
+                'page_size' => 50
+            ]
+        ];
+        $resultLargePage = $this->_webApiCall([
+            'rest' => [
+                'resourcePath' => sprintf(
+                    "%s/%s/%s?%s",
+                    self::API_PATH,
+                    'website',
+                    'base',
+                    http_build_query($requestDataLargePage)
+                ),
+                'httpMethod' => Request::HTTP_METHOD_GET
+            ],
+        ]);
+
+        // Core assertions: total_count should be consistent regardless of page_size
+        self::assertEquals($expectedTotalCount, $resultSmallPage['total_count'],
+            'total_count should reflect actual total products when page_size < total');
+        self::assertEquals($expectedTotalCount, $resultLargePage['total_count'],
+            'total_count should reflect actual total products when page_size > total');
+        
+        // Pagination behavior assertions
+        self::assertLessThanOrEqual(1, count($resultSmallPage['items']),
+            'page_size=1 should return at most 1 item');
+        self::assertEquals($expectedTotalCount, count($resultLargePage['items']),
+            'page_size > total should return all items');
+        
+        // Verify we have expected test data
+        self::assertEquals(2, $expectedTotalCount,
+            'Test should find exactly 2 products for reliable pagination testing');
     }
 }

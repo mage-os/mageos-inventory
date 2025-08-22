@@ -85,7 +85,7 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
         $searchResult = $this->exportStockSalableQtySearchResultFactory->create();
         $searchResult->setSearchCriteria($productSearchResult->getSearchCriteria());
         $searchResult->setItems($items);
-        $searchResult->setTotalCount(count($items));
+        $searchResult->setTotalCount($productSearchResult->getTotalCount());
 
         return $searchResult;
     }
