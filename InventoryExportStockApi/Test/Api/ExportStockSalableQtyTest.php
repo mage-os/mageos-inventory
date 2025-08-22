@@ -761,6 +761,8 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
 
     /**
      * Verify that total_count reflects actual total products regardless of page_size.
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     #[DataFixture('Magento_InventoryApi::Test/_files/sources.php')]
     #[DataFixture('Magento_InventoryApi::Test/_files/products.php')]
