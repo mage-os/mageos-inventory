@@ -846,19 +846,34 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
         ]);
 
         // Core assertions: total_count should be consistent regardless of page_size
-        self::assertEquals($expectedTotalCount, $resultSmallPage['total_count'],
-            'total_count should reflect actual total products when page_size < total');
-        self::assertEquals($expectedTotalCount, $resultLargePage['total_count'],
-            'total_count should reflect actual total products when page_size > total');
-        
+        self::assertEquals(
+            $expectedTotalCount,
+            $resultSmallPage['total_count'],
+            'total_count should reflect actual total products when page_size < total'
+        );
+        self::assertEquals(
+            $expectedTotalCount,
+            $resultLargePage['total_count'],
+            'total_count should reflect actual total products when page_size > total'
+        );
+
         // Pagination behavior assertions
-        self::assertLessThanOrEqual(1, count($resultSmallPage['items']),
-            'page_size=1 should return at most 1 item');
-        self::assertEquals($expectedTotalCount, count($resultLargePage['items']),
-            'page_size > total should return all items');
-        
+        self::assertLessThanOrEqual(
+            1,
+            count($resultSmallPage['items']),
+            'page_size=1 should return at most 1 item'
+        );
+        self::assertEquals(
+            $expectedTotalCount,
+            count($resultLargePage['items']),
+            'page_size > total should return all items'
+        );
+
         // Verify we have expected test data
-        self::assertEquals(2, $expectedTotalCount,
-            'Test should find exactly 2 products for reliable pagination testing');
+        self::assertEquals(
+            2,
+            $expectedTotalCount,
+            'Test should find exactly 2 products for reliable pagination testing'
+        );
     }
 }
