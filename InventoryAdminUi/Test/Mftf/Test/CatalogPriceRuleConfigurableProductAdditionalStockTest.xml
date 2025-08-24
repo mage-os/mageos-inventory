@@ -61,6 +61,8 @@
             </actionGroup>
         </before>
         <after>
+            <!--Delete configurable product created via API.-->
+            <deleteData createDataKey="createProduct" stepKey="deleteConfigurableProduct"/>
             <!--Assign Default Stock to Default Website.-->
             <actionGroup ref="AssignWebsiteToStockActionGroup" stepKey="assignMainWebsiteToDefaultStock" after="deleteCategory">
                 <argument name="stockName" value="{{_defaultStock.name}}"/>

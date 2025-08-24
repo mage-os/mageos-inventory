@@ -44,6 +44,10 @@
             <actionGroup ref="DisableSourceActionGroup" stepKey="disableCreatedCustomSource">
                 <argument name="sourceCode" value="$$customSource.source[source_code]$$"/>
             </actionGroup>
+            <!-- Delete bundle product created via UI -->
+            <actionGroup ref="DeleteProductBySkuActionGroup" stepKey="deleteBundleProduct">
+                <argument name="sku" value="{{BundleProduct.sku}}"/>
+            </actionGroup>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutFromAdminArea"/>
             <deleteData createDataKey="category" stepKey="deleteCategory"/>
             <actionGroup ref="StorefrontCustomerLogoutActionGroup" stepKey="logoutCustomer" />

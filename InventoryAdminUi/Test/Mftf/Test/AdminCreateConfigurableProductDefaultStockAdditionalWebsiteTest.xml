@@ -80,6 +80,8 @@
             <comment userInput="BIC workaround" stepKey="waitForStockEditPageLoad"/>
             <comment userInput="BIC workaround" stepKey="selectWebsiteAsSalesChannel"/>
             <comment userInput="BIC workaround" stepKey="saveDefaultStock"/>
+            <!-- Delete configurable product created via UI -->
+            <helper class="Magento\Catalog\Test\Mftf\Helper\ProductApiHelper" method="deleteAllProductsApi" stepKey="deleteAllProductsViaApi"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutOfAdmin"/>
             <!--Delete category, stock and revert configuration.-->
             <magentoCLI command="config:set {{StorefrontDisableAddStoreCodeToUrls.path}} {{StorefrontDisableAddStoreCodeToUrls.value}}" stepKey="addStoreCodeToUrlDisable"/>
