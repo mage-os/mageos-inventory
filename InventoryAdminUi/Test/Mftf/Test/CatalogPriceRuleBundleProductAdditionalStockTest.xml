@@ -64,10 +64,9 @@
             <actionGroup ref="DisableSourceActionGroup" stepKey="disableCreatedSource" before="assignMainWebsiteToDefaultStock">
                 <argument name="sourceCode" value="$$additionalSource.source[source_code]$$"/>
             </actionGroup>
-            <!-- Delete all created entities.-->
             <deleteData createDataKey="additionalStock" stepKey="deleteStock" after="assignMainWebsiteToDefaultStock"/>
-            <deleteData createDataKey="createProduct" stepKey="deleteBundleProduct" after="deleteStock"/>
-            <deleteData createDataKey="simpleProduct" stepKey="deleteSimpleProduct" after="deleteBundleProduct"/>
+            <!-- Delete all products via API using ProductApiHelper -->
+            <helper class="Magento\Catalog\Test\Mftf\Helper\ProductApiHelper" method="deleteAllProductsApi" stepKey="deleteAllProductsViaApi"/>
         </after>
     </test>
 </tests>
