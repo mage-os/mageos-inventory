@@ -40,13 +40,6 @@
         </before>
         <after>
             <deleteData createDataKey="virtualProduct1" stepKey="deleteVirtualProduct"/>
-            <deleteData createDataKey="createCategory1" stepKey="deleteCategory"/>
-            <deleteData createDataKey="customer" stepKey="deleteCustomer"/>
-            <deleteData createDataKey="createStock1" stepKey="deleteStock"/>
-            <!--Disable source.-->
-            <actionGroup ref="DisableSourceActionGroup" stepKey="disableSource">
-                <argument name="sourceCode" value="$$createSource1.source[source_code]$$"/>
-            </actionGroup>
             <!--Assign Default Stock to Default Website.-->
             <actionGroup ref="AssignWebsiteToStockActionGroup" stepKey="assignMainWebsiteToDefaultStock">
                 <argument name="stockName" value="{{_defaultStock.name}}"/>

@@ -44,11 +44,6 @@
                 <argument name="websiteName" value="{{_defaultWebsite.name}}"/>
             </actionGroup>
             <deleteData createDataKey="simpleProduct1" stepKey="deleteProduct"/>
-            <deleteData createDataKey="simpleCategory1" stepKey="deleteCategory"/>
-            <deleteData createDataKey="createStock1" stepKey="deleteStock"/>
-            <actionGroup ref="DisableSourceActionGroup" stepKey="disableCreatedSource">
-                <argument name="sourceCode" value="$$createSource1.source[source_code]$$"/>
-            </actionGroup>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutOfAdmin1"/>
         </after>
 
