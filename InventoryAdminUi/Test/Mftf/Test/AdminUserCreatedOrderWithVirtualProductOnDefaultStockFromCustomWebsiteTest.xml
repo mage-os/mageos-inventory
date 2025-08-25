@@ -27,7 +27,7 @@
             </createData>
         </before>
         <after>
-            <deleteData createDataKey="simpleProduct" stepKey="deleteVirtualProduct"/>
+
         </after>
         <!-- remove storefront steps -->
         <remove keyForRemoval="openProductPageUsingStoreCodeInUrl"/>
