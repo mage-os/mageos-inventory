@@ -94,6 +94,7 @@ class SourceItemImporter
         foreach ($stockData as $sku => $stockDatum) {
             $sku = (string)$sku;
             $isNewSku = !$this->skuStorage->has($sku);
+            $sources = $existingSourceItemsBySKU[$sku] ?? [];
             $isQtyExplicitlySet = $importedData[$sku]['qty'] ?? false;
 
             $inStock = $stockDatum['is_in_stock'] ?? 0;
@@ -108,26 +109,25 @@ class SourceItemImporter
             if ($isNewSku
                 || $isQtyExplicitlySet
                 || $isSingleSourceMode
-                || !empty($existingSourceItemsBySKU[$sku][$defaultSourceCode])) {
+                || isset($sources[$defaultSourceCode])) {
                 $sourceItems[] = $sourceItem;
             }
 
-            if (isset($existingSourceItemsBySKU[$sku])) {
-                $hasGlobalInventoryConfigurationChanges = array_filter(
+            unset($sources[$defaultSourceCode]);
+            // Is there any other source (except the default source) assigned to the product
+            if (count($sources) > 0
+                && array_filter(
                     array_intersect_key($importedData[$sku] ?? [], self::STOCK_CONFIGURATION_FIELDS),
                     fn ($value) => $value !== null
-                );
-                if ($hasGlobalInventoryConfigurationChanges) {
-                    $sources = $existingSourceItemsBySKU[$sku];
-                    unset($sources[$defaultSourceCode]);
-                    array_push($sourceItemIds, ...array_values($sources));
-                }
+                )
+            ) {
+                array_push($sourceItemIds, ...array_values($sources));
             }
         }
         if (count($sourceItems) > 0) {
             $this->sourceItemsSave->execute($sourceItems);
-            // reindex non default source items because global stock configuration
-            // such as backorders may affect stock status
+            // reindex non default source items if global stock configuration
+            // such as backorders have changed
             if (!empty($sourceItemIds)) {
                 $this->sourceItemIndexer->executeList($sourceItemIds);
             }

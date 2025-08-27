@@ -133,7 +133,7 @@ class ProcessSourceItemsObserver implements ObserverInterface
                 $assignedSources[$key] = $source;
             }
             if (isset($source['source_code']) && $source['source_code'] === $this->defaultSourceProvider->getCode()) {
-                $assignedSources[$key] = $this->getDefaultSourceData($product) + $assignedSources[$key];
+                $assignedSources[$key] = $this->getDefaultSourceData($product) + $source;
             }
         }
         return $assignedSources;
@@ -142,8 +142,11 @@ class ProcessSourceItemsObserver implements ObserverInterface
     /**
      * Get default source data from stock item
      *
-     * This is crucial because stock item contains the most up-to-date logic about product salability in default source
+     * This is important because default stock item status can change depending on stock configurations
+     * such as qty, backorders, min qty etc., and we need to reflect that in default source item data.
+     * In multi-source mode, the default source quantity will override the stock item qty in the plugin below
      *
+     * @see \Magento\InventoryCatalogAdminUi\Plugin\CatalogInventory\Api\StockRegistry\SetQtyToLegacyStock
      * @param ProductInterface $product
      * @return array
      */
