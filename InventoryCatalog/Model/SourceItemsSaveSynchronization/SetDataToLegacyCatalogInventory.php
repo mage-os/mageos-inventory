@@ -66,7 +66,6 @@ class SetDataToLegacyCatalogInventory
             }
             $legacyStockItem->setQty((float)$sourceItem->getQuantity());
             $legacyStockItem->setIsInStock((int)$sourceItem->getStatus());
-            $legacyStockItem->setMinQty((float)$sourceItem->getMinQty());
             if ($legacyStockItem->getManageStock() && !$this->stockStateProvider->verifyStock($legacyStockItem)) {
                 $legacyStockItem->setIsInStock(0);
             }

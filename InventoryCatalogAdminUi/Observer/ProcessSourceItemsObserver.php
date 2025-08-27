@@ -74,21 +74,12 @@ class ProcessSourceItemsObserver implements ObserverInterface
             $assignedSources =
                 isset($sources['assigned_sources'])
                 && is_array($sources['assigned_sources'])
-                    ? $this->prepareAssignedSources($sources['assigned_sources'], $product)
+                    ? $this->prepareAssignedSources($product, $sources['assigned_sources'])
                     : [];
             $this->sourceItemsProcessor->execute((string)$productData['sku'], $assignedSources);
         } else {
-            /** @var StockItemInterface $stockItem */
-            $stockItem = $product->getExtensionAttributes()?->getStockItem()
-                ?? $this->stockRegistry->getStockItem($product->getId());
-            $defaultSourceData = [
-                SourceItemInterface::SKU => $product->getSku(),
-                SourceItemInterface::SOURCE_CODE => $this->defaultSourceProvider->getCode(),
-                SourceItemInterface::QUANTITY => $stockItem->getQty(),
-                SourceItemInterface::STATUS => $stockItem->getIsInStock(),
-            ];
             $sourceItems = $this->getSourceItemsWithoutDefault($product->getSku());
-            $sourceItems[] = $defaultSourceData;
+            $sourceItems[] = $this->getDefaultSourceData($product);
             $this->sourceItemsProcessor->execute((string)$product->getSku(), $sourceItems);
         }
     }
@@ -126,45 +117,46 @@ class ProcessSourceItemsObserver implements ObserverInterface
     /**
      * Convert built-in UI component property qty into quantity and source_status into status
      *
-     * @param array $assignedSources
      * @param ProductInterface $product
+     * @param array $assignedSources
      * @return array
      */
-    private function prepareAssignedSources(array $assignedSources, ProductInterface $product): array
+    private function prepareAssignedSources(ProductInterface $product, array $assignedSources): array
     {
-        $stockItem = $product->getExtensionAttributes()?->getStockItem();
         foreach ($assignedSources as $key => $source) {
             if (!key_exists('quantity', $source) && isset($source['qty'])) {
                 $source['quantity'] = (int) $source['qty'];
+                $assignedSources[$key] = $source;
             }
             if (!key_exists('status', $source) && isset($source['source_status'])) {
                 $source['status'] = (int) $source['source_status'];
+                $assignedSources[$key] = $source;
             }
-            $assignedSources[$key] = $this->adjustStockItemStatus(
-                $stockItem,
-                $source
-            );
+            if (isset($source['source_code']) && $source['source_code'] === $this->defaultSourceProvider->getCode()) {
+                $assignedSources[$key] = $this->getDefaultSourceData($product) + $assignedSources[$key];
+            }
         }
         return $assignedSources;
     }
 
     /**
-     * Adjust stock item status based on the stock item and source item data.
+     * Get default source data from stock item
      *
-     * @param StockItemInterface|null $stockItem
-     * @param array $sourceItem
+     * This is crucial because stock item contains the most up-to-date logic about product salability in default source
+     *
+     * @param ProductInterface $product
      * @return array
      */
-    private function adjustStockItemStatus(?StockItemInterface $stockItem, array $sourceItem): array
+    private function getDefaultSourceData(ProductInterface $product): array
     {
-        if ($stockItem &&
-            $stockItem->getManageStock() &&
-            $sourceItem[SourceItemInterface::STATUS] == SourceItemInterface::STATUS_IN_STOCK &&
-            $sourceItem[SourceItemInterface::QUANTITY] < $stockItem->getMinQty()
-        ) {
-            $sourceItem[SourceItemInterface::STATUS] = SourceItemInterface::STATUS_OUT_OF_STOCK;
-        }
-
-        return $sourceItem;
+        /** @var StockItemInterface $stockItem */
+        $stockItem = $product->getExtensionAttributes()?->getStockItem()
+            ?? $this->stockRegistry->getStockItem($product->getId());
+        return [
+            SourceItemInterface::SKU => $product->getSku(),
+            SourceItemInterface::SOURCE_CODE => $this->defaultSourceProvider->getCode(),
+            SourceItemInterface::QUANTITY => $stockItem->getQty(),
+            SourceItemInterface::STATUS => $stockItem->getIsInStock(),
+        ];
     }
 }

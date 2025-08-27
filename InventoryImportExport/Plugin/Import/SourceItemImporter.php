@@ -7,67 +7,61 @@ declare(strict_types=1);
 
 namespace Magento\InventoryImportExport\Plugin\Import;
 
+use Magento\CatalogImportExport\Model\Import\Product\SkuStorage;
 use Magento\CatalogImportExport\Model\StockItemProcessorInterface;
-use Magento\Framework\EntityManager\EventManager;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Validation\ValidationException;
+use Magento\Inventory\Model\ResourceModel\SourceItem;
+use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
-use Magento\InventoryApi\Api\GetSourceItemsBySkuInterface;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
-use Magento\InventoryImportExport\Model\Import\SourceResolver;
+use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
+use Magento\InventoryCatalogApi\Model\IsSingleSourceModeInterface;
+use Magento\InventoryIndexer\Indexer\SourceItem\SourceItemIndexer;
 
 /**
- * Assigning products to corresponding source
+ * Assigning products to default source
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class SourceItemImporter
 {
     /**
-     * Source Items Save Interface for saving multiple source items
+     * These inventory configurations affects all sources
      *
-     * @var SourceItemsSaveInterface $sourceItemsSave
+     * @var string[]
      */
-    private SourceItemsSaveInterface $sourceItemsSave;
+    private const STOCK_CONFIGURATION_FIELDS = [
+        'min_qty' => null,
+        'use_config_min_qty' => null,
+        'backorders' => null,
+        'use_config_backorders' => null,
+        'out_of_stock_qty' => null, // alias for min_qty
+        'allow_backorders' => null // alias for backorders
+    ];
 
     /**
-     * @var SourceItemInterfaceFactory $sourceItemFactory
-     */
-    private SourceItemInterfaceFactory $sourceItemFactory;
-
-    /**
-     * @var SourceResolver $sourceResolver
-     */
-    private SourceResolver $sourceResolver;
-
-    /**
-     * @var GetSourceItemsBySkuInterface
-     */
-    private GetSourceItemsBySkuInterface $sourceItemsBySku;
-
-    /**
-     * @var EventManager
-     */
-    private EventManager $eventManager;
-
-    /**
+     * StockItemImporter constructor
+     *
      * @param SourceItemsSaveInterface $sourceItemsSave
      * @param SourceItemInterfaceFactory $sourceItemFactory
-     * @param GetSourceItemsBySkuInterface $sourceItemsBySku
-     * @param SourceResolver $sourceResolver
-     * @param EventManager $eventManager
+     * @param DefaultSourceProviderInterface $defaultSourceProvider
+     * @param IsSingleSourceModeInterface $isSingleSourceMode
+     * @param ResourceConnection $resourceConnection
+     * @param SkuStorage $skuStorage
+     * @param SourceItemIndexer $sourceItemIndexer
      */
     public function __construct(
-        SourceItemsSaveInterface $sourceItemsSave,
-        SourceItemInterfaceFactory $sourceItemFactory,
-        GetSourceItemsBySkuInterface $sourceItemsBySku,
-        SourceResolver $sourceResolver,
-        EventManager $eventManager
+        private readonly SourceItemsSaveInterface $sourceItemsSave,
+        private readonly SourceItemInterfaceFactory $sourceItemFactory,
+        private readonly DefaultSourceProviderInterface $defaultSourceProvider,
+        private readonly IsSingleSourceModeInterface $isSingleSourceMode,
+        private readonly ResourceConnection $resourceConnection,
+        private readonly SkuStorage $skuStorage,
+        private readonly SourceItemIndexer $sourceItemIndexer
     ) {
-        $this->sourceItemsSave = $sourceItemsSave;
-        $this->sourceItemFactory = $sourceItemFactory;
-        $this->sourceItemsBySku = $sourceItemsBySku;
-        $this->sourceResolver = $sourceResolver;
-        $this->eventManager = $eventManager;
     }
 
     /**
@@ -83,6 +77,7 @@ class SourceItemImporter
      * @throws ValidationException
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function afterProcess(
         StockItemProcessorInterface $subject,
@@ -91,101 +86,76 @@ class SourceItemImporter
         array $importedData
     ): void {
         $sourceItems = [];
-
+        $isSingleSourceMode = $this->isSingleSourceMode->execute();
+        // No need to load existing source items in single source mode as we know the only source is 'default'
+        $existingSourceItemsBySKU = $isSingleSourceMode ? [] : $this->getSourceItems(array_keys($stockData));
+        $defaultSourceCode = $this->defaultSourceProvider->getCode();
+        $sourceItemIds = [];
         foreach ($stockData as $sku => $stockDatum) {
-            foreach ($stockDatum as $storeId => $stockDataItem) {
-                $sources = $this->sourceResolver->getSourcesForStore($storeId);
-                $currentSource = reset($sources);
+            $sku = (string)$sku;
+            $isNewSku = !$this->skuStorage->has($sku);
+            $isQtyExplicitlySet = $importedData[$sku]['qty'] ?? false;
 
-                $qty = $this->determineSourceQuantity(
-                    (string)$sku,
-                    $storeId,
-                    $currentSource,
-                    $importedData
-                );
+            $inStock = $stockDatum['is_in_stock'] ?? 0;
+            $qty = $stockDatum['qty'] ?? 0;
+            $sourceItem = $this->sourceItemFactory->create();
+            $sourceItem->setSku($sku);
+            $sourceItem->setSourceCode($defaultSourceCode);
+            $sourceItem->setQuantity((float)$qty);
+            $sourceItem->setStatus((int)$inStock);
 
-                $inStock = $this->determineStatus((string)$sku, $storeId, $qty, $importedData, $stockDataItem);
-
-                $sourceItem = $this->sourceItemFactory->create();
-                $sourceItem->setSku((string)$sku);
-                $sourceItem->setSourceCode($currentSource);
-                $sourceItem->setQuantity($qty);
-                $sourceItem->setStatus($inStock);
-
+            //Prevent existing products to be assigned to `default` source, when `qty` is not explicitly set.
+            if ($isNewSku
+                || $isQtyExplicitlySet
+                || $isSingleSourceMode
+                || !empty($existingSourceItemsBySKU[$sku][$defaultSourceCode])) {
                 $sourceItems[] = $sourceItem;
             }
-        }
 
-        if (count($sourceItems) > 0) {
-            $this->eventManager->dispatch(
-                'before_import_source_items_save',
-                ['source_items' => $sourceItems]
-            );
-
-            /** SourceItemInterface[] $sourceItems */
-            $this->sourceItemsSave->execute($sourceItems);
-        }
-    }
-
-    /**
-     * Determine the stock status for a given SKU and store.
-     *
-     * @param string $sku
-     * @param int $storeId
-     * @param float $qty
-     * @param array $importedData
-     * @param array $stockDataItem
-     * @return int
-     */
-    private function determineStatus(
-        string $sku,
-        int $storeId,
-        float $qty,
-        array $importedData,
-        array $stockDataItem
-    ): int {
-        if (isset($importedData[$sku][$storeId]['is_in_stock'])) {
-            return (int)$importedData[$sku][$storeId]['is_in_stock'];
-        }
-
-        $minQty  = $stockDataItem['min_qty'] ?? 0;
-        $inStock = $qty > 0 && $qty >= $minQty ? 1 : 0;
-        if (!$inStock && $qty >= $minQty && isset($stockDataItem['backorders']) && $stockDataItem['backorders'] == 1) {
-            $inStock = 1;
-        }
-        return $inStock;
-    }
-
-    /**
-     * Determine the source quantity for a given SKU and store.
-     *
-     * @param string $sku
-     * @param int $storeId
-     * @param string $currentSource
-     * @param array $importedData
-     * @return float
-     */
-    private function determineSourceQuantity(
-        string $sku,
-        int $storeId,
-        string $currentSource,
-        array $importedData
-    ): float {
-        $isQtyExplicitlySet = isset($importedData[$sku][$storeId]['qty']) ?? false;
-
-        $qty = 0;
-        if ($isQtyExplicitlySet) {
-            $qty = $importedData[$sku][$storeId]['qty'];
-        } else {
-            $items = $this->sourceItemsBySku->execute($sku);
-            foreach ($items as $item) {
-                if ($item->getSourceCode() == $currentSource) {
-                    $qty = $item->getQuantity();
-                    break;
+            if (isset($existingSourceItemsBySKU[$sku])) {
+                $hasGlobalInventoryConfigurationChanges = array_filter(
+                    array_intersect_key($importedData[$sku] ?? [], self::STOCK_CONFIGURATION_FIELDS),
+                    fn ($value) => $value !== null
+                );
+                if ($hasGlobalInventoryConfigurationChanges) {
+                    $sources = $existingSourceItemsBySKU[$sku];
+                    unset($sources[$defaultSourceCode]);
+                    array_push($sourceItemIds, ...array_values($sources));
                 }
             }
         }
+        if (count($sourceItems) > 0) {
+            $this->sourceItemsSave->execute($sourceItems);
+            // reindex non default source items because global stock configuration
+            // such as backorders may affect stock status
+            if (!empty($sourceItemIds)) {
+                $this->sourceItemIndexer->executeList($sourceItemIds);
+            }
+        }
+    }
 
-        return (float)$qty;
+    /**
+     * Fetch product's source items
+     *
+     * @param array $skus
+     * @return array
+     */
+    private function getSourceItems(array $skus): array
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $select = $connection->select()->from(
+            $this->resourceConnection->getTableName(SourceItem::TABLE_NAME_SOURCE_ITEM),
+            [SourceItem::ID_FIELD_NAME, SourceItemInterface::SOURCE_CODE, SourceItemInterface::SKU]
+        )->where(
+            SourceItemInterface::SKU . ' IN (?)',
+            $skus
+        );
+
+        $result = [];
+        foreach ($connection->fetchAll($select) as $item) {
+            $result[$item[SourceItemInterface::SKU]][$item[SourceItemInterface::SOURCE_CODE]] =
+                $item[SourceItem::ID_FIELD_NAME];
+        }
+        return $result;
     }
 }

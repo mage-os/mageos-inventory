@@ -117,18 +117,22 @@ class StockItemProcessorTest extends TestCase
     public function testSourceItemImportWithDefaultSource(): void
     {
         $productId = $this->productIdBySku->execute(['SKU-1'])['SKU-1'];
-        $stockData['SKU-1'][0] = [
+        $stockData = [
+            'SKU-1' => [
                 'qty' => 1,
                 'is_in_stock' => SourceItemInterface::STATUS_IN_STOCK,
                 'product_id' => $productId,
                 'website_id' => 0,
-                'stock_id' => 1
+                'stock_id' => 1,
+            ]
         ];
-        $importedData['SKU-1'][0] = [
+        $importedData = [
+            'SKU-1' => [
                 'sku' => 'SKU-1',
                 'name' => 'New Name',
                 'qty' => 1,
-                'is_in_stock' => SourceItemInterface::STATUS_IN_STOCK
+                'is_in_stock' => SourceItemInterface::STATUS_IN_STOCK,
+            ]
         ];
 
         $this->importer->process($stockData, $importedData);
@@ -223,16 +227,20 @@ class StockItemProcessorTest extends TestCase
         $this->addInventorySourceItem($sourceCode, $sku, $quantity);
 
         // Now try to add
-        $stockData['simple'][0] = [
+        $stockData = [
+            'simple' => [
                 'qty' => 0,
                 'is_in_stock' => SourceItemInterface::STATUS_OUT_OF_STOCK,
                 'product_id' => $productId,
                 'website_id' => 0,
                 'stock_id' => 1,
+            ]
         ];
-        $importedData['simple'][0] = [
+        $importedData = [
+            'simple' => [
                 'sku' => 'simple',
-                'name' => 'New Name'
+                'name' => 'New Name',
+            ]
         ];
 
         $this->importer->process($stockData, $importedData);
