@@ -543,8 +543,8 @@ class ProductTest extends TestCase
      */
     protected function tearDown(): void
     {
+        $objectManager = Bootstrap::getObjectManager();
         if (!empty($this->importedProducts)) {
-            $objectManager = Bootstrap::getObjectManager();
             /** @var ProductRepositoryInterface $productRepository */
             $productRepository = $objectManager->create(ProductRepositoryInterface::class);
             $registry = $objectManager->get(\Magento\Framework\Registry::class);
@@ -560,12 +560,11 @@ class ProductTest extends TestCase
                 }
             }
 
-            /** @var Data $dataSourceModel */
-            $dataSourceModel = $objectManager->create(Data::class);
-            $dataSourceModel->cleanBunches();
-
             $registry->unregister('isSecureArea');
             $registry->register('isSecureArea', false);
         }
+        /** @var Data $dataSourceModel */
+        $dataSourceModel = $objectManager->create(Data::class);
+        $dataSourceModel->cleanBunches();
     }
 }
