@@ -85,7 +85,7 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
         $searchResult = $this->exportStockSalableQtySearchResultFactory->create();
         $searchResult->setSearchCriteria($productSearchResult->getSearchCriteria());
         $searchResult->setItems($items);
-        $searchResult->setTotalCount($productSearchResult->getTotalCount());
+        $searchResult->setTotalCount($this->getTotalCountWithStockFilter($searchCriteria, $stock->getStockId()));
 
         return $searchResult;
     }
@@ -100,5 +100,34 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
     private function getProducts(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
     {
         return $this->productRepository->getList($searchCriteria);
+    }
+
+    /**
+     * Remove pagination, get all matching products, process through stock filter to
+     * get total count of products that have stock assignments (inventory data)
+     *
+     * @param SearchCriteriaInterface $searchCriteria
+     * @param int $stockId
+     * @return int
+     * @throws LocalizedException
+     */
+    private function getTotalCountWithStockFilter(SearchCriteriaInterface $searchCriteria, int $stockId): int
+    {
+        // Clone search criteria and remove pagination to get all products
+        $searchCriteriaWithoutPagination = clone $searchCriteria;
+        $searchCriteriaWithoutPagination->setPageSize(null);
+        $searchCriteriaWithoutPagination->setCurrentPage(null);
+
+        // Get all products matching the search criteria (without pagination)
+        $allProductsResult = $this->productRepository->getList($searchCriteriaWithoutPagination);
+
+        // Process all products through the stock processor to get only those with inventory
+        $allStockItems = $this->preciseExportStockProcessor->execute(
+            $allProductsResult->getItems(),
+            $stockId
+        );
+
+        // Return the count of products that actually have stock assignments
+        return count($allStockItems);
     }
 }
