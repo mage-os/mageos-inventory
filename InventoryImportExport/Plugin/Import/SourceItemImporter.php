@@ -92,7 +92,7 @@ class SourceItemImporter
         foreach ($stockData as $sku => $stockDatum) {
             $sku = (string)$sku;
             $sources = $existingSourceItemsBySKU[$sku] ?? [];
-            $isQtyExplicitlySet = $importedData[$sku]['qty'] ?? false;
+            $isQtyExplicitlySet = (bool) ($importedData[$sku]['qty'] ?? false);
             $hasDefaultSource = isset($sources[$defaultSourceCode]);
 
             if ($this->shouldUpdateDefaultSourceItem($sku, $isQtyExplicitlySet, $hasDefaultSource, $isSingleSourceMode)
