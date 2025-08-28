@@ -103,8 +103,7 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
     }
 
     /**
-     * Remove pagination, get all matching products, process through stock filter to
-     * get total count of products that have stock assignments (inventory data)
+     * Get total count of products that have stock assignments (inventory data) without pagination.
      *
      * @param SearchCriteriaInterface $searchCriteria
      * @param int $stockId
@@ -115,8 +114,8 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
     {
         // Clone search criteria and remove pagination to get all products
         $searchCriteriaWithoutPagination = clone $searchCriteria;
-        $searchCriteriaWithoutPagination->setPageSize(null);
-        $searchCriteriaWithoutPagination->setCurrentPage(null);
+        $searchCriteriaWithoutPagination->setPageSize(0);
+        $searchCriteriaWithoutPagination->setCurrentPage(0);
 
         // Get all products matching the search criteria (without pagination)
         $allProductsResult = $this->productRepository->getList($searchCriteriaWithoutPagination);
