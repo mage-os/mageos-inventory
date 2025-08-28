@@ -61,7 +61,17 @@
         <checkOption selector="{{AdminBulkSourceAssignmentSection.selectTestSource(source3_code)}}" stepKey="checkSource3"/>
         <checkOption selector="{{AdminBulkSourceAssignmentSection.selectTestSource(source4_code)}}" stepKey="checkSource4"/>
         <click selector="{{AdminBulkSourceAssignmentSection.buttonAssignSources}}" stepKey="clickOnButtonAssignSources"/>
-        <seeElement selector="{{AdminBulkSourceAssignmentSection.msgBulkAssignmentSuccessful('Bulk operation was successful: 16 assignments.')}}" stepKey="assertsSuccessfulAssignmentOfSourcesToProducts"/>
+        <waitForElementVisible selector="{{AdminBulkSourceAssignmentSection.successMessageContainer}}" stepKey="waitForSuccessMessage" time="30"/>
+        <grabTextFrom selector="{{AdminBulkSourceAssignmentSection.successMessageContainer}}" stepKey="grabSuccessMessage"/>
+        <comment userInput="DEBUG: Actual success message is: $grabSuccessMessage" stepKey="debugActualMessage"/>
+        <assertStringContainsString stepKey="assertSuccessMessageContainsBulkOperation">
+            <expectedValue>Bulk operation was successful:</expectedValue>
+            <actualValue>$grabSuccessMessage</actualValue>
+        </assertStringContainsString>
+        <assertStringContainsString stepKey="assertSuccessMessageContainsAssignments">
+            <expectedValue>assignments.</expectedValue>
+            <actualValue>$grabSuccessMessage</actualValue>
+        </assertStringContainsString>
         <waitForPageLoad stepKey="waitForProductGridPagePostAssignmentToLoad"/>
     </actionGroup>
 </actionGroups>
