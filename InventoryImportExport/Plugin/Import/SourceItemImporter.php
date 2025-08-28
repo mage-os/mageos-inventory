@@ -9,11 +9,10 @@ namespace Magento\InventoryImportExport\Plugin\Import;
 
 use Magento\CatalogImportExport\Model\Import\Product\SkuStorage;
 use Magento\CatalogImportExport\Model\StockItemProcessorInterface;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Validation\ValidationException;
-use Magento\Inventory\Model\ResourceModel\SourceItem;
+use Magento\Inventory\Model\ResourceModel\SourceItem as SourceItemResourceModel;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
@@ -49,8 +48,8 @@ class SourceItemImporter
      * @param SourceItemInterfaceFactory $sourceItemFactory
      * @param DefaultSourceProviderInterface $defaultSourceProvider
      * @param IsSingleSourceModeInterface $isSingleSourceMode
-     * @param ResourceConnection $resourceConnection
      * @param SkuStorage $skuStorage
+     * @param SourceItemResourceModel $sourceItemResourceModel
      * @param SourceItemIndexer $sourceItemIndexer
      */
     public function __construct(
@@ -58,8 +57,8 @@ class SourceItemImporter
         private readonly SourceItemInterfaceFactory $sourceItemFactory,
         private readonly DefaultSourceProviderInterface $defaultSourceProvider,
         private readonly IsSingleSourceModeInterface $isSingleSourceMode,
-        private readonly ResourceConnection $resourceConnection,
         private readonly SkuStorage $skuStorage,
+        private readonly SourceItemResourceModel $sourceItemResourceModel,
         private readonly SourceItemIndexer $sourceItemIndexer
     ) {
     }
@@ -77,7 +76,6 @@ class SourceItemImporter
      * @throws ValidationException
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function afterProcess(
         StockItemProcessorInterface $subject,
@@ -93,23 +91,17 @@ class SourceItemImporter
         $sourceItemIds = [];
         foreach ($stockData as $sku => $stockDatum) {
             $sku = (string)$sku;
-            $isNewSku = !$this->skuStorage->has($sku);
             $sources = $existingSourceItemsBySKU[$sku] ?? [];
             $isQtyExplicitlySet = $importedData[$sku]['qty'] ?? false;
+            $hasDefaultSource = isset($sources[$defaultSourceCode]);
 
-            $inStock = $stockDatum['is_in_stock'] ?? 0;
-            $qty = $stockDatum['qty'] ?? 0;
-            $sourceItem = $this->sourceItemFactory->create();
-            $sourceItem->setSku($sku);
-            $sourceItem->setSourceCode($defaultSourceCode);
-            $sourceItem->setQuantity((float)$qty);
-            $sourceItem->setStatus((int)$inStock);
-
-            //Prevent existing products to be assigned to `default` source, when `qty` is not explicitly set.
-            if ($isNewSku
-                || $isQtyExplicitlySet
-                || $isSingleSourceMode
-                || isset($sources[$defaultSourceCode])) {
+            if ($this->shouldUpdateDefaultSourceItem($sku, $isQtyExplicitlySet, $hasDefaultSource, $isSingleSourceMode)
+            ) {
+                $sourceItem = $this->sourceItemFactory->create();
+                $sourceItem->setSku($sku);
+                $sourceItem->setSourceCode($defaultSourceCode);
+                $sourceItem->setQuantity((float) ($stockDatum['qty'] ?? 0));
+                $sourceItem->setStatus((int) ($stockDatum['is_in_stock'] ?? 0));
                 $sourceItems[] = $sourceItem;
             }
 
@@ -126,12 +118,36 @@ class SourceItemImporter
         }
         if (count($sourceItems) > 0) {
             $this->sourceItemsSave->execute($sourceItems);
-            // reindex non default source items if global stock configuration
-            // such as backorders have changed
-            if (!empty($sourceItemIds)) {
-                $this->sourceItemIndexer->executeList($sourceItemIds);
-            }
         }
+        // Reindex non default source items if global stock configuration such as backorders have changed
+        if (!empty($sourceItemIds)) {
+            $this->sourceItemIndexer->executeList($sourceItemIds);
+        }
+    }
+
+    /**
+     * Checks whether default source item should be updated for the given SKU
+     *
+     * Prevent products to be assigned to `default` source unless
+     *
+     * - The product is new
+     * - The qty is explicitly set in the import file
+     * - Only one source exists (single source mode)
+     * - The product is already assigned to the default source
+     *
+     * @param string $sku
+     * @param bool $hasQty
+     * @param bool $hasDefaultSource
+     * @param bool $isSingleSourceMode
+     * @return bool
+     */
+    private function shouldUpdateDefaultSourceItem(
+        string $sku,
+        bool $hasQty,
+        bool $hasDefaultSource,
+        bool $isSingleSourceMode
+    ): bool {
+        return !$this->skuStorage->has($sku) || $hasQty || $isSingleSourceMode || $hasDefaultSource;
     }
 
     /**
@@ -142,19 +158,15 @@ class SourceItemImporter
      */
     private function getSourceItems(array $skus): array
     {
-        $connection = $this->resourceConnection->getConnection();
-        $select = $connection->select()->from(
-            $this->resourceConnection->getTableName(SourceItem::TABLE_NAME_SOURCE_ITEM),
-            [SourceItem::ID_FIELD_NAME, SourceItemInterface::SOURCE_CODE, SourceItemInterface::SKU]
-        )->where(
-            SourceItemInterface::SKU . ' IN (?)',
-            $skus
-        );
-
+        $fields = [
+            SourceItemResourceModel::ID_FIELD_NAME,
+            SourceItemInterface::SOURCE_CODE,
+            SourceItemInterface::SKU
+        ];
         $result = [];
-        foreach ($connection->fetchAll($select) as $item) {
+        foreach ($this->sourceItemResourceModel->findAllBySkus($skus, $fields) as $item) {
             $result[$item[SourceItemInterface::SKU]][$item[SourceItemInterface::SOURCE_CODE]] =
-                $item[SourceItem::ID_FIELD_NAME];
+                $item[SourceItemResourceModel::ID_FIELD_NAME];
         }
         return $result;
     }

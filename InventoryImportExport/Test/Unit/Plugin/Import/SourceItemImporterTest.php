@@ -10,11 +10,10 @@ namespace Magento\InventoryImportExport\Test\Unit\Plugin\Import;
 use Magento\CatalogImportExport\Model\Import\Product\SkuStorage;
 use Magento\CatalogImportExport\Model\StockItemProcessorInterface;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\DB\Adapter\AdapterInterface;
-use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Validation\ValidationException;
+use Magento\Inventory\Model\ResourceModel\SourceItem;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
@@ -50,7 +49,7 @@ class SourceItemImporterTest extends TestCase
     /**
      * @var ResourceConnection|MockObject
      */
-    private $resourceConnectionMock;
+    private $sourceItemResourceModelMock;
 
     /**
      * @var SourceItemImporter
@@ -89,7 +88,7 @@ class SourceItemImporterTest extends TestCase
         $this->defaultSourceMock = $this->getMockBuilder(DefaultSourceProviderInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->resourceConnectionMock = $this->getMockBuilder(ResourceConnection::class)
+        $this->sourceItemResourceModelMock = $this->getMockBuilder(SourceItem::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -110,8 +109,8 @@ class SourceItemImporterTest extends TestCase
             $this->sourceItemFactoryMock,
             $this->defaultSourceMock,
             $this->isSingleSourceModeMock,
-            $this->resourceConnectionMock,
             $this->skuStorageMock,
+            $this->sourceItemResourceModelMock,
             $this->createMock(SourceItemIndexer::class),
         );
     }
@@ -145,7 +144,9 @@ class SourceItemImporterTest extends TestCase
             ]
         ];
 
-        $this->saveSkusHavingDefaultSourceMock($sku);
+        $this->sourceItemResourceModelMock->expects($this->once())
+            ->method('findAllBySkus')
+            ->willReturn([['sku' => $sku, 'source_code' => 'default', 'source_item_id' => 1]]);
 
         $this->skuStorageMock->method('get')->willReturnCallback(function ($sku) use ($existingSkus) {
             $skuLowered = strtolower($sku);
@@ -183,38 +184,6 @@ class SourceItemImporterTest extends TestCase
         }
 
         $this->plugin->afterProcess($this->stockItemProcessorMock, '', $stockData, []);
-    }
-
-    /**
-     * @param string $sku
-     */
-    private function saveSkusHavingDefaultSourceMock(string $sku): void
-    {
-        $connectionAdapterMock = $this->getMockForAbstractClass(AdapterInterface::class);
-        $selectMock = $this->createMock(Select::class);
-
-        $connectionAdapterMock->expects($this->once())
-            ->method('select')
-            ->willReturn($selectMock);
-        $selectMock->expects($this->once())
-            ->method('from')
-            ->willReturnSelf();
-        $selectMock->expects($this->once())
-            ->method('where')
-            ->willReturnSelf();
-        $connectionAdapterMock->expects($this->once())
-            ->method('fetchAll')
-            ->willReturn([['sku' => $sku, 'source_code' => 'default', 'source_item_id' => 1]]);
-
-        $this->resourceConnectionMock
-            ->expects($this->once())
-            ->method('getConnection')
-            ->willReturn($connectionAdapterMock);
-
-        $this->resourceConnectionMock
-            ->expects($this->once())
-            ->method('getTableName')
-            ->willReturnSelf();
     }
 
     /**
