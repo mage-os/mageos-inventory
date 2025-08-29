@@ -17,4 +17,42 @@
             <argument name="qtyForNotManageStock" xsi:type="null"/>
         </arguments>
     </type>
+
+    <!-- Extend product filter processor with inventory_stock_id custom filter -->
+    <virtualType name="Magento\InventoryExportStock\Model\Api\SearchCriteria\ProductFilterProcessorWithInventory" type="Magento\Eav\Model\Api\SearchCriteria\CollectionProcessor\FilterProcessor">
+        <arguments>
+            <argument name="customFilters" xsi:type="array">
+                <item name="inventory_stock_id" xsi:type="object">Magento\InventoryExportStock\Model\Api\SearchCriteria\FilterProcessor\InventoryStockFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Compose product collection processor using our augmented filter processor -->
+    <virtualType name="Magento\InventoryExportStock\Model\Api\SearchCriteria\ProductCollectionProcessorWithInventory" type="Magento\Eav\Model\Api\SearchCriteria\CollectionProcessor">
+        <arguments>
+            <argument name="processors" xsi:type="array">
+                <item name="joins" xsi:type="object">Magento\InventoryExportStock\Model\Api\SearchCriteria\JoinProcessor\InventoryStockJoinProcessor</item>
+                <item name="filters" xsi:type="object">Magento\InventoryExportStock\Model\Api\SearchCriteria\ProductFilterProcessorWithInventory</item>
+                <item name="sorting" xsi:type="object">Magento\Framework\Api\SearchCriteria\CollectionProcessor\SortingProcessor</item>
+                <item name="pagination" xsi:type="object">Magento\Framework\Api\SearchCriteria\CollectionProcessor\PaginationProcessor</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Override product repository to use our product collection processor with inventory -->
+    <type name="Magento\Catalog\Model\ProductRepository">
+        <arguments>
+            <argument name="collectionProcessor" xsi:type="object">Magento\InventoryExportStock\Model\Api\SearchCriteria\ProductCollectionProcessorWithInventory</argument>
+        </arguments>
+    </type>
+
+    <!-- Join processor mapping to ensure joins happen when our field is used -->
+    <virtualType name="Magento\InventoryExportStock\Model\Api\SearchCriteria\JoinProcessor\InventoryStockJoinProcessor" type="Magento\Framework\Api\SearchCriteria\CollectionProcessor\JoinProcessor">
+        <arguments>
+            <argument name="customJoins" xsi:type="array">
+                <item name="inventory_stock_id" xsi:type="object">Magento\InventoryExportStock\Model\Api\SearchCriteria\JoinProcessor\InventoryStockJoin</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
 </config>

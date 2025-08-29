@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\InventoryExportStock\Model;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -49,24 +51,32 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
     private $salesChannelInterfaceFactory;
 
     /**
+     * @var SearchCriteriaBuilder
+     */
+    private $searchCriteriaBuilder;
+
+    /**
      * @param ProductRepositoryInterface $productRepository
      * @param ExportStockSalableQtySearchResultInterfaceFactory $exportStockSalableQtySearchResultFactory
      * @param PreciseExportStockProcessor $preciseExportStockProcessor
      * @param GetStockBySalesChannelInterface $getStockBySalesChannel
      * @param SalesChannelInterfaceFactory $salesChannelInterfaceFactory
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
         ExportStockSalableQtySearchResultInterfaceFactory $exportStockSalableQtySearchResultFactory,
         PreciseExportStockProcessor $preciseExportStockProcessor,
         GetStockBySalesChannelInterface $getStockBySalesChannel,
-        SalesChannelInterfaceFactory $salesChannelInterfaceFactory
+        SalesChannelInterfaceFactory $salesChannelInterfaceFactory,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->productRepository = $productRepository;
         $this->exportStockSalableQtySearchResultFactory = $exportStockSalableQtySearchResultFactory;
         $this->preciseExportStockProcessor = $preciseExportStockProcessor;
         $this->getStockBySalesChannel = $getStockBySalesChannel;
         $this->salesChannelInterfaceFactory = $salesChannelInterfaceFactory;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     /**
@@ -79,13 +89,30 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
         \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
     ): ExportStockSalableQtySearchResultInterface {
         $stock = $this->getStockBySalesChannel->execute($salesChannel);
-        $productSearchResult = $this->getProducts($searchCriteria);
+        // Build a fresh SearchCriteria with original filters + our inventory filter
+        $builder = clone $this->searchCriteriaBuilder;
+        $builder->setCurrentPage($searchCriteria->getCurrentPage());
+        $builder->setPageSize($searchCriteria->getPageSize());
+        foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
+            foreach ($filterGroup->getFilters() as $filter) {
+                $builder->addFilter($filter->getField(), $filter->getValue(), $filter->getConditionType());
+            }
+        }
+        foreach ($searchCriteria->getSortOrders() ?: [] as $sortOrder) {
+            $builder->addSortOrder($sortOrder);
+        }
+        // Add stock filter that our custom processor intercepts
+        $builder->addFilter('inventory_stock_id', $stock->getStockId(), 'eq');
+        $searchCriteriaWithInventory = $builder->create();
+
+        $productSearchResult = $this->getProducts($searchCriteriaWithInventory);
         $items = $this->preciseExportStockProcessor->execute($productSearchResult->getItems(), $stock->getStockId());
         /** @var ExportStockSalableQtySearchResultInterface $searchResult */
         $searchResult = $this->exportStockSalableQtySearchResultFactory->create();
         $searchResult->setSearchCriteria($productSearchResult->getSearchCriteria());
         $searchResult->setItems($items);
-        $searchResult->setTotalCount($this->getTotalCountWithStockFilter($searchCriteria, $stock->getStockId()));
+        // Single-pass: total count comes from filtered collection getSize()
+        $searchResult->setTotalCount($productSearchResult->getTotalCount());
 
         return $searchResult;
     }
@@ -100,33 +127,5 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
     private function getProducts(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
     {
         return $this->productRepository->getList($searchCriteria);
-    }
-
-    /**
-     * Get total count of products that have stock assignments (inventory data) without pagination.
-     *
-     * @param SearchCriteriaInterface $searchCriteria
-     * @param int $stockId
-     * @return int
-     * @throws LocalizedException
-     */
-    private function getTotalCountWithStockFilter(SearchCriteriaInterface $searchCriteria, int $stockId): int
-    {
-        // Clone search criteria and remove pagination to get all products
-        $searchCriteriaWithoutPagination = clone $searchCriteria;
-        $searchCriteriaWithoutPagination->setPageSize(0);
-        $searchCriteriaWithoutPagination->setCurrentPage(0);
-
-        // Get all products matching the search criteria (without pagination)
-        $allProductsResult = $this->productRepository->getList($searchCriteriaWithoutPagination);
-
-        // Process all products through the stock processor to get only those with inventory
-        $allStockItems = $this->preciseExportStockProcessor->execute(
-            $allProductsResult->getItems(),
-            $stockId
-        );
-
-        // Return the count of products that actually have stock assignments
-        return count($allStockItems);
     }
 }
