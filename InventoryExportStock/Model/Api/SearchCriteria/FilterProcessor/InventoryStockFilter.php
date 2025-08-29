@@ -38,28 +38,10 @@ class InventoryStockFilter implements CustomFilterInterface
         $stockId = (int)$filter->getValue();
 
         $select = $collection->getSelect();
-        $from = $select->getPart(Select::FROM);
-
         $stockLinkAlias = 'inventory_stock_link';
-        $sourceItemAlias = 'inventory_source_item';
 
-        // Add joins only once
-        if (!isset($from[$stockLinkAlias])) {
-            $select->joinInner(
-                [$stockLinkAlias => $this->resourceConnection->getTableName(StockSourceLinkResource::TABLE_NAME_STOCK_SOURCE_LINK)],
-                $stockLinkAlias . '.stock_id = ' . $stockId,
-                []
-            );
-        }
-
-        if (!isset($from[$sourceItemAlias])) {
-            $select->joinInner(
-                [$sourceItemAlias => $this->resourceConnection->getTableName(SourceItemResource::TABLE_NAME_SOURCE_ITEM)],
-                $sourceItemAlias . '.source_code = ' . $stockLinkAlias . '.source_code AND ' .
-                $sourceItemAlias . '.sku = e.sku',
-                []
-            );
-        }
+        // Apply the dynamic stock id constraint (joins are provided by JoinProcessor)
+        $select->where($stockLinkAlias . '.stock_id = ?', $stockId);
 
         // Avoid duplicates when a product has multiple source items in the same stock
         $select->group('e.entity_id');
