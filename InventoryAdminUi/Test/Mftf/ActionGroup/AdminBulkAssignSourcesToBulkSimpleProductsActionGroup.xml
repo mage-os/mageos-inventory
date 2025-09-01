@@ -65,12 +65,12 @@
         <grabTextFrom selector="{{AdminBulkSourceAssignmentSection.successMessageContainer}}" stepKey="grabSuccessMessage"/>
         <comment userInput="DEBUG: Actual success message is: $grabSuccessMessage" stepKey="debugActualMessage"/>
         <assertStringContainsString stepKey="assertSuccessMessageContainsBulkOperation">
-            <expectedValue>Bulk operation was successful:</expectedValue>
-            <actualValue>$grabSuccessMessage</actualValue>
+            <expectedResult type="string">Bulk operation was successful:</expectedResult>
+            <actualResult type="variable">$grabSuccessMessage</actualResult>
         </assertStringContainsString>
         <assertStringContainsString stepKey="assertSuccessMessageContainsAssignments">
-            <expectedValue>assignments.</expectedValue>
-            <actualValue>$grabSuccessMessage</actualValue>
+            <expectedResult type="string">assignments.</expectedResult>
+            <actualResult type="variable">$grabSuccessMessage</actualResult>
         </assertStringContainsString>
         <waitForPageLoad stepKey="waitForProductGridPagePostAssignmentToLoad"/>
     </actionGroup>
