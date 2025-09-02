@@ -43,8 +43,6 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
      */
     private $getStockBySalesChannel;
 
-
-
     /**
      * @var SearchCriteriaBuilder
      */
