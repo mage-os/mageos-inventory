@@ -12,12 +12,10 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterface;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\InventoryExportStockApi\Api\Data\ExportStockSalableQtySearchResultInterface;
 use Magento\InventoryExportStockApi\Api\Data\ExportStockSalableQtySearchResultInterfaceFactory;
 use Magento\InventoryExportStockApi\Api\ExportStockSalableQtyBySalesChannelInterface;
-use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
-use Magento\InventorySalesApi\Api\Data\SalesChannelInterfaceFactory;
+ 
 use Magento\InventorySalesApi\Api\GetStockBySalesChannelInterface;
 
 /**
@@ -45,10 +43,7 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
      */
     private $getStockBySalesChannel;
 
-    /**
-     * @var SalesChannelInterfaceFactory
-     */
-    private $salesChannelInterfaceFactory;
+    
 
     /**
      * @var SearchCriteriaBuilder
@@ -60,7 +55,6 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
      * @param ExportStockSalableQtySearchResultInterfaceFactory $exportStockSalableQtySearchResultFactory
      * @param PreciseExportStockProcessor $preciseExportStockProcessor
      * @param GetStockBySalesChannelInterface $getStockBySalesChannel
-     * @param SalesChannelInterfaceFactory $salesChannelInterfaceFactory
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
@@ -68,14 +62,12 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
         ExportStockSalableQtySearchResultInterfaceFactory $exportStockSalableQtySearchResultFactory,
         PreciseExportStockProcessor $preciseExportStockProcessor,
         GetStockBySalesChannelInterface $getStockBySalesChannel,
-        SalesChannelInterfaceFactory $salesChannelInterfaceFactory,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->productRepository = $productRepository;
         $this->exportStockSalableQtySearchResultFactory = $exportStockSalableQtySearchResultFactory;
         $this->preciseExportStockProcessor = $preciseExportStockProcessor;
         $this->getStockBySalesChannel = $getStockBySalesChannel;
-        $this->salesChannelInterfaceFactory = $salesChannelInterfaceFactory;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 

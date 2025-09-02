@@ -9,27 +9,13 @@ namespace Magento\InventoryExportStock\Model\Api\SearchCriteria\FilterProcessor;
 
 use Magento\Framework\Api\Filter;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessor\FilterProcessor\CustomFilterInterface;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\DB\Select;
-use Magento\Inventory\Model\ResourceModel\SourceItem as SourceItemResource;
-use Magento\Inventory\Model\ResourceModel\StockSourceLink as StockSourceLinkResource;
 
 /**
  * Applies inventory stock filtering by joining MSI tables and restricting by stock_id.
  */
 class InventoryStockFilter implements CustomFilterInterface
 {
-    /**
-     * @var ResourceConnection
-     */
-    private ResourceConnection $resourceConnection;
-
-    public function __construct(ResourceConnection $resourceConnection)
-    {
-        $this->resourceConnection = $resourceConnection;
-    }
-
     /**
      * @inheritDoc
      */
