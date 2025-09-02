@@ -15,7 +15,7 @@ use Magento\Framework\Api\SearchResultsInterface;
 use Magento\InventoryExportStockApi\Api\Data\ExportStockSalableQtySearchResultInterface;
 use Magento\InventoryExportStockApi\Api\Data\ExportStockSalableQtySearchResultInterfaceFactory;
 use Magento\InventoryExportStockApi\Api\ExportStockSalableQtyBySalesChannelInterface;
- 
+
 use Magento\InventorySalesApi\Api\GetStockBySalesChannelInterface;
 
 /**
@@ -43,7 +43,7 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
      */
     private $getStockBySalesChannel;
 
-    
+
 
     /**
      * @var SearchCriteriaBuilder
@@ -82,7 +82,7 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
     ): ExportStockSalableQtySearchResultInterface {
         $stock = $this->getStockBySalesChannel->execute($salesChannel);
         // Build a fresh SearchCriteria with original filters + our inventory filter
-        $builder = clone $this->searchCriteriaBuilder;
+        $builder = $this->searchCriteriaBuilder;
         $builder->setCurrentPage($searchCriteria->getCurrentPage());
         $builder->setPageSize($searchCriteria->getPageSize());
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
@@ -99,9 +99,10 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
 
         $productSearchResult = $this->getProducts($searchCriteriaWithInventory);
         $items = $this->preciseExportStockProcessor->execute($productSearchResult->getItems(), $stock->getStockId());
+
         /** @var ExportStockSalableQtySearchResultInterface $searchResult */
         $searchResult = $this->exportStockSalableQtySearchResultFactory->create();
-        $searchResult->setSearchCriteria($productSearchResult->getSearchCriteria());
+        $searchResult->setSearchCriteria($searchCriteria);
         $searchResult->setItems($items);
         // Single-pass: total count comes from filtered collection getSize()
         $searchResult->setTotalCount($productSearchResult->getTotalCount());
