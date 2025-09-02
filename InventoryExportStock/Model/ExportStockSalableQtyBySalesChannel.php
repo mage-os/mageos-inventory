@@ -84,9 +84,7 @@ class ExportStockSalableQtyBySalesChannel implements ExportStockSalableQtyBySale
         $builder->setCurrentPage($searchCriteria->getCurrentPage());
         $builder->setPageSize($searchCriteria->getPageSize());
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
-            foreach ($filterGroup->getFilters() as $filter) {
-                $builder->addFilter($filter->getField(), $filter->getValue(), $filter->getConditionType());
-            }
+            $builder->addFilters($filterGroup->getFilters());
         }
         foreach ($searchCriteria->getSortOrders() ?: [] as $sortOrder) {
             $builder->addSortOrder($sortOrder);

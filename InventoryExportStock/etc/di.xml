@@ -19,7 +19,7 @@
     </type>
 
     <!-- Extend product filter processor with inventory_stock_id custom filter -->
-    <virtualType name="Magento\Catalog\Model\Api\SearchCriteria\CollectionProcessor\ProductFilterProcessor" type="Magento\Framework\Api\SearchCriteria\CollectionProcessor\FilterProcessor">
+    <virtualType name="Magento\Catalog\Model\Api\SearchCriteria\CollectionProcessor\ProductFilterProcessor" type="Magento\Eav\Model\Api\SearchCriteria\CollectionProcessor\FilterProcessor">
         <arguments>
             <argument name="customFilters" xsi:type="array">
                 <item name="inventory_stock_id" xsi:type="object">Magento\InventoryExportStock\Model\Api\SearchCriteria\FilterProcessor\InventoryStockFilter</item>
