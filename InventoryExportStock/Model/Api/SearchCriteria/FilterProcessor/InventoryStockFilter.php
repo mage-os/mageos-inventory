@@ -55,6 +55,9 @@ class InventoryStockFilter implements CustomFilterInterface
             );
         }
 
+        // Prevent duplicates when a product has multiple source items in the same stock
+        $select->group('e.entity_id');
+
         return true;
     }
 }
