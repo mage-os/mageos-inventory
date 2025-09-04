@@ -35,10 +35,17 @@ class InventoryStockFilter implements CustomFilterInterface
         $select = $collection->getSelect();
 
         if (Stock::DEFAULT_STOCK_ID === $stockId) {
-            $select->join(
-                ['ci_si' => $this->resourceConnection->getTableName('cataloginventory_stock_item')],
-                'ci_si.product_id = e.entity_id',
+            $select->joinLeft(
+                ['inventory_source_item' => $this->resourceConnection->getTableName('inventory_source_item')],
+                'inventory_source_item.sku = e.sku',
                 []
+            )->joinLeft(
+                ['stock_source_link' => $this->resourceConnection->getTableName('inventory_source_stock_link')],
+                'stock_source_link.source_code = inventory_source_item.source_code',
+                []
+            )->where(
+                '(stock_source_link.stock_id = ? OR stock_source_link.stock_id IS NULL)',
+                $stockId
             );
         } else {
             $select->joinLeft(
