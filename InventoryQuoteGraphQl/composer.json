@@ -10,7 +10,8 @@
         "magento/module-inventory-catalog": "*",
         "magento/module-inventory-sales-api": "*",
         "magento/module-catalog": "*",
-        "magento/module-checkout": "*"
+        "magento/module-checkout": "*",
+        "magento/module-inventory-sales": "*"
     },
     "license": [
         "OSL-3.0",

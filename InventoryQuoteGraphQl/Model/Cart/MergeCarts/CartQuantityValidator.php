@@ -12,6 +12,7 @@ use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
 use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
+use Magento\InventorySales\Model\IsProductSalableCondition\BackOrderCondition;
 use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
@@ -38,6 +39,7 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      * @param Config $config
      * @param ProductRepositoryInterface $productRepository
      * @param LoggerInterface $logger
+     * @param BackOrderCondition $backOrderCondition
      */
     public function __construct(
         private readonly CartItemRepositoryInterface   $cartItemRepository,
@@ -45,7 +47,8 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
         private readonly GetStockIdForCurrentWebsite   $getStockIdForCurrentWebsite,
         private readonly Config                        $config,
         private readonly ProductRepositoryInterface    $productRepository,
-        private readonly LoggerInterface               $logger
+        private readonly LoggerInterface               $logger,
+        private readonly BackOrderCondition            $backOrderCondition
     ) {
     }
 
@@ -122,6 +125,11 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
         $this->cumulativeQty[$sku] ??= 0;
         $this->cumulativeQty[$sku] += $this->getCurrentCartItemQty($guestItemQty, $customerItemQty);
 
+        // If backorders are enabled, allow quantities beyond available stock
+        if ($this->backOrderCondition->execute($sku, $stockId)) {
+            return true;
+        }
+
         return $salableQty >= $this->cumulativeQty[$sku];
     }
 
@@ -147,6 +155,11 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
             $guestQty = $guestChild ? $guestItem->getQty() * $guestChild->getQty() : 0;
             $customerQty = $customerItem->getQty() * $customerChild->getQty();
 
+            // If backorders are enabled for this product, skip quantity validation
+            if ($this->backOrderCondition->execute($sku, $stockId)) {
+                continue;
+            }
+
             if (!$this->validateProductQty($stockId, $sku, $guestQty, $customerQty)) {
                 return false;
             }
@@ -164,6 +177,7 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      */
     private function resolveSku(CartItemInterface $item): string
     {
+        /** @var \Magento\Quote\Model\Quote\Item $item */
         $product = $item->getProduct();
         if ($product->getOptions()) {
             return $this->productRepository->getById($product->getId())->getSku();
