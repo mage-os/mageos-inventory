@@ -8,10 +8,10 @@
         "magento/module-quote": "*",
         "magento/module-quote-graph-ql": "*",
         "magento/module-inventory-catalog": "*",
+        "magento/module-inventory-sales": "*",
         "magento/module-inventory-sales-api": "*",
         "magento/module-catalog": "*",
-        "magento/module-checkout": "*",
-        "magento/module-inventory-sales": "*"
+        "magento/module-checkout": "*"
     },
     "license": [
         "OSL-3.0",
