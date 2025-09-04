@@ -7,12 +7,21 @@ declare(strict_types=1);
 
 namespace Magento\InventoryExportStockApi\Test\Api;
 
+use Magento\Catalog\Test\Fixture\Product as ProductFixture;
 use Magento\Framework\Api\SearchCriteria;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
+use Magento\InventoryApi\Test\Fixture\Source as SourceFixture;
+use Magento\InventoryApi\Test\Fixture\SourceItems as SourceItemsFixture;
+use Magento\InventoryApi\Test\Fixture\Stock as StockFixture;
+use Magento\InventoryApi\Test\Fixture\StockSourceLinks as StockSourceLinksFixture;
+use Magento\InventoryCatalogApi\Api\BulkSourceUnassignInterface;
+use Magento\InventorySalesApi\Test\Fixture\StockSalesChannels as StockSalesChannelsFixture;
 use Magento\InventorySales\Model\ResourceModel\DeleteReservationsBySkus;
 use Magento\InventorySales\Test\Api\OrderPlacementBase;
 use Magento\TestFramework\Fixture\DataFixture;
+use Magento\TestFramework\Fixture\DataFixtureStorage;
+use Magento\TestFramework\Fixture\DataFixtureStorageManager;
 use Magento\TestFramework\Helper\Bootstrap;
 
 /**
@@ -25,6 +34,20 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
 {
     private const API_PATH = '/V1/inventory/export-stock-salable-qty';
     public const SERVICE_NAME = 'inventoryExportStockApiExportStockSalableQtyV1';
+
+    /**
+     * @var DataFixtureStorage
+     */
+    private $fixtures;
+
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->fixtures = DataFixtureStorageManager::getStorage();
+    }
 
     /**
      * Verify salable qty export with reservations simple product types - default stock, default website.
@@ -760,122 +783,141 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
     }
 
     /**
-     * Verify that total_count reflects actual total products regardless of page_size.
-     *
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * Test pagination with 4 products assigned to non-default stock, 1 to default stock.
+     * Verify that non-default stock returns total_count = 4 with page_size = 2.
      */
-    #[DataFixture('Magento_InventoryApi::Test/_files/sources.php')]
-    #[DataFixture('Magento_InventoryApi::Test/_files/products.php')]
-    #[DataFixture('Magento_InventoryCatalog::Test/_files/source_items_on_default_source.php')]
+    #[DataFixture(SourceFixture::class, ['source_code' => 'test_source'], 'source')]
+    #[DataFixture(StockFixture::class, as: 'stock')]
+    #[DataFixture(
+        StockSourceLinksFixture::class,
+        [['stock_id' => '$stock.stock_id$', 'source_code' => '$source.source_code$']]
+    )]
+    #[DataFixture(
+        StockSalesChannelsFixture::class,
+        ['stock_id' => '$stock.stock_id$', 'sales_channels' => ['base']]
+    )]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-1'], 'p1')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-2'], 'p2')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-3'], 'p3')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-4'], 'p4')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-5'], 'p5')]
+    #[DataFixture(
+        SourceItemsFixture::class,
+        [
+            ['sku' => '$p1.sku$', 'source_code' => '$source.source_code$', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p2.sku$', 'source_code' => '$source.source_code$', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p3.sku$', 'source_code' => '$source.source_code$', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p4.sku$', 'source_code' => '$source.source_code$', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p5.sku$', 'source_code' => 'default', 'quantity' => 10, 'status' => 1],
+        ]
+    )]
     #[DataFixture('Magento_InventoryIndexer::Test/_files/reindex_inventory.php')]
-    public function testPaginationTotalCountBehavior(): void
+    public function testPaginationNonDefaultStock(): void
     {
         $this->_markTestAsRestOnly();
+
+        // Get the stock ID from the fixture
+        $stockId = $this->fixtures->get('stock')->getStockId();
+
+        // Ensure the stock is linked to the website
+        $this->assignStockToWebsite($stockId, 'base');
+
+        // Test non-default stock with page_size = 2
+        $requestData = [
+            'searchCriteria' => [
+                'page_size' => 2
+            ]
+        ];
+
+        $result = $this->_webApiCall([
+            'rest' => [
+                'resourcePath' => sprintf(
+                    "%s/%s/%s?%s",
+                    self::API_PATH,
+                    'website',
+                    'base',
+                    http_build_query($requestData)
+                ),
+                'httpMethod' => Request::HTTP_METHOD_GET
+            ],
+        ]);
+
+        // Should return 4 products assigned to non-default stock
+        self::assertEquals(4, $result['total_count'], 'Non-default stock should return 4 products');
+        self::assertEquals(2, count($result['items']), 'Page size 2 should return 2 items');
+    }
+
+    /**
+     * Test pagination with 1 product assigned to non-default stock, 4 to default stock.
+     * Verify that default stock returns total_count = 4 with page_size = 2.
+     */
+    #[DataFixture(SourceFixture::class, ['source_code' => 'test_source'], 'source')]
+    #[DataFixture(StockFixture::class, as: 'stock')]
+    #[DataFixture(
+        StockSourceLinksFixture::class,
+        [['stock_id' => '$stock.stock_id$', 'source_code' => '$source.source_code$']]
+    )]
+    #[DataFixture(
+        StockSalesChannelsFixture::class,
+        ['stock_id' => '$stock.stock_id$', 'sales_channels' => ['base']]
+    )]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-1'], 'p1')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-2'], 'p2')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-3'], 'p3')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-4'], 'p4')]
+    #[DataFixture(ProductFixture::class, ['sku' => 'test-product-5'], 'p5')]
+    #[DataFixture(
+        SourceItemsFixture::class,
+        [
+            ['sku' => '$p1.sku$', 'source_code' => '$source.source_code$', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p2.sku$', 'source_code' => 'default', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p3.sku$', 'source_code' => 'default', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p4.sku$', 'source_code' => 'default', 'quantity' => 10, 'status' => 1],
+            ['sku' => '$p5.sku$', 'source_code' => 'default', 'quantity' => 10, 'status' => 1],
+        ]
+    )]
+    #[DataFixture('Magento_InventoryIndexer::Test/_files/reindex_inventory.php')]
+    public function testPaginationDefaultStock(): void
+    {
+        $this->_markTestAsRestOnly();
+
+        // Ensure default stock is linked to the website
         $this->assignStockToWebsite(1, 'base');
 
-        // Use SKU-1 and SKU-2 which have inventory from the fixture
-        $filters = [
-            [
-                'field' => SourceItemInterface::SKU,
-                'value' => 'SKU-1',
-                'condition_type' => 'eq',
-            ],
-            [
-                'field' => SourceItemInterface::SKU,
-                'value' => 'SKU-2',
-                'condition_type' => 'eq',
-            ],
-        ];
+        // Unassign product 1 from default stock
+        $this->unassignProductFromDefaultStock('test-product-1');
 
-        // First request: Get baseline without page_size
-        $requestDataBaseline = [
+        // Test default stock with page_size = 2
+        $requestData = [
             'searchCriteria' => [
-                SearchCriteria::FILTER_GROUPS => [['filters' => $filters]]
+                'page_size' => 2
             ]
         ];
-        $resultBaseline = $this->_webApiCall([
+
+        $result = $this->_webApiCall([
             'rest' => [
                 'resourcePath' => sprintf(
                     "%s/%s/%s?%s",
                     self::API_PATH,
                     'website',
                     'base',
-                    http_build_query($requestDataBaseline)
-                ),
-                'httpMethod' => Request::HTTP_METHOD_GET
-            ],
-        ]);
-        $expectedTotalCount = $resultBaseline['total_count'];
-
-        // Test with page_size=1 (smaller than total)
-        $requestDataSmallPage = [
-            'searchCriteria' => [
-                SearchCriteria::FILTER_GROUPS => [['filters' => $filters]],
-                'page_size' => 1
-            ]
-        ];
-        $resultSmallPage = $this->_webApiCall([
-            'rest' => [
-                'resourcePath' => sprintf(
-                    "%s/%s/%s?%s",
-                    self::API_PATH,
-                    'website',
-                    'base',
-                    http_build_query($requestDataSmallPage)
+                    http_build_query($requestData)
                 ),
                 'httpMethod' => Request::HTTP_METHOD_GET
             ],
         ]);
 
-        // Test with page_size=50 (larger than total)
-        $requestDataLargePage = [
-            'searchCriteria' => [
-                SearchCriteria::FILTER_GROUPS => [['filters' => $filters]],
-                'page_size' => 50
-            ]
-        ];
-        $resultLargePage = $this->_webApiCall([
-            'rest' => [
-                'resourcePath' => sprintf(
-                    "%s/%s/%s?%s",
-                    self::API_PATH,
-                    'website',
-                    'base',
-                    http_build_query($requestDataLargePage)
-                ),
-                'httpMethod' => Request::HTTP_METHOD_GET
-            ],
-        ]);
+        // Should return 4 products assigned to default stock
+        self::assertEquals(4, $result['total_count'], 'Default stock should return 4 products');
+        self::assertEquals(2, count($result['items']), 'Page size 2 should return 2 items');
+    }
 
-        // Core assertions: total_count should be consistent regardless of page_size
-        self::assertEquals(
-            $expectedTotalCount,
-            $resultSmallPage['total_count'],
-            'total_count should reflect actual total products when page_size < total'
-        );
-        self::assertEquals(
-            $expectedTotalCount,
-            $resultLargePage['total_count'],
-            'total_count should reflect actual total products when page_size > total'
-        );
-
-        // Pagination behavior assertions
-        self::assertLessThanOrEqual(
-            1,
-            count($resultSmallPage['items']),
-            'page_size=1 should return at most 1 item'
-        );
-        self::assertEquals(
-            $expectedTotalCount,
-            count($resultLargePage['items']),
-            'page_size > total should return all items'
-        );
-
-        // Verify we have expected test data
-        self::assertEquals(
-            2,
-            $expectedTotalCount,
-            'Test should find exactly 2 products for reliable pagination testing'
-        );
+    /**
+     * Unassign product from default stock using proper Magento API
+     */
+    private function unassignProductFromDefaultStock(string $sku): void
+    {
+        $bulkSourceUnassign = $this->objectManager->get(BulkSourceUnassignInterface::class);
+        $bulkSourceUnassign->execute([$sku], ['default']);
     }
 }
