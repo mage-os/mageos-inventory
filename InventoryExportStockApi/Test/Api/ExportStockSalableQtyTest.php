@@ -9,6 +9,7 @@ namespace Magento\InventoryExportStockApi\Test\Api;
 
 use Magento\Catalog\Test\Fixture\Product as ProductFixture;
 use Magento\Framework\Api\SearchCriteria;
+use Magento\Framework\Validation\ValidationException;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Test\Fixture\Source as SourceFixture;
@@ -783,8 +784,7 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
     }
 
     /**
-     * Test pagination with 4 products assigned to non-default stock, 1 to default stock.
-     * Verify that non-default stock returns total_count = 4 with page_size = 2.
+     * Test pagination total count with 4 products assigned to non-default stock, 1 to default stock.
      */
     #[DataFixture(SourceFixture::class, ['source_code' => 'test_source'], 'source')]
     #[DataFixture(StockFixture::class, as: 'stock')]
@@ -848,8 +848,7 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
     }
 
     /**
-     * Test pagination with 1 product assigned to non-default stock, 4 to default stock.
-     * Verify that default stock returns total_count = 4 with page_size = 2.
+     * Test pagination total count with 1 product assigned to non-default stock, 4 to default stock.
      */
     #[DataFixture(SourceFixture::class, ['source_code' => 'test_source'], 'source')]
     #[DataFixture(StockFixture::class, as: 'stock')]
@@ -913,7 +912,10 @@ class ExportStockSalableQtyTest extends OrderPlacementBase
     }
 
     /**
-     * Unassign product from default stock using proper Magento API
+     * Unassign product from default stock
+     *
+     * @param string $sku
+     * @throws ValidationException
      */
     private function unassignProductFromDefaultStock(string $sku): void
     {
