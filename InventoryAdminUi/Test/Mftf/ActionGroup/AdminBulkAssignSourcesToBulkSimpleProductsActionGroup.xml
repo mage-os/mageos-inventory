@@ -63,7 +63,6 @@
         <click selector="{{AdminBulkSourceAssignmentSection.buttonAssignSources}}" stepKey="clickOnButtonAssignSources"/>
         <waitForElementVisible selector="{{AdminBulkSourceAssignmentSection.successMessageContainer}}" stepKey="waitForSuccessMessage" time="30"/>
         <grabTextFrom selector="{{AdminBulkSourceAssignmentSection.successMessageContainer}}" stepKey="grabSuccessMessage"/>
-        <comment userInput="DEBUG: Actual success message is: $grabSuccessMessage" stepKey="debugActualMessage"/>
         <assertStringContainsString stepKey="assertSuccessMessageContainsBulkOperation">
             <expectedResult type="string">Bulk operation was successful:</expectedResult>
             <actualResult type="variable">$grabSuccessMessage</actualResult>
