@@ -21,12 +21,12 @@ class InventoryStockFilter implements CustomFilterInterface
 {
     /**
      * @param ResourceConnection $resourceConnection
+     * @param StockConfigurationInterface $stockConfiguration
      */
     public function __construct(
         private readonly ResourceConnection          $resourceConnection,
         private readonly StockConfigurationInterface $stockConfiguration
-    )
-    {
+    ) {
     }
 
     /**
@@ -53,7 +53,8 @@ class InventoryStockFilter implements CustomFilterInterface
             'stock_source_link.source_code = inventory_source_item.source_code',
             []
         )->where(
-            'stock_source_link.stock_id = ?', $stockId
+            'stock_source_link.stock_id = ?',
+            $stockId
         )->orWhere(
             'e.type_id IN (?)',
             $notAllowedProductTypes
