@@ -35,9 +35,7 @@
             <waitForPageLoad stepKey="waitForDashboardLoad"/>
         </before>
         <after>
-            <!-- Delete configurable product and variants created via UI -->
-            <helper class="Magento\Catalog\Test\Mftf\Helper\ProductApiHelper" method="deleteAllProductsApi" stepKey="deleteAllProductsViaApi"/>
-            <!--Assign Default Stock to Default Website.-->
+           <!--Assign Default Stock to Default Website.-->
             <actionGroup ref="AssignWebsiteToStockActionGroup" stepKey="assignMainWebsiteToDefaultStock">
                 <argument name="stockName" value="{{_defaultStock.name}}"/>
                 <argument name="websiteName" value="{{_defaultWebsite.name}}"/>
