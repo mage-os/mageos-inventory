@@ -23,6 +23,7 @@ class ShippingInformationManagementPlugin
      * @param int $cartId
      * @param ShippingInformationInterface $addressInformation
      * @return array
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function beforeSaveAddressInformation(
         ShippingInformationManagement $subject,

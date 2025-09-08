@@ -10,7 +10,8 @@
         "magento/module-inventory-in-store-pickup-shipping-api": "*",
         "magento/module-store": "*",
         "magento/module-customer": "*",
-        "magento/module-inventory-sales-api": "*"
+        "magento/module-inventory-sales-api": "*",
+        "magento/module-checkout": "*"
     },
     "type": "magento2-module",
     "license": [
