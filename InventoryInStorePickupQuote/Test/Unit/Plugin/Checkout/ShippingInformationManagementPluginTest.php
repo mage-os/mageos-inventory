@@ -64,12 +64,26 @@ class ShippingInformationManagementPluginTest extends TestCase
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $this->shippingAddress = $this->getMockBuilder(AddressInterface::class)
+            ->onlyMethods(['getExtensionAttributes'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $this->billingAddress = $this->getMockBuilder(AddressInterface::class)
+            ->onlyMethods(
+                [
+                    'getFirstname',
+                    'getLastname',
+                    'getStreet',
+                    'getCity',
+                    'getPostcode',
+                    'getTelephone',
+                    'getRegionId',
+                    'getCountryId'
+                ]
+            )
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $this->extensionAttributes = $this->getMockBuilder(AddressExtensionInterface::class)
+            ->onlyMethods(['getPickupLocationCode'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $this->plugin = new ShippingInformationManagementPlugin();
