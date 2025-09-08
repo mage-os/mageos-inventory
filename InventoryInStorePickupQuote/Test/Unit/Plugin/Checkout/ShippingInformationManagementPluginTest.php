@@ -11,6 +11,7 @@ use Magento\Checkout\Api\Data\ShippingInformationInterface;
 use Magento\Checkout\Model\ShippingInformationManagement;
 use Magento\InventoryInStorePickupQuote\Plugin\Checkout\ShippingInformationManagementPlugin;
 use Magento\Quote\Api\Data\AddressInterface;
+use Magento\Quote\Api\Data\AddressExtensionInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -81,7 +82,10 @@ class ShippingInformationManagementPluginTest extends TestCase
             )
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
-        $this->extensionAttributes = $this->createMock(AddressInterface::class);
+        $this->extensionAttributes = $this->getMockBuilder(AddressExtensionInterface::class)
+            ->addMethods(['getPickupLocationCode'])
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
         $this->plugin = new ShippingInformationManagementPlugin();
     }
 
