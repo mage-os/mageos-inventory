@@ -16,6 +16,7 @@ use Magento\Quote\Model\Quote\Item;
 use Magento\QuoteGraphQl\Model\Cart\MergeCarts\CartQuantityValidatorInterface;
 use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
 use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
+use Magento\InventorySales\Model\IsProductSalableCondition\BackOrderCondition;
 
 class CartQuantityValidator implements CartQuantityValidatorInterface
 {
@@ -35,6 +36,11 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
     private $getStockIdForCurrentWebsite;
 
     /**
+     * @var BackOrderCondition
+     */
+    private $backOrderCondition;
+
+    /**
      * @var array
      */
     private $cumulativeQty = [];
@@ -43,15 +49,18 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      * @param CartItemRepositoryInterface $cartItemRepository
      * @param GetProductSalableQtyInterface $getProductSalableQty
      * @param GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
+     * @param BackOrderCondition $backOrderCondition
      */
     public function __construct(
         CartItemRepositoryInterface $cartItemRepository,
         GetProductSalableQtyInterface $getProductSalableQty,
-        GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
+        GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite,
+        BackOrderCondition $backOrderCondition
     ) {
         $this->cartItemRepository = $cartItemRepository;
         $this->getProductSalableQty = $getProductSalableQty;
         $this->getStockIdForCurrentWebsite = $getStockIdForCurrentWebsite;
+        $this->backOrderCondition = $backOrderCondition;
     }
 
     /**
@@ -79,8 +88,12 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
                             $guestCartItem->getQty(),
                             $customerCartItem->getQty()
                         );
+                    $backordersEnabled = $this->backOrderCondition->execute(
+                        $customerCartItem->getProduct()->getSku(),
+                        $stockId
+                    );
 
-                    if (!$enoughQty) {
+                    if (!$enoughQty && !$backordersEnabled) {
                         try {
                             $this->cartItemRepository->deleteById($guestCart->getId(), $guestCartItem->getItemId());
                             $modified = true;
