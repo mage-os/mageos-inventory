@@ -143,12 +143,6 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
 
             $guestQty = $guestChild ? $guestItem->getQty() * $guestChild->getQty() : 0;
             $customerQty = $customerItem->getQty() * $customerChild->getQty();
-
-            // If backorders are enabled for this product, skip quantity validation
-            if ($this->backOrderCondition->execute($sku, $stockId)) {
-                continue;
-            }
-
             if (!$this->validateProductQty($stockId, $sku, $guestQty, $customerQty)) {
                 return false;
             }
