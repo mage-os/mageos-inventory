@@ -31,6 +31,7 @@
         </before>
         <after>
             <deleteData createDataKey="simpleCategory1" stepKey="deletesimpleCategory1"/>
+            <deleteData createDataKey="simpleProduct1" stepKey="deleteProduct"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutOfAdmin1"/>
         </after>
 
