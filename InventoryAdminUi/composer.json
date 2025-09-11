@@ -1,27 +1,31 @@
 {
-    "name": "magento/module-inventory-admin-ui",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": "*",
-        "magento/module-inventory": "*",
-        "magento/module-inventory-api": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-backend": "*",
-        "magento/module-directory": "*",
-        "magento/module-ui": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-admin-ui",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/framework": "1.3.1",
+    "mage-os/module-inventory": "1.3.1",
+    "mage-os/module-inventory-api": "1.3.1",
+    "mage-os/module-inventory-catalog-api": "1.3.1",
+    "mage-os/module-backend": "1.3.1",
+    "mage-os/module-directory": "1.3.1",
+    "mage-os/module-ui": "1.3.1"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryAdminUi\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryAdminUi\\": ""
     }
+  },
+  "version": "1.3.1",
+  "replace": {
+    "magento/module-inventory-admin-ui": "1.2.6-p1"
+  }
 }
