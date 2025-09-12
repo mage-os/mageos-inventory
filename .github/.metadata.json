@@ -1,25 +1,25 @@
 {
-  "templateVersion":"0.1",
-  "product":{
-    "name":"Inventory",
-    "description":"Provides inventory related features."
-  },
-  "contacts":{
-    "team":{
-      "name":"Inventory",
-      "DL":"Grp-RQ-SPARTANS",
-      "slackChannel":"adobe-commerce-inventory"
-    }
-  },
-  "ticketTracker":{
-    "functionalJiraQueue":{
-      "projectKey":"AC",
-      "component":""
+    "templateVersion": "0.2",
+    "product": {
+      "name": "Inventory",
+      "description": "Magento 2 CE (Community Edition) is the free, open-source version of the Adobe commerce, offering essential e-commerce features for small to medium-sized businesses. It provides a wide range of essential features such as product management, order processing, and customer management. It provides flexibility for customisation."
     },
-    "securityJiraQueue":{
-      "projectKey":"AC",
-      "component":""
-    }
-  },
-  "productionCodeBranches":["develop"]
-}
+    "contacts": {
+      "team": {
+        "name": "release-engineering-team",
+        "DL": "GRP-RQ-SPARTANS",
+        "slackChannel": "#gatekeepers"
+      }
+    },
+    "ticketTracker": {
+      "functionalJiraQueue": {
+          "projectKey": "AC",
+          "component": "catalog"
+      },
+      "securityJiraQueue": {
+          "projectKey": "MAGREQ",
+          "component": "AC"
+      }
+    },  
+    "productionCodeBranches": ["develop"]
+  }
