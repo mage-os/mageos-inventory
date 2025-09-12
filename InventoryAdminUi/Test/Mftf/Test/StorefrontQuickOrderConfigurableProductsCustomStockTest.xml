@@ -124,6 +124,7 @@
             <actionGroup ref="DisableSourceActionGroup" stepKey="disableSource2">
                 <argument name="sourceCode" value="$source2.source[source_code]$"/>
             </actionGroup>
+            <deleteData createDataKey="category" stepKey="deletecategory"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
 
             <!-- Reindex invalidated indices after product attribute has been created/deleted -->
