@@ -29,8 +29,12 @@
             </createData>
             <!--Create simple product.-->
             <createData entity="SimpleSubCategory" stepKey="category"/>
-            <!-- Delete all products via API -->
-            <helper class="Magento\Catalog\Test\Mftf\Helper\ProductApiHelper" method="deleteAllProductsApi" stepKey="deleteAllProductsViaApi"/>
+            <createData entity="SimpleProduct" stepKey="product">
+                <requiredEntity createDataKey="category"/>
+            </createData>
+            <createData entity="ApiConfigurableProduct" stepKey="configurableProduct">
+                <requiredEntity createDataKey="category"/>
+            </createData>
             <actionGroup ref="AdminLoginActionGroup" stepKey="loginToAdminArea"/>
         </before>
         <after>
@@ -44,8 +48,8 @@
             </actionGroup>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutFromAdminArea"/>
             <deleteData createDataKey="category" stepKey="deleteCategory"/>
-            <deleteData createDataKey="product" stepKey="deleteSimpleProduct"/>
-            <deleteData createDataKey="configurableProduct" stepKey="deleteConfigurableProduct"/>
+            <!-- Delete all products via API -->
+            <helper class="Magento\Catalog\Test\Mftf\Helper\ProductApiHelper" method="deleteAllProductsApi" stepKey="deleteAllProductsViaApi"/>
             <actionGroup ref="CliIndexerReindexActionGroup" stepKey="reindex">
                 <argument name="indices" value=""/>
             </actionGroup>
