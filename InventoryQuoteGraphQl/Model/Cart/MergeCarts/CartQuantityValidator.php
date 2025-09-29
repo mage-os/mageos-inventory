@@ -11,8 +11,7 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
-use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
-use Magento\InventorySales\Model\IsProductSalableCondition\BackOrderCondition;
+use Magento\InventorySalesApi\Api\IsProductSalableForRequestedQtyInterface as IsProductSalableForRequestedQty;
 use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
@@ -31,24 +30,20 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
     private array $cumulativeQty = [];
 
     /**
-     * CartQuantityValidator Constructor
-     *
      * @param CartItemRepositoryInterface $cartItemRepository
-     * @param GetProductSalableQtyInterface $getProductSalableQty
      * @param GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
      * @param Config $config
      * @param ProductRepositoryInterface $productRepository
      * @param LoggerInterface $logger
-     * @param BackOrderCondition $backOrderCondition
+     * @param IsProductSalableForRequestedQty $isProductSalableForRequestedQty
      */
     public function __construct(
-        private readonly CartItemRepositoryInterface   $cartItemRepository,
-        private readonly GetProductSalableQtyInterface $getProductSalableQty,
-        private readonly GetStockIdForCurrentWebsite   $getStockIdForCurrentWebsite,
-        private readonly Config                        $config,
-        private readonly ProductRepositoryInterface    $productRepository,
-        private readonly LoggerInterface               $logger,
-        private readonly BackOrderCondition            $backOrderCondition
+        private readonly CartItemRepositoryInterface     $cartItemRepository,
+        private readonly GetStockIdForCurrentWebsite     $getStockIdForCurrentWebsite,
+        private readonly Config                          $config,
+        private readonly ProductRepositoryInterface      $productRepository,
+        private readonly LoggerInterface                 $logger,
+        private readonly IsProductSalableForRequestedQty $isProductSalableForRequestedQty,
     ) {
     }
 
@@ -120,17 +115,11 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
      */
     private function validateProductQty(int $stockId, string $sku, float $guestItemQty, float $customerItemQty): bool
     {
-        $salableQty = $this->getProductSalableQty->execute($sku, $stockId);
-
         $this->cumulativeQty[$sku] ??= 0;
         $this->cumulativeQty[$sku] += $this->getCurrentCartItemQty($guestItemQty, $customerItemQty);
+        $salableResult = $this->isProductSalableForRequestedQty->execute($sku, $stockId, $this->cumulativeQty[$sku]);
 
-        // If backorders are enabled, allow quantities beyond available stock
-        if ($this->backOrderCondition->execute($sku, $stockId)) {
-            return true;
-        }
-
-        return $salableQty >= $this->cumulativeQty[$sku];
+        return $salableResult->isSalable();
     }
 
     /**
@@ -154,12 +143,6 @@ class CartQuantityValidator implements CartQuantityValidatorInterface
 
             $guestQty = $guestChild ? $guestItem->getQty() * $guestChild->getQty() : 0;
             $customerQty = $customerItem->getQty() * $customerChild->getQty();
-
-            // If backorders are enabled for this product, skip quantity validation
-            if ($this->backOrderCondition->execute($sku, $stockId)) {
-                continue;
-            }
-
             if (!$this->validateProductQty($stockId, $sku, $guestQty, $customerQty)) {
                 return false;
             }
