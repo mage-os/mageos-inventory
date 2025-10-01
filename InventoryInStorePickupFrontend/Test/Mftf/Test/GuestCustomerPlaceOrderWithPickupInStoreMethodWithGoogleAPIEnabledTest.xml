@@ -132,10 +132,7 @@
         <actionGroup ref="StorefrontPickInStoreNavigateToPaymentActionGroup" stepKey="navigateToPaymentStep"/>
         <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="clickCheckMoneyOrderPayment"/>
         <!--Fill Shipping address -->
-        <actionGroup ref="StorefrontPickInStoreGuestCustomerFillBillingAddressActionGroup" stepKey="fillAddress">
-            <argument name="customerVar" value="Simple_US_Customer"/>
-            <argument name="customerAddressVar" value="US_Address_TX"/>
-        </actionGroup>
+        <comment userInput="Billing address step is no longer needed for in-store pickup" stepKey="fillAddress"/>
         <!--Click on place order -->
         <actionGroup ref="ClickPlaceOrderActionGroup" stepKey="clickOnPlaceOrder"/>
         <waitForElement selector="{{CheckoutSuccessMainSection.orderNumber}}" stepKey="waitForOrderNumber"/>
