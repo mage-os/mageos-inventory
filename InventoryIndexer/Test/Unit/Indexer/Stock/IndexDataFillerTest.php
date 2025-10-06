@@ -23,6 +23,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 #[
     CoversClass(IndexDataFiller::class),
 ]
@@ -192,34 +195,30 @@ class IndexDataFillerTest extends TestCase
         $this->indexStructureHandlerMock->expects(self::exactly(2))
             ->method('cleanIndex')
             ->willReturnCallback(
-                function (IndexName $indexName, \Traversable $skus, string $connectionName)
-                use ($indexNameMock, $simpleSkuList, $compositeSkuList)
-                {
+                function (...$args) use ($indexNameMock, $simpleSkuList, $compositeSkuList) {
                     static $callIndex = 0;
                     $callIndex++;
-                    self::assertEquals($indexNameMock, $indexName);
-                    self::assertEquals($this->connectionName, $connectionName);
+                    self::assertEquals($indexNameMock, $args[0]);
+                    self::assertEquals($this->connectionName, $args[2]);
                     if ($callIndex === 1) {
-                        self::assertEquals(new \ArrayIterator($simpleSkuList), $skus);
+                        self::assertEquals(new \ArrayIterator($simpleSkuList), $args[1]);
                     } elseif ($callIndex === 2) {
-                        self::assertEquals(new \ArrayIterator($compositeSkuList), $skus);
+                        self::assertEquals(new \ArrayIterator($compositeSkuList), $args[1]);
                     }
                 }
             );
         $this->indexStructureHandlerMock->expects(self::exactly(2))
             ->method('saveIndex')
             ->willReturnCallback(
-                function (IndexName $indexName, \Traversable $data, string $connectionName)
-                use ($indexNameMock, $simpleData, $compositeData)
-                {
+                function (...$args) use ($indexNameMock, $simpleData, $compositeData) {
                     static $callIndex = 0;
                     $callIndex++;
-                    self::assertEquals($indexNameMock, $indexName);
-                    self::assertEquals($this->connectionName, $connectionName);
+                    self::assertEquals($indexNameMock, $args[0]);
+                    self::assertEquals($this->connectionName, $args[2]);
                     if ($callIndex === 1) {
-                        self::assertEquals(new \ArrayIterator($simpleData), $data);
+                        self::assertEquals(new \ArrayIterator($simpleData), $args[1]);
                     } elseif ($callIndex === 2) {
-                        self::assertEquals(new \ArrayIterator($compositeData), $data);
+                        self::assertEquals(new \ArrayIterator($compositeData), $args[1]);
                     }
                 }
             );
@@ -333,37 +332,34 @@ class IndexDataFillerTest extends TestCase
         $this->indexStructureHandlerMock->expects(self::exactly(3))
             ->method('cleanIndex')
             ->willReturnCallback(
-                function (IndexName $indexName, \Traversable $skus, string $connectionName) use ($indexNameMock)
-                {
+                function (...$args) use ($indexNameMock) {
                     static $callIndex = 0;
                     $callIndex++;
-                    self::assertEquals($indexNameMock, $indexName);
-                    self::assertEquals($this->connectionName, $connectionName);
+                    self::assertEquals($indexNameMock, $args[0]);
+                    self::assertEquals($this->connectionName, $args[2]);
                     if ($callIndex === 1) {
-                        self::assertEquals(new \ArrayIterator(['simple-1', 'simple-2']), $skus);
+                        self::assertEquals(new \ArrayIterator(['simple-1', 'simple-2']), $args[1]);
                     } elseif ($callIndex === 2) {
-                        self::assertEquals(new \ArrayIterator(['bundle-1', 'bundle-2', 'bundle-3']), $skus);
+                        self::assertEquals(new \ArrayIterator(['bundle-1', 'bundle-2', 'bundle-3']), $args[1]);
                     } elseif ($callIndex === 3) {
-                        self::assertEquals(new \ArrayIterator(['grouped-1', 'grouped-2']), $skus);
+                        self::assertEquals(new \ArrayIterator(['grouped-1', 'grouped-2']), $args[1]);
                     }
                 }
             );
         $this->indexStructureHandlerMock->expects(self::exactly(3))
             ->method('saveIndex')
             ->willReturnCallback(
-                function (IndexName $indexName, \Traversable $data, string $connectionName)
-                use ($indexNameMock, $simpleData, $bundleData, $groupedData)
-                {
+                function (...$args) use ($indexNameMock, $simpleData, $bundleData, $groupedData) {
                     static $callIndex = 0;
                     $callIndex++;
-                    self::assertEquals($indexNameMock, $indexName);
-                    self::assertEquals($this->connectionName, $connectionName);
+                    self::assertEquals($indexNameMock, $args[0]);
+                    self::assertEquals($this->connectionName, $args[2]);
                     if ($callIndex === 1) {
-                        self::assertEquals(new \ArrayIterator($simpleData), $data);
+                        self::assertEquals(new \ArrayIterator($simpleData), $args[1]);
                     } elseif ($callIndex === 2) {
-                        self::assertEquals(new \ArrayIterator($bundleData), $data);
+                        self::assertEquals(new \ArrayIterator($bundleData), $args[1]);
                     } elseif ($callIndex === 3) {
-                        self::assertEquals(new \ArrayIterator($groupedData), $data);
+                        self::assertEquals(new \ArrayIterator($groupedData), $args[1]);
                     }
                 }
             );
