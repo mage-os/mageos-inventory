@@ -12,6 +12,9 @@ define([
     'Magento_Checkout/js/checkout-data',
     'Magento_Checkout/js/model/address-converter',
     'Magento_Checkout/js/action/select-shipping-address',
+    'Magento_Checkout/js/action/select-billing-address',
+    'Magento_Checkout/js/model/checkout-data-resolver',
+    'Magento_Checkout/js/model/quote',
     'underscore',
     'mage/translate',
     'mage/url',
@@ -25,6 +28,9 @@ define([
     checkoutData,
     addressConverter,
     selectShippingAddressAction,
+    selectBillingAddressAction,
+    checkoutDataResolver,
+    quote,
     _,
     $t,
     url,
@@ -104,29 +110,30 @@ define([
         },
 
         /**
-         * Select location for sipping.
+         * Select location for shipping.
          *
          * @param {Object} location
          * @param {Boolean} [persist=true]
          * @returns void
          */
         selectForShipping: function (location, persist) {
-            var address = $.extend(
-                {},
-                addressConverter.formAddressDataToQuoteAddress({
-                    firstname: location.name,
-                    lastname: 'Store',
-                    street: location.street,
-                    city: location.city,
-                    postcode: location.postcode,
-                    'country_id': location['country_id'],
-                    telephone: location.telephone,
-                    'region_id': location['region_id'],
-                    'save_in_address_book': 0,
-                    'extension_attributes': {
-                        'pickup_location_code': location['pickup_location_code']
-                    }
-                }));
+            var billingAddress = quote.billingAddress(),
+                address = $.extend(
+                    {},
+                    addressConverter.formAddressDataToQuoteAddress({
+                        firstname: location.name,
+                        lastname: 'Store',
+                        street: location.street,
+                        city: location.city,
+                        postcode: location.postcode,
+                        'country_id': location['country_id'],
+                        telephone: location.telephone,
+                        'region_id': location['region_id'],
+                        'save_in_address_book': 0,
+                        'extension_attributes': {
+                            'pickup_location_code': location['pickup_location_code']
+                        }
+                    }));
 
             address = pickupAddressConverter.formatAddressToPickupAddress(address);
             this.selectedLocation(location);
@@ -136,6 +143,10 @@ define([
                 checkoutData.setSelectedPickupAddress(
                     addressConverter.quoteAddressToFormAddressData(address)
                 );
+            }
+            if (!billingAddress || this.isBillingAddressIncomplete(billingAddress)) {
+                selectBillingAddressAction(address);
+                checkoutDataResolver.resolveBillingAddress();
             }
         },
 
@@ -192,6 +203,43 @@ define([
         },
 
         /**
+         * Check if billing address is incomplete (missing required fields)
+         *
+         * @param {Object} billingAddress
+         * @returns {Boolean}
+         */
+        isBillingAddressIncomplete: function (billingAddress) {
+            var field,
+                value,
+                counter,
+                requiredFields = [
+                    'firstname',
+                    'lastname',
+                    'street',
+                    'city',
+                    'postcode',
+                    'telephone',
+                    'regionId',
+                    'countryId'
+                ];
+
+            if (!billingAddress) {
+                return true;
+            }
+            for (counter = 0; counter < requiredFields.length; counter++) {
+                field = requiredFields[counter];
+                value = billingAddress[field];
+                if (field === 'street' && (!value || !Array.isArray(value) || value.length === 0 || !value[0])) {
+                    return true;
+                }
+                if (field !== 'street' && (!value || value === '' || value === null || value === undefined)) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        /**
          * Process response errors.
          *
          * @param {Object} response
@@ -210,7 +258,7 @@ define([
 
             try {
                 error = JSON.parse(response.responseText);
-            } catch (exception) {
+            } catch (exception) { // eslint-disable-line no-unused-vars
                 error = $t(
                     'Something went wrong with your request. Please try again later.'
                 );
