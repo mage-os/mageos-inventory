@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\InventoryIndexer\Test\Unit\Indexer;
 
-use Magento\Catalog\Model\ProductTypes\ConfigInterface as ProductTypesConfig;
 use Magento\InventoryApi\Model\GetStockIdsBySkusInterface;
+use Magento\InventoryCatalogApi\Model\CompositeProductTypesProviderInterface;
 use Magento\InventoryCatalogApi\Model\GetChildrenSkusOfParentSkusInterface;
 use Magento\InventoryCatalogApi\Model\GetProductTypesBySkusInterface;
 use Magento\InventoryIndexer\Indexer\CompositeProductsIndexer;
@@ -52,23 +52,18 @@ class CompositeProductsIndexerTest extends TestCase
 
     protected function setUp(): void
     {
-        $productTypesConfigMock = $this->createMock(ProductTypesConfig::class);
+        $compositeProductTypesProviderMock = $this->createMock(CompositeProductTypesProviderInterface::class);
         $this->getProductTypesBySkusMock = $this->createMock(GetProductTypesBySkusInterface::class);
         $this->getChildrenSkusOfParentSkusMock = $this->createMock(GetChildrenSkusOfParentSkusInterface::class);
         $this->getStockIdsBySkusMock = $this->createMock(GetStockIdsBySkusInterface::class);
         $this->skuListInStockFactoryMock = $this->createMock(SkuListInStockFactory::class);
         $this->skuListsProcessorMock = $this->createMock(SkuListsProcessor::class);
 
-        $productTypesConfigMock->method('getAll')
-            ->willReturn([
-                'simple' => ['composite' => false],
-                'configurable' => ['composite' => true],
-                'bundle' => ['composite' => true],
-                'grouped' => ['composite' => true],
-            ]);
+        $compositeProductTypesProviderMock->method('execute')
+            ->willReturn(['bundle', 'configurable', 'grouped']);
 
         $this->indexer = new CompositeProductsIndexer(
-            $productTypesConfigMock,
+            $compositeProductTypesProviderMock,
             $this->getProductTypesBySkusMock,
             $this->getChildrenSkusOfParentSkusMock,
             $this->getStockIdsBySkusMock,

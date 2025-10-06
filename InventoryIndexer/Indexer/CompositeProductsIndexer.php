@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\InventoryIndexer\Indexer;
 
-use Magento\Catalog\Model\ProductTypes\ConfigInterface as ProductTypesConfig;
 use Magento\InventoryApi\Model\GetStockIdsBySkusInterface;
+use Magento\InventoryCatalogApi\Model\CompositeProductTypesProviderInterface;
 use Magento\InventoryCatalogApi\Model\GetChildrenSkusOfParentSkusInterface;
 use Magento\InventoryCatalogApi\Model\GetProductTypesBySkusInterface;
 use Magento\InventoryIndexer\Indexer\SourceItem\SkuListInStockFactory;
@@ -17,7 +17,7 @@ use Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor;
 class CompositeProductsIndexer
 {
     /**
-     * @param ProductTypesConfig $productTypesConfig
+     * @param CompositeProductTypesProviderInterface $compositeProductTypesProvider
      * @param GetProductTypesBySkusInterface $getProductTypesBySkus
      * @param GetChildrenSkusOfParentSkusInterface $getChildrenSkusOfParentSkus
      * @param GetStockIdsBySkusInterface $getStockIdsBySkus
@@ -25,7 +25,7 @@ class CompositeProductsIndexer
      * @param SkuListsProcessor $skuListsProcessor
      */
     public function __construct(
-        private readonly ProductTypesConfig $productTypesConfig,
+        private readonly CompositeProductTypesProviderInterface $compositeProductTypesProvider,
         private readonly GetProductTypesBySkusInterface $getProductTypesBySkus,
         private readonly GetChildrenSkusOfParentSkusInterface $getChildrenSkusOfParentSkus,
         private readonly GetStockIdsBySkusInterface $getStockIdsBySkus,
@@ -46,17 +46,14 @@ class CompositeProductsIndexer
             return;
         }
 
-        $compositeTypes = array_filter(
-            $this->productTypesConfig->getAll(),
-            fn (array $type) => ($type['composite'] ?? false) === true,
-        );
-
         $productTypesBySkus = $this->getProductTypesBySkus->execute($skus);
         $productSkusByTypes = array_fill_keys(array_unique(array_values($productTypesBySkus)), []);
         foreach ($productTypesBySkus as $sku => $type) {
             $productSkusByTypes[$type][] = $sku;
         }
-        $compositeSkus = array_merge([], ...array_values(array_intersect_key($productSkusByTypes, $compositeTypes)));
+        $compositeTypes = $this->compositeProductTypesProvider->execute();
+        $compositeSkusByTypes = array_intersect_key($productSkusByTypes, array_flip($compositeTypes));
+        $compositeSkus = array_merge([], ...array_values($compositeSkusByTypes));
         if (!$compositeSkus) {
             return;
         }

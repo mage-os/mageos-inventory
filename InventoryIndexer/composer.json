@@ -11,8 +11,7 @@
         "magento/module-inventory-catalog-api": "*",
         "magento/module-inventory-configuration-api": "*",
         "magento/module-inventory-sales-api": "*",
-        "magento/module-inventory-sales": "*",
-        "magento/module-catalog": "*"
+        "magento/module-inventory-sales": "*"
     },
     "suggest": {
         "magento/module-catalog": "*"
