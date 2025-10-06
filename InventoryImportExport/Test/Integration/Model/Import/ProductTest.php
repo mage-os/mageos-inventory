@@ -471,8 +471,8 @@ class ProductTest extends TestCase
             CsvFileFixture::class,
             [
                 'rows' => [
-                    ['product_websites', 'product_type', 'sku', 'name', 'associated_skus'],
-                    ['base', 'grouped', 'grouped1', 'Grouped Product 1', 'simple1=5'],
+                    ['product_type', 'sku', 'name', 'product_websites', 'associated_skus', 'attribute_set_code'],
+                    ['grouped', 'grouped1', 'Grouped Product 1', 'base', 'simple1=5', 'Default'],
                 ]
             ],
             'grouped_product_import_file'

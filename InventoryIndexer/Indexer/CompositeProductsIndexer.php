@@ -49,7 +49,7 @@ class CompositeProductsIndexer
         $productTypesBySkus = $this->getProductTypesBySkus->execute($skus);
         $productSkusByTypes = array_fill_keys(array_unique(array_values($productTypesBySkus)), []);
         foreach ($productTypesBySkus as $sku => $type) {
-            $productSkusByTypes[$type][] = $sku;
+            $productSkusByTypes[$type][] = (string) $sku;
         }
         $compositeTypes = $this->compositeProductTypesProvider->execute();
         $compositeSkusByTypes = array_intersect_key($productSkusByTypes, array_flip($compositeTypes));
@@ -67,7 +67,7 @@ class CompositeProductsIndexer
 
             $stockIds = $this->getStockIdsBySkus->execute($childrenSkus);
             foreach ($stockIds as $stockId) {
-                $parentStocks[$stockId][] = $parentSku;
+                $parentStocks[$stockId][] = (string) $parentSku;
             }
         }
 

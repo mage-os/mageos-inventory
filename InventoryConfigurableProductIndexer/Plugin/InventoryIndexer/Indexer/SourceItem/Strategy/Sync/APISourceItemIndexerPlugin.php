@@ -19,12 +19,14 @@ use Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor;
 class APISourceItemIndexerPlugin
 {
     /**
+     * @param Configurable $configurableType
      * @param GetSkusByProductIdsInterface $getSkusByProductIds
      * @param GetStockIdsBySkusInterface $getStockIdsBySkus
      * @param SkuListInStockFactory $skuListInStockFactory
      * @param SkuListsProcessor $skuListsProcessor
      */
     public function __construct(
+        private readonly Configurable $configurableType,
         private readonly GetSkusByProductIdsInterface $getSkusByProductIds,
         private readonly GetStockIdsBySkusInterface $getStockIdsBySkus,
         private readonly SkuListInStockFactory $skuListInStockFactory,
@@ -51,8 +53,12 @@ class APISourceItemIndexerPlugin
             return $result;
         }
 
-        $childProductIds = $product->getTypeInstance()->getChildrenIds($product->getId());
-        $childProductSkus = $this->getSkusByProductIds->execute($childProductIds[0]);
+        $childProductIds = $this->configurableType->getChildrenIds($product->getId())[0];
+        if (!$childProductIds) {
+            return $result;
+        }
+
+        $childProductSkus = $this->getSkusByProductIds->execute($childProductIds);
         $stockIds = $this->getStockIdsBySkus->execute($childProductSkus);
         if ($stockIds) {
             $skuListInStockList = [];

@@ -30,6 +30,11 @@ class APISourceItemIndexerPluginTest extends TestCase
     private $plugin;
 
     /**
+     * @var Configurable|MockObject
+     */
+    private $typeInstanceMock;
+
+    /**
      * @var GetSkusByProductIdsInterface|MockObject
      */
     private $getSkusByProductIdsMock;
@@ -53,11 +58,13 @@ class APISourceItemIndexerPluginTest extends TestCase
     {
         parent::setUp();
 
+        $this->typeInstanceMock = $this->createMock(Configurable::class);
         $this->getSkusByProductIdsMock = $this->createMock(GetSkusByProductIdsInterface::class);
         $this->getStockIdsBySkusMock = $this->createMock(GetStockIdsBySkusInterface::class);
         $this->skuListInStockFactoryMock = $this->createMock(SkuListInStockFactory::class);
         $this->skuListsProcessorMock = $this->createMock(SkuListsProcessor::class);
         $this->plugin = new APISourceItemIndexerPlugin(
+            $this->typeInstanceMock,
             $this->getSkusByProductIdsMock,
             $this->getStockIdsBySkusMock,
             $this->skuListInStockFactoryMock,
@@ -77,8 +84,7 @@ class APISourceItemIndexerPluginTest extends TestCase
         $result = $this->createMock(ProductResource::class);
         $object = $this->createMock(Product::class);
         $object->expects($this->once())->method('getTypeId')->willReturn(Configurable::TYPE_CODE);
-        $typeInstance = $this->createMock(AbstractType::class);
-        $typeInstance->expects($this->once())
+        $this->typeInstanceMock->expects($this->once())
             ->method('getChildrenIds')
             ->with($confId)
             ->willReturn([$childIds]);
@@ -95,7 +101,6 @@ class APISourceItemIndexerPluginTest extends TestCase
             ->willReturn($skuListInStockMock);
         $this->skuListsProcessorMock->expects($this->once())->method('reindexList')->with([$skuListInStockMock]);
 
-        $object->expects($this->once())->method('getTypeInstance')->willReturn($typeInstance);
         $object->expects($this->once())->method('getId')->willReturn($confId);
         $object->expects($this->once())->method('getSku')->willReturn($confSku);
         $object->expects($this->once())->method('cleanModelCache');

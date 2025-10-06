@@ -87,6 +87,8 @@ class SourceItemImporter
         array $importedData
     ): void {
         $sourceItems = [];
+        $skus = [];
+
         $isSingleSourceMode = $this->isSingleSourceMode->execute();
         // No need to load existing source items in single source mode as we know the only source is 'default'
         $existingSourceItemsBySKU = $isSingleSourceMode ? [] : $this->getSourceItems(array_keys($stockData));
@@ -94,6 +96,7 @@ class SourceItemImporter
         $sourceItemIds = [];
         foreach ($stockData as $sku => $stockDatum) {
             $sku = (string)$sku;
+            $skus[] = $sku;
             $sources = $existingSourceItemsBySKU[$sku] ?? [];
             $isQtyExplicitlySet = (bool) ($importedData[$sku]['qty'] ?? false);
             $hasDefaultSource = isset($sources[$defaultSourceCode]);
@@ -129,7 +132,7 @@ class SourceItemImporter
 
         // Reindex composite products present in data.
         // As they don't have their own source items, no reindex will be triggered automatically.
-        $this->compositeProductsIndexer->reindexList(array_keys($stockData));
+        $this->compositeProductsIndexer->reindexList($skus);
     }
 
     /**
