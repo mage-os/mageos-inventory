@@ -13,14 +13,14 @@ namespace Magento\InventoryIndexer\Indexer\SourceItem;
 class SkuListInStock
 {
     /**
-     * @var int
+     * @param int $stockId
+     * @param array $skuList
      */
-    private $stockId;
-
-    /**
-     * @var array
-     */
-    private $skuList;
+    public function __construct(
+        private int $stockId,
+        private array $skuList = [],
+    ) {
+    }
 
     /**
      * Returns the stock ID associated with the current instance.

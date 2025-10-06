@@ -94,9 +94,7 @@ class GetSkuListInStock
         $skuListInStockList = [];
         foreach ($items as $stockId => $skuList) {
             /** @var SkuListInStock $skuListInStock */
-            $skuListInStock = $this->skuListInStockFactory->create();
-            $skuListInStock->setStockId((int)$stockId);
-            $skuListInStock->setSkuList($skuList);
+            $skuListInStock = $this->skuListInStockFactory->create(['stockId' => $stockId, 'skuList' => $skuList]);
             $skuListInStockList[] = $skuListInStock;
         }
         return $skuListInStockList;

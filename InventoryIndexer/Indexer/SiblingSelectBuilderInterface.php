@@ -8,16 +8,17 @@ declare(strict_types=1);
 namespace Magento\InventoryIndexer\Indexer;
 
 use Magento\Framework\DB\Select;
-use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexName;
+use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexAlias;
 
 interface SiblingSelectBuilderInterface
 {
     /**
      * Prepare select for sibling products.
      *
-     * @param IndexName $indexName
-     * @param array $skuList
+     * @param int $stockId
+     * @param string[] $skuList
+     * @param IndexAlias $indexAlias
      * @return Select
      */
-    public function getSelect(IndexName $indexName, array $skuList = []): Select;
+    public function getSelect(int $stockId, array $skuList = [], IndexAlias $indexAlias = IndexAlias::MAIN): Select;
 }

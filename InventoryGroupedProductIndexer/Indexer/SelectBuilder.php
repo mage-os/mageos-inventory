@@ -13,8 +13,10 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\EntityManager\MetadataPool;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
 use Magento\InventoryIndexer\Indexer\IndexStructure;
+use Magento\InventoryIndexer\Indexer\InventoryIndexer;
 use Magento\InventoryIndexer\Indexer\SiblingSelectBuilderInterface;
-use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexName;
+use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexAlias;
+use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexNameBuilder;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexNameResolverInterface;
 
 /**
@@ -23,41 +25,29 @@ use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexNameResolverInterface
 class SelectBuilder implements SiblingSelectBuilderInterface
 {
     /**
-     * @var ResourceConnection
-     */
-    private $resourceConnection;
-
-    /**
-     * @var IndexNameResolverInterface
-     */
-    private $indexNameResolver;
-
-    /**
-     * @var MetadataPool
-     */
-    private $metadataPool;
-
-    /**
      * @param ResourceConnection $resourceConnection
+     * @param IndexNameBuilder $indexNameBuilder
      * @param IndexNameResolverInterface $indexNameResolver
      * @param MetadataPool $metadataPool
      */
     public function __construct(
-        ResourceConnection $resourceConnection,
-        IndexNameResolverInterface $indexNameResolver,
-        MetadataPool $metadataPool,
+        private readonly ResourceConnection $resourceConnection,
+        private readonly IndexNameBuilder $indexNameBuilder,
+        private readonly IndexNameResolverInterface $indexNameResolver,
+        private readonly MetadataPool $metadataPool,
     ) {
-        $this->resourceConnection = $resourceConnection;
-        $this->indexNameResolver = $indexNameResolver;
-        $this->metadataPool = $metadataPool;
     }
 
     /**
      * @inheritdoc
      */
-    public function getSelect(IndexName $indexName, array $skuList = []): Select
+    public function getSelect(int $stockId, array $skuList = [], IndexAlias $indexAlias = IndexAlias::MAIN): Select
     {
         $connection = $this->resourceConnection->getConnection();
+        $indexName = $this->indexNameBuilder->setIndexId(InventoryIndexer::INDEXER_ID)
+            ->addDimension('stock_', (string) $stockId)
+            ->setAlias($indexAlias->value)
+            ->build();
         $indexTableName = $this->indexNameResolver->resolveName($indexName);
         $metadata = $this->metadataPool->getMetadata(ProductInterface::class);
         $linkField = $metadata->getLinkField();

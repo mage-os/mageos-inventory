@@ -7,25 +7,28 @@ declare(strict_types=1);
 
 namespace Magento\InventoryConfigurableProductIndexer\Test\Integration\Indexer;
 
-use Magento\InventoryConfigurableProductIndexer\Indexer\SiblingProductsProvider;
-use Magento\InventoryIndexer\Indexer\InventoryIndexer;
-use Magento\InventoryMultiDimensionalIndexerApi\Model\Alias;
-use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexNameBuilder;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
+use Magento\InventoryConfigurableProductIndexer\Indexer\SelectBuilder;
+use Magento\InventoryIndexer\Indexer\Stock\DataProvider;
 use Magento\TestFramework\Fixture\DataFixture;
 use Magento\TestFramework\Fixture\DbIsolation;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class SiblingProductsProviderTest extends TestCase
+#[
+    CoversClass(SelectBuilder::class),
+]
+class SelectBuilderTest extends TestCase
 {
     /**
-     * @var SiblingProductsProvider
+     * @var DataProvider
      */
-    private $siblingProductsProvider;
+    private $dataProvider;
 
     protected function setUp(): void
     {
-        $this->siblingProductsProvider = Bootstrap::getObjectManager()->create(SiblingProductsProvider::class);
+        $this->dataProvider = Bootstrap::getObjectManager()->create(DataProvider::class);
     }
 
     #[
@@ -42,17 +45,12 @@ class SiblingProductsProviderTest extends TestCase
     public function testGetSelect(): void
     {
         $stockId = 10;
-        $skus = [];
-
-        $indexNameBuilder = Bootstrap::getObjectManager()->get(IndexNameBuilder::class);
-        $indexName = $indexNameBuilder->setIndexId(InventoryIndexer::INDEXER_ID)
-            ->addDimension('stock_', (string) $stockId)
-            ->setAlias(Alias::ALIAS_MAIN)
-            ->build();
-        $indexData = $this->siblingProductsProvider->getData($indexName);
-        foreach ($indexData as $item) {
-            $skus[] = $item['sku'];
-        }
-        $this->assertContains('configurable_1', $skus);
+        $sku = 'configurable_1';
+        $indexData = $this->dataProvider->getSiblingsData($stockId, ConfigurableType::TYPE_CODE, [$sku]);
+        self::assertCount(1, $indexData);
+        $row = reset($indexData);
+        self::assertEquals($sku, $row['sku']);
+        self::assertEquals(300, $row['quantity']);
+        self::assertEquals(1, $row['is_salable']);
     }
 }

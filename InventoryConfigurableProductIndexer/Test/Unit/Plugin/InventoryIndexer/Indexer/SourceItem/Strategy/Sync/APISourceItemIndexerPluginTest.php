@@ -12,65 +12,67 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type\AbstractType;
 use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\Inventory\Model\SourceItem;
-use Magento\InventoryApi\Api\GetSourceItemsBySkuInterface;
-use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
+use Magento\InventoryApi\Model\GetStockIdsBySkusInterface;
 use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
-use Magento\InventoryConfigurableProductIndexer\Indexer\SourceItem\SourceItemIndexer;
 use Magento\InventoryConfigurableProductIndexer\Plugin\InventoryIndexer\Indexer\SourceItem\Strategy\Sync\APISourceItemIndexerPlugin;
+use Magento\InventoryIndexer\Indexer\SourceItem\SkuListInStock;
+use Magento\InventoryIndexer\Indexer\SourceItem\SkuListInStockFactory;
+use Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 // @codingStandardsIgnoreEnd
 
-/**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
 class APISourceItemIndexerPluginTest extends TestCase
 {
     /**
-     * @var SourceItemIndexer|MockObject
+     * @var APISourceItemIndexerPlugin
      */
-    private SourceItemIndexer $configurableProductsSourceItemIndexer;
-
-    /**
-     * @var GetSourceItemsBySkuInterface|MockObject
-     */
-    private GetSourceItemsBySkuInterface $getSourceItemsBySku;
-
-    /**
-     * @var DefaultSourceProviderInterface|MockObject
-     */
-    private DefaultSourceProviderInterface $defaultSourceProvider;
+    private $plugin;
 
     /**
      * @var GetSkusByProductIdsInterface|MockObject
      */
-    private GetSkusByProductIdsInterface $skuProvider;
+    private $getSkusByProductIdsMock;
 
     /**
-     * @var APISourceItemIndexerPlugin|MockObject
+     * @var GetStockIdsBySkusInterface|MockObject
      */
-    private APISourceItemIndexerPlugin $plugin;
+    private $getStockIdsBySkusMock;
+
+    /**
+     * @var SkuListInStockFactory|MockObject
+     */
+    private $skuListInStockFactoryMock;
+
+    /**
+     * @var SkuListsProcessor|MockObject
+     */
+    private $skuListsProcessorMock;
 
     protected function setUp(): void
     {
-        $this->configurableProductsSourceItemIndexer = $this->createMock(SourceItemIndexer::class);
-        $this->getSourceItemsBySku = $this->createMock(GetSourceItemsBySkuInterface::class);
-        $this->defaultSourceProvider = $this->createMock(DefaultSourceProviderInterface::class);
-        $this->skuProvider = $this->createMock(GetSkusByProductIdsInterface::class);
-
-        $this->plugin = new APISourceItemIndexerPlugin(
-            $this->configurableProductsSourceItemIndexer,
-            $this->getSourceItemsBySku,
-            $this->defaultSourceProvider,
-            $this->skuProvider
-        );
-
         parent::setUp();
+
+        $this->getSkusByProductIdsMock = $this->createMock(GetSkusByProductIdsInterface::class);
+        $this->getStockIdsBySkusMock = $this->createMock(GetStockIdsBySkusInterface::class);
+        $this->skuListInStockFactoryMock = $this->createMock(SkuListInStockFactory::class);
+        $this->skuListsProcessorMock = $this->createMock(SkuListsProcessor::class);
+        $this->plugin = new APISourceItemIndexerPlugin(
+            $this->getSkusByProductIdsMock,
+            $this->getStockIdsBySkusMock,
+            $this->skuListInStockFactoryMock,
+            $this->skuListsProcessorMock,
+        );
     }
 
     public function testAfterSave()
     {
+        $confId = 1;
+        $confSku = 'configurable1';
+        $stockId = 2;
+        $childIds = [11, 12];
+        $childSkus = ['sku-11', 'sku-12'];
+
         $subject = $this->createMock(ProductResource::class);
         $result = $this->createMock(ProductResource::class);
         $object = $this->createMock(Product::class);
@@ -78,44 +80,27 @@ class APISourceItemIndexerPluginTest extends TestCase
         $typeInstance = $this->createMock(AbstractType::class);
         $typeInstance->expects($this->once())
             ->method('getChildrenIds')
-            ->with(1)
-            ->willReturn(
-                [
-                    0 => [11 => '11', 12 => '12']
-                ]
-            );
+            ->with($confId)
+            ->willReturn([$childIds]);
+
+        $this->getSkusByProductIdsMock->expects($this->once())
+            ->method('execute')
+            ->with($childIds)
+            ->willReturn($childSkus);
+        $this->getStockIdsBySkusMock->expects($this->once())->method('execute')->with($childSkus)->willReturn([2]);
+        $skuListInStockMock = $this->createMock(SkuListInStock::class);
+        $this->skuListInStockFactoryMock->expects($this->once())
+            ->method('create')
+            ->with(['stockId' => $stockId, 'skuList' => [$confSku]])
+            ->willReturn($skuListInStockMock);
+        $this->skuListsProcessorMock->expects($this->once())->method('reindexList')->with([$skuListInStockMock]);
 
         $object->expects($this->once())->method('getTypeInstance')->willReturn($typeInstance);
-        $object->expects($this->once())->method('getId')->willReturn(1);
+        $object->expects($this->once())->method('getId')->willReturn($confId);
+        $object->expects($this->once())->method('getSku')->willReturn($confSku);
         $object->expects($this->once())->method('cleanModelCache');
-        $this->defaultSourceProvider->expects($this->exactly(2))->method('getCode')->willreturn('default');
-        $childSourceItem1 = $this->getSourceItem(1);
-        $childSourceItem2 = $this->getSourceItem(2);
-        $this->skuProvider->expects($this->once())
-            ->method('execute')
-            ->with([11 => '11', 12 => '12'])
-            ->willReturn([11 => 'child-1', 12 => 'child-2']);
-        $this->getSourceItemsBySku->expects($this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function ($arg) use ($childSourceItem1, $childSourceItem2) {
-                if ($arg == 'child-1') {
-                    return [$childSourceItem1];
-                } elseif ($arg == 'child-2') {
-                    return [$childSourceItem2];
-                }
-            });
-        $this->configurableProductsSourceItemIndexer->expects($this->once())->method('executeList')->with([1, 2]);
 
         $interceptorResult = $this->plugin->afterSave($subject, $result, $object);
         $this->assertSame($interceptorResult, $result);
-    }
-
-    private function getSourceItem(int $returnValue): MockObject
-    {
-        $sourceItem = $this->createMock(SourceItem::class);
-        $sourceItem->expects($this->once())->method('getSourceCode')->willReturn('non-default-source');
-        $sourceItem->expects($this->once())->method('getId')->willReturn($returnValue);
-
-        return $sourceItem;
     }
 }
