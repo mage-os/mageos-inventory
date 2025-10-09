@@ -132,7 +132,10 @@
             <argument name="sourceName" value="$culverSource.source[name]$"/>
         </actionGroup>
         <actionGroup ref="StorefrontPickInStoreNavigateToPaymentActionGroup" stepKey="navigateToPaymentStep"/>
-        <comment userInput="Billing address step is no longer needed for in-store pickup" stepKey="fillAddress"/>
+        <actionGroup ref="StorefrontPickInStoreGuestCustomerFillBillingAddressActionGroup" stepKey="fillAddress">
+            <argument name="customerVar" value="Simple_US_Customer"/>
+            <argument name="customerAddressVar" value="US_Address_TX"/>
+        </actionGroup>
         <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="selectCheckMoneyOrder"/>
         <actionGroup ref="ClickPlaceOrderActionGroup" stepKey="clickOnPlaceOrder"/>
         <waitForPageLoad stepKey="waitForSuccess"/>
