@@ -9,7 +9,7 @@
 <actionGroups xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:mftf:Test/etc/actionGroupSchema.xsd">
     <actionGroup name="StorefrontPickInStoreGuestCustomerFillBillingAddressWithParamsActionGroup">
         <annotations>
-            <description>Fill guest customer billing address for store pickup shipping method.</description>
+            <description>Fill guest customer billing address for store pickup shipping method with provided address.</description>
         </annotations>
         <arguments>
             <argument name="customerVar"/>
