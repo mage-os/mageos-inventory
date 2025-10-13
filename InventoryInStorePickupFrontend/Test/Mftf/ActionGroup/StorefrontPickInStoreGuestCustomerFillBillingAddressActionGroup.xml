@@ -12,9 +12,12 @@
             <description>Fill guest customer billing address for store pickup shipping method.</description>
         </annotations>
         <arguments>
-            <argument name="customerVar"/>
-            <argument name="customerAddressVar"/>
+            <argument name="customerVar" defaultValue="CustomerEntityOne"/>
+            <argument name="customerAddressVar" defaultValue="CustomerAddressSimple"/>
         </arguments>
+
+        <comment userInput="BIC workaround" stepKey="waitForEmailField"/>
+        <comment userInput="BIC workaround" stepKey="enterEmail"/>
 
         <!-- The billing form is already in edit mode, so just wait for it to be visible -->
         <waitForElementVisible selector="{{CheckoutPaymentSection.guestFirstName}}" stepKey="waitForBillingFormVisible"/>
