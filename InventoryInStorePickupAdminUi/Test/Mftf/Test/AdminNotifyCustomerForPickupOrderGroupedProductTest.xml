@@ -115,7 +115,7 @@
             <argument name="sourceName" value="$culverSource.source[name]$"/>
         </actionGroup>
         <actionGroup ref="StorefrontPickInStoreNavigateToPaymentActionGroup" stepKey="navigateToPaymentStep"/>
-        <actionGroup ref="StorefrontPickInStoreGuestCustomerFillBillingAddressWithParamsActionGroup" stepKey="fillAddress">
+        <actionGroup ref="AdminPickInStoreGuestCustomerFillBillingAddressWithParamsActionGroup" stepKey="fillAddress">
             <argument name="customerVar" value="Simple_US_Customer"/>
             <argument name="customerAddressVar" value="US_Address_TX"/>
         </actionGroup>
