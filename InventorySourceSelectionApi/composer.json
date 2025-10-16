@@ -1,25 +1,29 @@
 {
-    "name": "magento/module-inventory-source-selection-api",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/module-inventory-api": "*",
-        "magento/module-inventory-sales-api": "*",
-        "magento/module-store": "*",
-        "magento/module-sales": "*",
-        "magento/framework": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-source-selection-api",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/module-inventory-api": "2.0.0",
+    "mage-os/module-inventory-sales-api": "2.0.0",
+    "mage-os/module-store": "2.0.0",
+    "mage-os/module-sales": "2.0.0",
+    "mage-os/framework": "2.0.0"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventorySourceSelectionApi\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventorySourceSelectionApi\\": ""
     }
+  },
+  "version": "2.0.0",
+  "replace": {
+    "magento/module-inventory-source-selection-api": "1.4.5"
+  }
 }

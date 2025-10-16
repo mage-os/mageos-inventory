@@ -1,26 +1,30 @@
 {
-    "name": "magento/module-inventory-cache",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-inventory-indexer": "*"
-    },
-    "suggest": {
-        "magento/module-catalog": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-cache",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/framework": "2.0.0",
+    "mage-os/module-inventory-catalog-api": "2.0.0",
+    "mage-os/module-inventory-indexer": "2.0.0"
+  },
+  "suggest": {
+    "mage-os/module-catalog": "2.0.0"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryCache\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryCache\\": ""
     }
+  },
+  "version": "2.0.0",
+  "replace": {
+    "magento/module-inventory-cache": "1.2.6"
+  }
 }

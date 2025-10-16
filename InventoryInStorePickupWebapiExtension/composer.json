@@ -1,23 +1,27 @@
 {
-    "name": "magento/module-inventory-in-store-pickup-webapi-extension",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": "*",
-        "magento/module-webapi": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-in-store-pickup-webapi-extension",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/framework": "2.0.0",
+    "mage-os/module-webapi": "2.0.0"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "abandoned": true,
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "abandoned": true,
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryInStorePickupWebapiExtension\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryInStorePickupWebapiExtension\\": ""
     }
+  },
+  "version": "2.0.0",
+  "replace": {
+    "magento/module-inventory-in-store-pickup-webapi-extension": "1.1.4"
+  }
 }

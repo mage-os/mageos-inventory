@@ -1,32 +1,36 @@
 {
-    "name": "magento/module-inventory-indexer",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": "*",
-        "magento/framework-message-queue": "*",
-        "magento/module-inventory-multi-dimensional-indexer-api": "*",
-        "magento/module-inventory": "*",
-        "magento/module-inventory-api": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-inventory-configuration-api": "*",
-        "magento/module-inventory-sales-api": "*",
-        "magento/module-inventory-sales": "*"
-    },
-    "suggest": {
-        "magento/module-catalog": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-indexer",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/framework": "2.0.0",
+    "mage-os/framework-message-queue": "2.0.0",
+    "mage-os/module-inventory-multi-dimensional-indexer-api": "2.0.0",
+    "mage-os/module-inventory": "2.0.0",
+    "mage-os/module-inventory-api": "2.0.0",
+    "mage-os/module-inventory-catalog-api": "2.0.0",
+    "mage-os/module-inventory-configuration-api": "2.0.0",
+    "mage-os/module-inventory-sales-api": "2.0.0",
+    "mage-os/module-inventory-sales": "2.0.0"
+  },
+  "suggest": {
+    "mage-os/module-catalog": "2.0.0"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryIndexer\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryIndexer\\": ""
     }
+  },
+  "version": "2.0.0",
+  "replace": {
+    "magento/module-inventory-indexer": "2.2.3-p3"
+  }
 }

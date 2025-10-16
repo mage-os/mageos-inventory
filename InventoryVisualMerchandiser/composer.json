@@ -1,34 +1,38 @@
 {
-    "name": "magento/module-inventory-visual-merchandiser",
-    "description": "N/A",
-    "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": "*",
-        "magento/module-catalog": "*",
-        "magento/module-inventory": "*",
-        "magento/module-inventory-catalog-api": "*",
-        "magento/module-inventory-indexer": "*",
-        "magento/module-inventory-sales-api": "*",
-        "magento/module-store": "*"
-    },
-    "require-dev": {
-        "magento/module-inventory-api": "*",
-        "magento/module-inventory-configuration-api": "*"
-    },
-    "suggest": {
-        "magento/module-visual-merchandiser": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-visual-merchandiser",
+  "description": "N/A",
+  "require": {
+    "php": "~8.2.0||~8.3.0||~8.4.0",
+    "mage-os/framework": "2.0.0",
+    "mage-os/module-catalog": "2.0.0",
+    "mage-os/module-inventory": "2.0.0",
+    "mage-os/module-inventory-catalog-api": "2.0.0",
+    "mage-os/module-inventory-indexer": "2.0.0",
+    "mage-os/module-inventory-sales-api": "2.0.0",
+    "mage-os/module-store": "2.0.0"
+  },
+  "require-dev": {
+    "mage-os/module-inventory-api": "2.0.0",
+    "mage-os/module-inventory-configuration-api": "2.0.0"
+  },
+  "suggest": {
+    "mage-os/module-visual-merchandiser": "2.0.0"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryVisualMerchandiser\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryVisualMerchandiser\\": ""
     }
+  },
+  "version": "2.0.0",
+  "replace": {
+    "magento/module-inventory-visual-merchandiser": "1.1.6"
+  }
 }
