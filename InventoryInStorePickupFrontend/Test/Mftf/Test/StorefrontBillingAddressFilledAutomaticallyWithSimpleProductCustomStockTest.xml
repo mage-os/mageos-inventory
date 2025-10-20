@@ -104,7 +104,7 @@
         </actionGroup>
         <actionGroup ref="StorefrontPickInStoreNavigateToPaymentActionGroup" stepKey="navigateToPaymentStep"/>
         <actionGroup ref="StorefrontAssertPaymentInformationActionGroup" stepKey="verifyPaymentInformation">
-            <argument name="address" value="{{US_Address_California.street[0]}}"/>
+            <argument name="address" value="{{US_Address_TX.street[0]}}"/>
         </actionGroup>
     </test>
 </tests>

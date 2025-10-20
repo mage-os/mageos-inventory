@@ -33,7 +33,7 @@ class ShippingInformationManagementPlugin
         $address = $addressInformation->getShippingAddress();
         $billingAddress = $addressInformation->getBillingAddress();
 
-        if ($this->isPickupStoreShipping($address) && $this->isBillingAddressIncomplete($billingAddress)) {
+        if (!$this->isPickupStoreShipping($address) && $this->isBillingAddressCompletelyNull($billingAddress)) {
             $addressInformation->setBillingAddress($address);
         }
 
@@ -59,32 +59,13 @@ class ShippingInformationManagementPlugin
     }
 
     /**
-     * Check if billing address is incomplete (missing required fields)
+     * Check if billing address is completely null (not set at all)
      *
      * @param AddressInterface|null $billingAddress
      * @return bool
      */
-    private function isBillingAddressIncomplete(?AddressInterface $billingAddress): bool
+    private function isBillingAddressCompletelyNull(?AddressInterface $billingAddress): bool
     {
-        if (!$billingAddress) {
-            return true;
-        }
-        $requiredFields = [
-            'firstname',
-            'lastname',
-            'street',
-            'city',
-            'postcode',
-            'telephone',
-            'regionId',
-            'countryId'
-        ];
-        foreach ($requiredFields as $field) {
-            $getter = 'get' . ucfirst($field);
-            if (method_exists($billingAddress, $getter) && !$billingAddress->$getter()) {
-                return true;
-            }
-        }
-        return false;
+        return $billingAddress === null;
     }
 }
