@@ -13,7 +13,7 @@ use Magento\Framework\DB\Select;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 use Magento\InventoryIndexer\Indexer\IndexStructure;
 use Magento\InventoryIndexer\Indexer\SiblingSelectBuilderInterface;
-use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexName;
+use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexAlias;
 
 /**
  * Get bundle product for given stock select builder.
@@ -53,11 +53,11 @@ class SelectBuilder implements SiblingSelectBuilderInterface
     /**
      * @inheritdoc
      */
-    public function getSelect(IndexName $indexName, array $skuList = []): Select
+    public function getSelect(int $stockId, array $skuList = [], IndexAlias $indexAlias = IndexAlias::MAIN): Select
     {
         $connection = $this->resourceConnection->getConnection();
 
-        $optionsStatusSelect = $this->optionsStatusSelectBuilder->execute($indexName, $skuList);
+        $optionsStatusSelect = $this->optionsStatusSelectBuilder->execute($stockId, $skuList, $indexAlias);
         $isRequiredOptionUnavailable = $connection->getCheckSql(
             'options.required AND options.stock_status = 0',
             '1',

@@ -9,11 +9,10 @@ namespace Magento\InventoryIndexer\Indexer\Stock\Strategy;
 use Magento\Framework\App\ResourceConnection;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 use Magento\InventoryIndexer\Indexer\InventoryIndexer;
+use Magento\InventoryIndexer\Indexer\SourceItem\SkuListInStockFactory;
 use Magento\InventoryIndexer\Indexer\Stock\GetAllStockIds;
 use Magento\InventoryIndexer\Indexer\Stock\IndexDataFiller;
-use Magento\InventoryIndexer\Indexer\Stock\PrepareReservationsIndexData;
-use Magento\InventoryIndexer\Indexer\Stock\ReservationsIndexTable;
-use Magento\InventoryMultiDimensionalIndexerApi\Model\Alias;
+use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexAlias;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexNameBuilder;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexStructureInterface;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexTableSwitcherInterface;
@@ -24,69 +23,28 @@ use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexTableSwitcherInterfac
 class Sync
 {
     /**
-     * @var GetAllStockIds
+     * @var string
      */
-    private $getAllStockIds;
+    private string $connectionName = ResourceConnection::DEFAULT_CONNECTION;
 
     /**
-     * @var IndexStructureInterface
-     */
-    private $indexStructure;
-
-    /**
-     * @var IndexNameBuilder
-     */
-    private $indexNameBuilder;
-
-    /**
-     * @var IndexTableSwitcherInterface
-     */
-    private $indexTableSwitcher;
-
-    /**
-     * @var DefaultStockProviderInterface
-     */
-    private $defaultStockProvider;
-
-    /**
-     * @var ReservationsIndexTable
-     */
-    private $reservationsIndexTable;
-
-    /**
-     * @var PrepareReservationsIndexData
-     */
-    private $prepareReservationsIndexData;
-
-    /**
-     * $indexStructure is reserved name for construct variable in index internal mechanism
-     *
      * @param GetAllStockIds $getAllStockIds
-     * @param IndexStructureInterface $indexStructureHandler
+     * @param IndexStructureInterface $indexStructure
      * @param IndexNameBuilder $indexNameBuilder
      * @param IndexTableSwitcherInterface $indexTableSwitcher
      * @param DefaultStockProviderInterface $defaultStockProvider
-     * @param ReservationsIndexTable $reservationsIndexTable
-     * @param PrepareReservationsIndexData $prepareReservationsIndexData
+     * @param SkuListInStockFactory $skuListInStockFactory
      * @param IndexDataFiller $indexDataFiller
      */
     public function __construct(
-        GetAllStockIds $getAllStockIds,
-        IndexStructureInterface $indexStructureHandler,
-        IndexNameBuilder $indexNameBuilder,
-        IndexTableSwitcherInterface $indexTableSwitcher,
-        DefaultStockProviderInterface $defaultStockProvider,
-        ReservationsIndexTable $reservationsIndexTable,
-        PrepareReservationsIndexData $prepareReservationsIndexData,
+        private readonly GetAllStockIds $getAllStockIds,
+        private readonly IndexStructureInterface $indexStructure,
+        private readonly IndexNameBuilder $indexNameBuilder,
+        private readonly IndexTableSwitcherInterface $indexTableSwitcher,
+        private readonly DefaultStockProviderInterface $defaultStockProvider,
+        private readonly SkuListInStockFactory $skuListInStockFactory,
         private readonly IndexDataFiller $indexDataFiller,
     ) {
-        $this->getAllStockIds = $getAllStockIds;
-        $this->indexStructure = $indexStructureHandler;
-        $this->indexNameBuilder = $indexNameBuilder;
-        $this->indexTableSwitcher = $indexTableSwitcher;
-        $this->defaultStockProvider = $defaultStockProvider;
-        $this->reservationsIndexTable = $reservationsIndexTable;
-        $this->prepareReservationsIndexData = $prepareReservationsIndexData;
     }
 
     /**
@@ -124,34 +82,25 @@ class Sync
                 continue;
             }
 
-            $replicaIndexName = $this->indexNameBuilder
-                ->setIndexId(InventoryIndexer::INDEXER_ID)
-                ->addDimension('stock_', (string)$stockId)
-                ->setAlias(Alias::ALIAS_REPLICA)
+            $replicaIndexName = $this->indexNameBuilder->setIndexId(InventoryIndexer::INDEXER_ID)
+                ->addDimension('stock_', (string) $stockId)
+                ->setAlias(IndexAlias::REPLICA->value)
                 ->build();
+            $this->indexStructure->delete($replicaIndexName, $this->connectionName);
+            $this->indexStructure->create($replicaIndexName, $this->connectionName);
 
-            $mainIndexName = $this->indexNameBuilder
-                ->setIndexId(InventoryIndexer::INDEXER_ID)
-                ->addDimension('stock_', (string)$stockId)
-                ->setAlias(Alias::ALIAS_MAIN)
+            $skuListInStock = $this->skuListInStockFactory->create(['stockId' => $stockId]);
+            $this->indexDataFiller->fillIndex($replicaIndexName, $skuListInStock, $this->connectionName);
+
+            $mainIndexName = $this->indexNameBuilder->setIndexId(InventoryIndexer::INDEXER_ID)
+                ->addDimension('stock_', (string) $stockId)
+                ->setAlias(IndexAlias::MAIN->value)
                 ->build();
-
-            $this->indexStructure->delete($replicaIndexName, ResourceConnection::DEFAULT_CONNECTION);
-            $this->indexStructure->create($replicaIndexName, ResourceConnection::DEFAULT_CONNECTION);
-
-            if (!$this->indexStructure->isExist($mainIndexName, ResourceConnection::DEFAULT_CONNECTION)) {
-                $this->indexStructure->create($mainIndexName, ResourceConnection::DEFAULT_CONNECTION);
+            if (!$this->indexStructure->isExist($mainIndexName, $this->connectionName)) {
+                $this->indexStructure->create($mainIndexName, $this->connectionName);
             }
-
-            $this->reservationsIndexTable->createTable($stockId);
-            $this->prepareReservationsIndexData->execute($stockId);
-
-            $this->indexDataFiller->fillIndex($replicaIndexName, $stockId);
-
-            $this->indexTableSwitcher->switch($mainIndexName, ResourceConnection::DEFAULT_CONNECTION);
-            $this->indexStructure->delete($replicaIndexName, ResourceConnection::DEFAULT_CONNECTION);
-
-            $this->reservationsIndexTable->dropTable($stockId);
+            $this->indexTableSwitcher->switch($mainIndexName, $this->connectionName);
+            $this->indexStructure->delete($replicaIndexName, $this->connectionName);
         }
     }
 }

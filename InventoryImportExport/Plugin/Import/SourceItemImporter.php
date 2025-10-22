@@ -18,6 +18,7 @@ use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
 use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
 use Magento\InventoryCatalogApi\Model\IsSingleSourceModeInterface;
+use Magento\InventoryIndexer\Indexer\CompositeProductsIndexer;
 use Magento\InventoryIndexer\Indexer\SourceItem\SourceItemIndexer;
 
 /**
@@ -51,6 +52,7 @@ class SourceItemImporter
      * @param SkuStorage $skuStorage
      * @param SourceItemResourceModel $sourceItemResourceModel
      * @param SourceItemIndexer $sourceItemIndexer
+     * @param CompositeProductsIndexer $compositeProductsIndexer
      */
     public function __construct(
         private readonly SourceItemsSaveInterface $sourceItemsSave,
@@ -59,7 +61,8 @@ class SourceItemImporter
         private readonly IsSingleSourceModeInterface $isSingleSourceMode,
         private readonly SkuStorage $skuStorage,
         private readonly SourceItemResourceModel $sourceItemResourceModel,
-        private readonly SourceItemIndexer $sourceItemIndexer
+        private readonly SourceItemIndexer $sourceItemIndexer,
+        private readonly CompositeProductsIndexer $compositeProductsIndexer,
     ) {
     }
 
@@ -84,6 +87,8 @@ class SourceItemImporter
         array $importedData
     ): void {
         $sourceItems = [];
+        $skus = [];
+
         $isSingleSourceMode = $this->isSingleSourceMode->execute();
         // No need to load existing source items in single source mode as we know the only source is 'default'
         $existingSourceItemsBySKU = $isSingleSourceMode ? [] : $this->getSourceItems(array_keys($stockData));
@@ -91,6 +96,7 @@ class SourceItemImporter
         $sourceItemIds = [];
         foreach ($stockData as $sku => $stockDatum) {
             $sku = (string)$sku;
+            $skus[] = $sku;
             $sources = $existingSourceItemsBySKU[$sku] ?? [];
             $isQtyExplicitlySet = (bool) ($importedData[$sku]['qty'] ?? false);
             $hasDefaultSource = isset($sources[$defaultSourceCode]);
@@ -123,6 +129,10 @@ class SourceItemImporter
         if (!empty($sourceItemIds)) {
             $this->sourceItemIndexer->executeList($sourceItemIds);
         }
+
+        // Reindex composite products present in data.
+        // As they don't have their own source items, no reindex will be triggered automatically.
+        $this->compositeProductsIndexer->reindexList($skus);
     }
 
     /**
