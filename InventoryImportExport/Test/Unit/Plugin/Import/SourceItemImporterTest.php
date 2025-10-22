@@ -20,6 +20,7 @@ use Magento\InventoryApi\Api\SourceItemsSaveInterface;
 use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
 use Magento\InventoryCatalogApi\Model\IsSingleSourceModeInterface;
 use Magento\InventoryImportExport\Plugin\Import\SourceItemImporter;
+use Magento\InventoryIndexer\Indexer\CompositeProductsIndexer;
 use Magento\InventoryIndexer\Indexer\SourceItem\SourceItemIndexer;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -72,6 +73,11 @@ class SourceItemImporterTest extends TestCase
     private $isSingleSourceModeMock;
 
     /**
+     * @var CompositeProductsIndexer|MockObject
+     */
+    private $compositeProductsIndexerMock;
+
+    /**
      * @var SkuStorage|MockObject
      */
     private SkuStorage $skuStorageMock;
@@ -81,26 +87,14 @@ class SourceItemImporterTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->sourceItemsSaveMock = $this->getMockBuilder(SourceItemsSaveInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->sourceItemsSaveMock = $this->createMock(SourceItemsSaveInterface::class);
         $this->sourceItemFactoryMock = $this->createMock(SourceItemInterfaceFactory::class);
-        $this->defaultSourceMock = $this->getMockBuilder(DefaultSourceProviderInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->sourceItemResourceModelMock = $this->getMockBuilder(SourceItem::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->stockItemProcessorMock = $this->getMockBuilder(StockItemProcessorInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->sourceItemMock = $this->getMockBuilder(SourceItemInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
+        $this->defaultSourceMock = $this->createMock(DefaultSourceProviderInterface::class);
+        $this->sourceItemResourceModelMock = $this->createMock(SourceItem::class);
+        $this->stockItemProcessorMock = $this->createMock(StockItemProcessorInterface::class);
+        $this->sourceItemMock = $this->createMock(SourceItemInterface::class);
         $this->isSingleSourceModeMock = $this->createMock(IsSingleSourceModeInterface::class);
+        $this->compositeProductsIndexerMock = $this->createMock(CompositeProductsIndexer::class);
 
         $this->skuStorageMock = $this->createMock(SkuStorage::class);
 
@@ -112,6 +106,7 @@ class SourceItemImporterTest extends TestCase
             $this->skuStorageMock,
             $this->sourceItemResourceModelMock,
             $this->createMock(SourceItemIndexer::class),
+            $this->compositeProductsIndexerMock,
         );
     }
 
@@ -182,6 +177,7 @@ class SourceItemImporterTest extends TestCase
             $this->sourceItemsSaveMock->expects($this->once())->method('execute')->with([$this->sourceItemMock])
                 ->willReturnSelf();
         }
+        $this->compositeProductsIndexerMock->expects($this->once())->method('reindexList')->with([$sku]);
 
         $this->plugin->afterProcess($this->stockItemProcessorMock, '', $stockData, []);
     }

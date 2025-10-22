@@ -11,20 +11,16 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\EntityManager\MetadataPool;
 use Magento\InventoryIndexer\Indexer\SiblingProductsProviderInterface;
-use Magento\InventoryIndexer\Indexer\SiblingSelectBuilderInterface;
-use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexName;
 
 class SiblingProductsProvider implements SiblingProductsProviderInterface
 {
     /**
      * @param ResourceConnection $resourceConnection
      * @param MetadataPool $metadataPool
-     * @param SiblingSelectBuilderInterface $selectBuilder
      */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
         private readonly MetadataPool $metadataPool,
-        private readonly SiblingSelectBuilderInterface $selectBuilder,
     ) {
     }
 
@@ -55,17 +51,5 @@ class SiblingProductsProvider implements SiblingProductsProviderInterface
         $siblingSkus = $connection->fetchCol($select);
 
         return $siblingSkus;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getData(IndexName $indexName, array $skuList = []): array
-    {
-        $connection = $this->resourceConnection->getConnection();
-        $select = $this->selectBuilder->getSelect($indexName, $skuList);
-        $data = $connection->fetchAll($select);
-
-        return $data;
     }
 }

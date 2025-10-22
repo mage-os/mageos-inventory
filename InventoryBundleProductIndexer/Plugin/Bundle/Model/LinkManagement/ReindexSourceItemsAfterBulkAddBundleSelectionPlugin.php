@@ -11,7 +11,8 @@ use Magento\Bundle\Api\Data\LinkInterface;
 use Magento\Bundle\Api\ProductLinkManagementAddChildrenInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\InventoryApi\Model\GetStockIdsBySkusInterface;
-use Magento\InventoryBundleProductIndexer\Indexer\StockIndexer;
+use Magento\InventoryIndexer\Indexer\SourceItem\SkuListInStockFactory;
+use Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,33 +21,17 @@ use Psr\Log\LoggerInterface;
 class ReindexSourceItemsAfterBulkAddBundleSelectionPlugin
 {
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var GetStockIdsBySkusInterface
-     */
-    private $getStockIdsBySkus;
-
-    /**
-     * @var StockIndexer
-     */
-    private $stockIndexer;
-
-    /**
      * @param LoggerInterface $logger
      * @param GetStockIdsBySkusInterface $getStockIdsBySkus
-     * @param StockIndexer $stockIndexer
+     * @param SkuListInStockFactory $skuListInStockFactory
+     * @param SkuListsProcessor $skuListsProcessor
      */
     public function __construct(
-        LoggerInterface $logger,
-        GetStockIdsBySkusInterface $getStockIdsBySkus,
-        StockIndexer $stockIndexer
+        private readonly LoggerInterface $logger,
+        private readonly GetStockIdsBySkusInterface $getStockIdsBySkus,
+        private readonly SkuListInStockFactory $skuListInStockFactory,
+        private readonly SkuListsProcessor $skuListsProcessor,
     ) {
-        $this->logger = $logger;
-        $this->getStockIdsBySkus = $getStockIdsBySkus;
-        $this->stockIndexer = $stockIndexer;
     }
 
     /**
@@ -70,7 +55,13 @@ class ReindexSourceItemsAfterBulkAddBundleSelectionPlugin
         try {
             $skus = array_map(fn ($linkedProduct) => $linkedProduct->getSku(), $linkedProducts);
             $stockIds = $this->getStockIdsBySkus->execute($skus);
-            $this->stockIndexer->executeList($stockIds, [$product->getSku()]);
+            $skuListInStockList = [];
+            foreach ($stockIds as $stockId) {
+                $skuListInStockList[] = $this->skuListInStockFactory->create(
+                    ['stockId' => $stockId, 'skuList' => $skus]
+                );
+            }
+            $this->skuListsProcessor->reindexList($skuListInStockList);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }

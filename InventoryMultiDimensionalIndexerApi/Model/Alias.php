@@ -19,20 +19,24 @@ class Alias
 {
     /**
      * Replica index alias
+     *
+     * @deprecated
+     * @see IndexAlias::REPLICA
      */
-    public const ALIAS_REPLICA = 'replica';
+    public const ALIAS_REPLICA = IndexAlias::REPLICA->value;
 
     /**
      * Main index alias
+     *
+     * @deprecated
+     * @see IndexAlias::MAIN
      */
-    public const ALIAS_MAIN = 'main';
+    public const ALIAS_MAIN = IndexAlias::MAIN->value;
 
     /**
-     * One of self::ALIAS_*
-     *
-     * @var string
+     * @var IndexAlias
      */
-    private $value;
+    private IndexAlias $value;
 
     /**
      * @param string $value One of self::ALIAS_*
@@ -40,10 +44,11 @@ class Alias
      */
     public function __construct(string $value)
     {
-        if ($value !== self::ALIAS_REPLICA && $value !== self::ALIAS_MAIN) {
+        try {
+            $this->value = IndexAlias::from($value);
+        } catch (\ValueError) {
             throw new LocalizedException(new Phrase('Wrong value %value for alias', ['value' => $value]));
         }
-        $this->value = $value;
     }
 
     /**
@@ -53,6 +58,6 @@ class Alias
      */
     public function getValue(): string
     {
-        return $this->value;
+        return $this->value->value;
     }
 }

@@ -11,78 +11,27 @@ use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Model\AbstractModel;
-use Magento\InventoryApi\Api\GetSourceItemsBySkuInterface;
-use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
+use Magento\InventoryApi\Model\GetStockIdsBySkusInterface;
 use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
-use Magento\InventoryConfigurableProductIndexer\Indexer\SourceItem\SourceItemIndexer;
+use Magento\InventoryIndexer\Indexer\SourceItem\SkuListInStockFactory;
+use Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor;
 
 class APISourceItemIndexerPlugin
 {
     /**
-     * @var SourceItemIndexer
-     */
-    private SourceItemIndexer $configurableProductsSourceItemIndexer;
-
-    /**
-     * @var GetSourceItemsBySkuInterface
-     */
-    private GetSourceItemsBySkuInterface $getSourceItemsBySku;
-
-    /**
-     * @var DefaultSourceProviderInterface
-     */
-    private DefaultSourceProviderInterface $defaultSourceProvider;
-
-    /**
-     * @var GetSkusByProductIdsInterface
-     */
-    private GetSkusByProductIdsInterface $skuProvider;
-
-    /**
-     * @param SourceItemIndexer $configurableProductsSourceItemIndexer
-     * @param GetSourceItemsBySkuInterface $getSourceItemsBySku
-     * @param DefaultSourceProviderInterface $defaultSourceProvider
-     * @param GetSkusByProductIdsInterface $getSkusByProductIdsInterface
+     * @param Configurable $configurableType
+     * @param GetSkusByProductIdsInterface $getSkusByProductIds
+     * @param GetStockIdsBySkusInterface $getStockIdsBySkus
+     * @param SkuListInStockFactory $skuListInStockFactory
+     * @param SkuListsProcessor $skuListsProcessor
      */
     public function __construct(
-        SourceItemIndexer              $configurableProductsSourceItemIndexer,
-        GetSourceItemsBySkuInterface   $getSourceItemsBySku,
-        DefaultSourceProviderInterface $defaultSourceProvider,
-        GetSkusByProductIdsInterface   $getSkusByProductIdsInterface
+        private readonly Configurable $configurableType,
+        private readonly GetSkusByProductIdsInterface $getSkusByProductIds,
+        private readonly GetStockIdsBySkusInterface $getStockIdsBySkus,
+        private readonly SkuListInStockFactory $skuListInStockFactory,
+        private readonly SkuListsProcessor $skuListsProcessor,
     ) {
-        $this->configurableProductsSourceItemIndexer = $configurableProductsSourceItemIndexer;
-        $this->getSourceItemsBySku = $getSourceItemsBySku;
-        $this->defaultSourceProvider = $defaultSourceProvider;
-        $this->skuProvider = $getSkusByProductIdsInterface;
-    }
-
-    /**
-     * Extracts product source item ids
-     *
-     * @param array $childProductIds
-     * @return array
-     * @throws NoSuchEntityException
-     */
-    private function getProductSourceItemIds(array $childProductIds): array
-    {
-        $sourceItemIds = [];
-        foreach ($childProductIds as $productIds) {
-            if (empty($productIds)) {
-                continue;
-            }
-            foreach ($this->skuProvider->execute($productIds) as $childSku) {
-                $sourceItems = $this->getSourceItemsBySku->execute($childSku);
-                foreach ($sourceItems as $key => $sourceItem) {
-                    if ($sourceItem->getSourceCode() === $this->defaultSourceProvider->getCode()) {
-                        unset($sourceItems[$key]);
-                        continue;
-                    }
-                    $sourceItemIds[] = $sourceItem->getId();
-                }
-            }
-        }
-
-        return $sourceItemIds;
     }
 
     /**
@@ -104,10 +53,23 @@ class APISourceItemIndexerPlugin
             return $result;
         }
 
-        $childProductIds = $product->getTypeInstance()->getChildrenIds($product->getId());
-        $sourceItemIds = $this->getProductSourceItemIds($childProductIds);
-        if ($sourceItemIds) {
-            $this->configurableProductsSourceItemIndexer->executeList($sourceItemIds);
+        $childProductIds = $this->configurableType->getChildrenIds($product->getId())[0];
+        if (!$childProductIds) {
+            return $result;
+        }
+
+        $childProductSkus = $this->getSkusByProductIds->execute($childProductIds);
+        $stockIds = $this->getStockIdsBySkus->execute($childProductSkus);
+        if ($stockIds) {
+            $skuListInStockList = [];
+            foreach ($stockIds as $stockId) {
+                $skuListInStock = $this->skuListInStockFactory->create(
+                    ['stockId' => $stockId, 'skuList' => [$product->getSku()]]
+                );
+                $skuListInStockList[] = $skuListInStock;
+            }
+            $this->skuListsProcessor->reindexList($skuListInStockList);
+
             $product->setIsChangedCategories(true);
             $product->setAffectedCategoryIds($product->getCategoryIds());
             $product->cleanModelCache();

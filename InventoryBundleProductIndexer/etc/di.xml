@@ -6,11 +6,6 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <type name="Magento\InventoryBundleProductIndexer\Indexer\StockIndexer">
-        <arguments>
-            <argument name="productsProvider" xsi:type="object">Magento\InventoryBundleProductIndexer\Indexer\SiblingProductsProvider</argument>
-        </arguments>
-    </type>
     <type name="Magento\Bundle\Api\ProductLinkManagementInterface">
         <plugin name="reindex_source_items_after_add_bundle_selection" type="Magento\InventoryBundleProductIndexer\Plugin\Bundle\Model\LinkManagement\ReindexSourceItemsAfterAddBundleSelectionPlugin"/>
         <plugin name="reindex_source_items_after_save_bundle_selection" type="Magento\InventoryBundleProductIndexer\Plugin\Bundle\Model\LinkManagement\ReindexSourceItemsAfterSaveBundleSelectionPlugin"/>
@@ -19,12 +14,14 @@
     <type name="Magento\Bundle\Api\ProductLinkManagementAddChildrenInterface">
         <plugin name="reindex_source_items_after_bulk_add_bundle_selection" type="Magento\InventoryBundleProductIndexer\Plugin\Bundle\Model\LinkManagement\ReindexSourceItemsAfterBulkAddBundleSelectionPlugin"/>
     </type>
-    <type name="Magento\InventoryBundleProductIndexer\Indexer\SiblingProductsProvider">
+    <type name="Magento\InventoryIndexer\Indexer\Stock\DataProvider">
         <arguments>
-            <argument name="selectBuilder" xsi:type="object">Magento\InventoryBundleProductIndexer\Indexer\SelectBuilder</argument>
+            <argument name="siblingSelectBuilders" xsi:type="array">
+                <item name="bundle" xsi:type="object">Magento\InventoryBundleProductIndexer\Indexer\SelectBuilder</item>
+            </argument>
         </arguments>
     </type>
-    <type name="Magento\InventoryIndexer\Indexer\Stock\IndexDataFiller">
+    <type name="Magento\InventoryIndexer\Indexer\SiblingProductsProvidersPool">
         <arguments>
             <argument name="siblingProductsProviders" xsi:type="array">
                 <item name="bundle" xsi:type="object">Magento\InventoryBundleProductIndexer\Indexer\SiblingProductsProvider</item>
