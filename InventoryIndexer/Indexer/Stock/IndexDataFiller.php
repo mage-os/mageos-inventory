@@ -8,81 +8,96 @@ declare(strict_types=1);
 namespace Magento\InventoryIndexer\Indexer\Stock;
 
 use ArrayIterator;
-use Magento\Framework\App\ResourceConnection;
-use Magento\InventoryIndexer\Indexer\SelectBuilder;
-use Magento\InventoryIndexer\Indexer\SiblingProductsProviderInterface;
+use Magento\InventoryCatalogApi\Model\GetProductTypesBySkusInterface;
+use Magento\InventoryConfigurationApi\Model\GetAllowedProductTypesForSourceItemManagementInterface;
+use Magento\InventoryIndexer\Indexer\SiblingProductsProvidersPool;
+use Magento\InventoryIndexer\Indexer\SourceItem\SkuListInStock;
+use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexAlias;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexHandlerInterface;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexName;
 
 class IndexDataFiller
 {
     /**
-     * @param ResourceConnection $resourceConnection
-     * @param SelectBuilder $selectBuilder
+     * @param ReservationsIndexTable $reservationsIndexTable
+     * @param PrepareReservationsIndexData $prepareReservationsIndexData
+     * @param GetProductTypesBySkusInterface $getProductTypesBySkus
+     * @param GetAllowedProductTypesForSourceItemManagementInterface $getSourceItemManagementProductTypes
+     * @param DataProvider $dataProvider
      * @param IndexHandlerInterface $indexStructureHandler
-     * @param SiblingProductsProviderInterface[] $siblingProductsProviders
+     * @param SiblingProductsProvidersPool $siblingProductsProvidersPool
      */
     public function __construct(
-        private readonly ResourceConnection $resourceConnection,
-        private readonly SelectBuilder $selectBuilder,
+        private readonly ReservationsIndexTable $reservationsIndexTable,
+        private readonly PrepareReservationsIndexData $prepareReservationsIndexData,
+        private readonly GetProductTypesBySkusInterface $getProductTypesBySkus,
+        private readonly GetAllowedProductTypesForSourceItemManagementInterface $getSourceItemManagementProductTypes,
+        private readonly DataProvider $dataProvider,
         private readonly IndexHandlerInterface $indexStructureHandler,
-        private readonly array $siblingProductsProviders = [],
+        private readonly SiblingProductsProvidersPool $siblingProductsProvidersPool,
     ) {
-        (fn (SiblingProductsProviderInterface ...$siblingProductsProviders) => $siblingProductsProviders)(
-            ...$this->siblingProductsProviders
-        );
     }
 
     /**
      * Fill index with data.
      *
      * @param IndexName $indexName
-     * @param int $stockId
-     * @param array $skuList
+     * @param SkuListInStock $skuListInStock
+     * @param string $connectionName
      * @return void
      */
-    public function fillIndex(IndexName $indexName, int $stockId, array $skuList = []): void
+    public function fillIndex(IndexName $indexName, SkuListInStock $skuListInStock, string $connectionName): void
     {
-        $select = $this->selectBuilder->getSelect($stockId, $skuList);
-        $data = $this->resourceConnection->getConnection()->fetchAll($select);
-        if ($skuList) {
-            $this->indexStructureHandler->cleanIndex(
-                $indexName,
-                new ArrayIterator($skuList),
-                ResourceConnection::DEFAULT_CONNECTION
-            );
-        }
-        $this->indexStructureHandler->saveIndex(
-            $indexName,
-            new ArrayIterator($data),
-            ResourceConnection::DEFAULT_CONNECTION
-        );
+        $stockId = $skuListInStock->getStockId();
+        $this->reservationsIndexTable->createTable($stockId);
+        $this->prepareReservationsIndexData->execute($stockId);
 
-        foreach ($this->siblingProductsProviders as $siblingProductsProvider) {
-            if (!empty($skuList)) {
-                // partial reindex
-                $siblingSkus = $siblingProductsProvider->getSkus($skuList);
-                if (!$siblingSkus) {
-                    continue;
-                }
-            } else {
-                // full reindex
-                $siblingSkus = [];
+        $skuList = $skuListInStock->getSkuList();
+        if ($skuList) {
+            $productTypesBySkus = $this->getProductTypesBySkus->execute($skuList);
+            $productSkusByTypes = array_fill_keys(array_unique(array_values($productTypesBySkus)), []);
+            foreach ($productTypesBySkus as $sku => $type) {
+                $productSkusByTypes[$type][] = $sku;
             }
 
-            $data = $siblingProductsProvider->getData($indexName, $siblingSkus);
-            if ($siblingSkus) {
+            $sourceItemManagementTypes = $this->getSourceItemManagementProductTypes->execute();
+            $composableSkusByTypes = array_intersect_key($productSkusByTypes, array_flip($sourceItemManagementTypes));
+            $compositeSkusByTypes = array_diff_key($productSkusByTypes, $composableSkusByTypes);
+
+            $composableSkus = array_merge([], ...array_values($composableSkusByTypes));
+            if ($composableSkus) {
+                $data = $this->dataProvider->getData($stockId, $composableSkus);
                 $this->indexStructureHandler->cleanIndex(
                     $indexName,
-                    new ArrayIterator($siblingSkus),
-                    ResourceConnection::DEFAULT_CONNECTION
+                    new ArrayIterator($composableSkus),
+                    $connectionName
                 );
+                $this->indexStructureHandler->saveIndex($indexName, new ArrayIterator($data), $connectionName);
             }
-            $this->indexStructureHandler->saveIndex(
-                $indexName,
-                new ArrayIterator($data),
-                ResourceConnection::DEFAULT_CONNECTION
-            );
+        } else {
+            $data = $this->dataProvider->getData($stockId);
+            $this->indexStructureHandler->saveIndex($indexName, new ArrayIterator($data), $connectionName);
+            $composableSkus = array_keys($data);
+            $compositeSkusByTypes = [];
         }
+
+        $siblingsGroupedByType = $this->siblingProductsProvidersPool->getSiblingsGroupedByType($composableSkus);
+        foreach ($siblingsGroupedByType as $productType => $siblingSkus) {
+            $compositeSkusByTypes[$productType] = isset($compositeSkusByTypes[$productType])
+                ? array_keys(array_flip($compositeSkusByTypes[$productType]) + array_flip($siblingSkus))
+                : $siblingSkus;
+        }
+
+        $indexAlias = IndexAlias::from($indexName->getAlias()->getValue());
+        foreach ($compositeSkusByTypes as $productType => $skus) {
+            $data = $this->dataProvider->getSiblingsData($stockId, $productType, $skus, $indexAlias);
+            if ($skuList) {
+                // Partial reindex. When full reindex, replica table is used, so no cleaning is required.
+                $this->indexStructureHandler->cleanIndex($indexName, new ArrayIterator($skus), $connectionName);
+            }
+            $this->indexStructureHandler->saveIndex($indexName, new ArrayIterator($data), $connectionName);
+        }
+
+        $this->reservationsIndexTable->dropTable($stockId);
     }
 }

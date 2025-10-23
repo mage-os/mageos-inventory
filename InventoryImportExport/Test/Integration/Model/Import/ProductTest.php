@@ -447,6 +447,54 @@ class ProductTest extends TestCase
         $this->assertEquals(0, $getProductSalableQty->execute($sku, $stock2));
     }
 
+    #[
+        AppArea(\Magento\Framework\App\Area::AREA_ADMINHTML),
+        DataFixture(SourceFixture::class, ['source_code' => 'source2']),
+        DataFixture(StockFixture::class, as: 'stock2'),
+        DataFixture(
+            StockSourceLinksFixture::class,
+            [['stock_id' => '$stock2.stock_id$', 'source_code' => 'source2']]
+        ),
+        DataFixture(
+            StockSalesChannelsFixture::class,
+            ['stock_id' => '$stock2.stock_id$', 'sales_channels' => ['base']]
+        ),
+        DataFixture(ProductFixture::class, ['sku' => 'simple1']),
+        DataFixture(
+            SourceItemsFixture::class,
+            [
+                ['sku' => 'simple1', 'source_code' => 'default', 'quantity' => 0],
+                ['sku' => 'simple1', 'source_code' => 'source2', 'quantity' => 100],
+            ]
+        ),
+        DataFixture(
+            CsvFileFixture::class,
+            [
+                'rows' => [
+                    ['product_type', 'sku', 'name', 'product_websites', 'associated_skus', 'attribute_set_code'],
+                    ['grouped', 'grouped1', 'Grouped Product 1', 'base', 'simple1=5', 'Default'],
+                ]
+            ],
+            'grouped_product_import_file'
+        ),
+    ]
+    public function testShouldReindexCustomStockWhenCompositeProductImported(): void
+    {
+        $getStockItemData = Bootstrap::getObjectManager()->get(GetStockItemData::class);
+        $fixtures = DataFixtureStorageManager::getStorage();
+        $stockId = (int) $fixtures->get('stock2')->getId();
+
+        $pathToFile = $fixtures->get('grouped_product_import_file')->getAbsolutePath();
+        $productImporterModel = $this->getProductImporterModel($pathToFile);
+        $errors = $productImporterModel->validateData();
+        self::assertEquals(0, $errors->getErrorsCount());
+        $productImporterModel->importData();
+
+        $stockItemData = $getStockItemData->execute('grouped1', $stockId);
+        self::assertNotEmpty($stockItemData);
+        self::assertTrue((bool) $stockItemData[GetStockItemData::IS_SALABLE]);
+    }
+
     /**
      * Process messages
      *
@@ -508,12 +556,12 @@ class ProductTest extends TestCase
      * Return Product Importer Model for use with tests requires path to CSV import file
      *
      * @param string $pathToFile
-     * @param string $behavior
+     * @param string $behavior See Magento\ImportExport\Model\Source\Import\Behavior\Basic::toArray for proper mapping
      * @return Product
      */
     private function getProductImporterModel(
         string $pathToFile,
-        string $behavior = Import::BEHAVIOR_ADD_UPDATE
+        string $behavior = Import::BEHAVIOR_APPEND
     ): Product {
         /** @var Filesystem\Directory\WriteInterface $directory */
         $directory = $this->filesystem

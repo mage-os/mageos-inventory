@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\InventoryIndexer\Indexer;
 
-use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexName;
-
 interface SiblingProductsProviderInterface
 {
     /**
@@ -18,13 +16,4 @@ interface SiblingProductsProviderInterface
      * @return string[]
      */
     public function getSkus(array $skus): array;
-
-    /**
-     * Retrieve sibling product data based on their SKUs.
-     *
-     * @param IndexName $indexName
-     * @param array $skuList
-     * @return array
-     */
-    public function getData(IndexName $indexName, array $skuList = []): array;
 }
