@@ -17,7 +17,6 @@
             <group value="multi_mode"/>
             <group value="pr_exclude"/>
         </annotations>
-
         <before>
             <!--Create test data.-->
             <createData entity="_defaultCategory" stepKey="category"/>
@@ -103,6 +102,7 @@
                 <argument name="websiteName" value="{{_defaultWebsite.name}}"/>
             </actionGroup>
             <deleteData createDataKey="stock" stepKey="deleteStock"/>
+            <deleteData createDataKey="customer" stepKey="deleteCustomer"/>
             <!--Disable source.-->
             <actionGroup ref="DisableAllSourcesActionGroup" stepKey="disableAllSources"/>
             <actionGroup ref="CliIndexerReindexActionGroup" stepKey="reindex">
@@ -111,7 +111,6 @@
             <deleteData createDataKey="category" stepKey="deletecategory"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutFromAdminArea"/>
         </after>
-
         <!--Add configurable product to cart.-->
         <actionGroup ref="LoginToStorefrontActionGroup" stepKey="loginAsCustomer">
             <argument name="Customer" value="$$customer$$" />
@@ -132,7 +131,6 @@
         <!-- Assert out of stock option is absent on product page -->
         <amOnPage url="{{StorefrontProductPage.url($$configurableProduct.custom_attributes[url_key]$$)}}" stepKey="navigateToConfigurablePDP"/>
         <waitForPageLoad stepKey="waitForConfigurablePDP"/>
-
         <grabMultiple selector="{{StorefrontProductInfoMainSection.selectableProductOptions($$configurableProductAttribute.attribute_id$$)}}" stepKey="productOptions"/>
         <assertEquals stepKey="assertProductOptions">
             <actualResult type="variable">productOptions</actualResult>

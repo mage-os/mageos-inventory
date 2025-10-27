@@ -45,7 +45,8 @@
                 <argument name="sourceCode" value="$$additionalSourceMainWebsite.source[source_code]$$"/>
             </actionGroup>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutOfAdmin"/>
-            <!--Delete category and stock.-->
+            <!--Delete category, product and stock.-->
+            <deleteData createDataKey="customer" stepKey="deleteCustomer"/>
             <deleteData createDataKey="category" stepKey="deleteCategory"/>
             <deleteData createDataKey="additionalStockMainWebsite" stepKey="deleteMainWebsiteStock"/>
             <!-- Delete all products via API -->

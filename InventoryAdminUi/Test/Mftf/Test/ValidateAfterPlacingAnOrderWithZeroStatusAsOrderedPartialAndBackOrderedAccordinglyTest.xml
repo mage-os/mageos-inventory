@@ -18,7 +18,6 @@
             <group value="msi"/>
             <group value="multi_mode"/>
         </annotations>
-
         <before>
             <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
           <!-- Create category, product and customer-->
@@ -27,7 +26,6 @@
               <requiredEntity createDataKey="category"/>
             </createData>
             <createData entity="MsiCustomer1" stepKey="customer"/>
-
           <!-- Create source and stock-->
             <createData entity="FullSource1" stepKey="source"/>
             <createData entity="BasicMsiStockWithMainWebsite1" stepKey="stock"/>
@@ -35,7 +33,6 @@
               <requiredEntity createDataKey="stock"/>
               <requiredEntity createDataKey="source"/>
             </createData>
-
           <!--Create 3 product.-->
             <createData entity="_defaultProduct" stepKey="product1">
                <requiredEntity createDataKey="category"/>
@@ -46,11 +43,9 @@
             <createData entity="SimpleProduct3" stepKey="product3">
                <requiredEntity createDataKey="category"/>
             </createData>
-
           <!--Create Bundle product -->
             <createData entity="ApiBundleProductShipmentTypeSeparately" stepKey="createBundleProduct"/>
         </before>
-
         <!-- select allow Backorder below 0 and notify customer-->
         <comment userInput="Fill config 'Backorders'." stepKey="fillConfigComment"/>
         <magentoCLI command="config:set cataloginventory/item_options/backorders 2" stepKey="fillBackordersConfigValue"/>
@@ -61,7 +56,6 @@
         <actionGroup ref="CliCacheFlushActionGroup" stepKey="cleanCacheAfterFillBackordersConfig">
             <argument name="tags" value=""/>
         </actionGroup>
-
          <!--Assign source to product, and save the product-->
         <amOnPage url="{{AdminProductEditPage.url($$product.id$$)}}" stepKey="openProductEditPage"/>
         <waitForPageLoad stepKey="waitForPageToLoad"/>
@@ -71,18 +65,15 @@
             <argument name="sourceQty" value="0"/>
         </actionGroup>
         <actionGroup ref="SaveProductFormActionGroup" stepKey="saveProduct"/>
-
         <!-- Login as customer -->
         <actionGroup ref="LoginToStorefrontActionGroup" stepKey="loginToStorefront">
             <argument name="Customer" value="$$customer$$"/>
         </actionGroup>
-
         <!-- Add product to shopping cart -->
         <amOnPage url="{{StorefrontProductPage.url($product.custom_attributes[url_key]$)}}" stepKey="navigateToToPDP"/>
         <actionGroup ref="StorefrontAddProductToCartWithQtyActionGroup" stepKey="addProductToCart">
             <argument name="productQty" value="1"/>
         </actionGroup>
-
         <!--Place order.-->
         <actionGroup ref="GoToCheckoutFromMinicartActionGroup" stepKey="navigateToCheckout"/>
         <actionGroup ref="StorefrontCheckoutClickNextButtonActionGroup" stepKey="clickOnNextPaymentPage"/>
@@ -90,7 +81,6 @@
         <actionGroup ref="ClickPlaceOrderActionGroup" stepKey="clickOnPlaceOrder"/>
         <actionGroup ref="StorefrontClickOrderLinkFromCheckoutSuccessPageActionGroup" stepKey="clickOrderLink"/>
         <grabFromCurrentUrl regex="~/order_id/(\d+)/~" stepKey="orderId"/>
-
         <!--Check placed order in admin grid and validate the product.-->
         <actionGroup ref="AdminOpenOrderByEntityIdActionGroup" stepKey="openOrderGrid">
             <argument name="entityId" value="{$orderId}"/>
@@ -99,7 +89,6 @@
             <argument name="product_name" value="$$product.name$$"/>
             <argument name="status" value="Backordered"/>
         </actionGroup>
-
         <!--Assign source to all 3 product, and save the product-->
         <amOnPage url="{{AdminProductEditPage.url($$product1.id$$)}}" stepKey="openProduct1EditPage"/>
         <waitForPageLoad stepKey="waitForPageToLoad1"/>
@@ -125,12 +114,10 @@
             <argument name="sourceQty" value="2"/>
         </actionGroup>
         <actionGroup ref="SaveProductFormActionGroup" stepKey="saveProduct3"/>
-
         <!--Search for the Created Bundle product -->
         <actionGroup ref="FilterAndSelectProductActionGroup" stepKey="openBundleProductPage">
             <argument name="productSku" value="$$createBundleProduct.sku$$"/>
         </actionGroup>
-
         <!--Update the Created Bundle product-->
         <actionGroup ref="AdminAddOptionToBundleProductActionGroup" stepKey="AdminAddOptionToBundleProduct">
             <argument name="categoryName" value="$$category.name$$"/>
@@ -147,23 +134,18 @@
         <click selector="{{AdminAddProductsToOptionPanel.addSelectedProducts}}" stepKey="clickAddSelectedBundleProducts"/>
         <fillField selector="{{AdminProductFormBundleSection.defaultQuantity1}}" userInput="1" stepKey="fillQtyForSimpleProductAdded"/>
         <scrollToTopOfPage stepKey="scrollToTheTopOfBundleProductPage"/>
-
         <!--Save the Bundle Product-->
         <actionGroup ref="SaveProductFormActionGroup" stepKey="saveBundleProduct"/>
-
         <!-- Verify the Bundle Product in Created Category in Storefront-->
         <actionGroup ref="AssertProductInStorefrontCategoryPage" stepKey="assertProductInStorefront1">
             <argument name="category" value="$$category$$"/>
             <argument name="product" value="$$createBundleProduct$$"/>
         </actionGroup>
-
         <!-- Add product to shopping cart -->
         <amOnPage url="{{StorefrontProductPage.url($createBundleProduct.custom_attributes[url_key]$)}}" stepKey="navigateToToPDP1"/>
         <comment userInput="Comment is added to preserve the step key for backward compatibility" stepKey="waitForBundleProductPageToLoad"/>
-
         <!--Storefront: Verify Product option details-->
         <actionGroup ref="StorefrontAddMultipleSimpleProductToBundleProductActionGroup"  stepKey="addBundleProductInStorefront"/>
-
         <!--Place order Again.-->
         <actionGroup ref="GoToCheckoutFromMinicartActionGroup" stepKey="navigateToCheckoutAgain"/>
         <actionGroup ref="StorefrontCheckoutClickNextButtonActionGroup" stepKey="clickOnNextPaymentPageAgain"/>
@@ -171,7 +153,6 @@
         <actionGroup ref="ClickPlaceOrderActionGroup" stepKey="clickOnPlaceOrderAgain"/>
         <actionGroup ref="StorefrontClickOrderLinkFromCheckoutSuccessPageActionGroup" stepKey="clickOrderLinkAgain"/>
         <grabFromCurrentUrl regex="~/order_id/(\d+)/~" stepKey="orderId1"/>
-
         <!--Check placed order in admin grid and validate the all product status .-->
         <actionGroup ref="AdminOpenOrderByEntityIdActionGroup" stepKey="openOrderInGrid">
             <argument name="entityId" value="{$orderId1}"/>
@@ -188,7 +169,6 @@
             <argument name="product_name" value="$$product3.name$$"/>
             <argument name="status" value="Ordered"/>
         </actionGroup>
-
         <after>
             <comment userInput="Fill config 'Backorders'." stepKey="fillConfigComment1"/>
             <magentoCLI command="config:set cataloginventory/item_options/backorders 0" stepKey="fillDefaultBackordersConfigValue1"/>
@@ -199,7 +179,6 @@
             <actionGroup ref="CliCacheFlushActionGroup" stepKey="cleanCacheAfterFillBackordersConfig1">
                 <argument name="tags" value=""/>
             </actionGroup>
-
             <!--Delete the created products and catagory.-->
             <deleteData createDataKey="product" stepKey="deleteProduct"/>
             <deleteData createDataKey="product1" stepKey="deleteProduct1"/>
@@ -207,14 +186,13 @@
             <deleteData createDataKey="product3" stepKey="deleteProduct3"/>
             <deleteData createDataKey="createBundleProduct" stepKey="deleteProduct4"/>
             <deleteData createDataKey="category" stepKey="deleteCategory"/>
-
             <!--Assign Default Stock to Default Website.-->
             <actionGroup ref="AssignWebsiteToStockActionGroup" stepKey="assignMainWebsiteToDefaultStock">
                 <argument name="stockName" value="{{_defaultStock.name}}"/>
                 <argument name="websiteName" value="{{_defaultWebsite.name}}"/>
             </actionGroup>
             <deleteData createDataKey="stock" stepKey="deleteCustomStock"/>
-
+            <deleteData createDataKey="customer" stepKey="deleteCustomer"/>
             <!--Disable source.-->
             <actionGroup ref="DisableSourceActionGroup" stepKey="deleteSource">
                 <argument name="sourceCode" value="$source.source[source_code]$"/>
