@@ -28,4 +28,13 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Bundle\Model\ResourceModel\Indexer\Stock">
+        <plugin name="default_stock_indexer_plugin" type="Magento\InventoryBundleProductIndexer\Plugin\Bundle\Model\ResourceModel\Indexer\StockPlugin" />
+    </type>
+    <type name="Magento\Bundle\Model\ResourceModel\Indexer\BundleOptionStockDataSelectBuilder">
+        <plugin name="join_reservations_table" type="Magento\InventoryBundleProductIndexer\Plugin\Bundle\Model\ResourceModel\Indexer\BundleOptionStockDataSelectBuilderPlugin" />
+    </type>
+    <type name="Magento\Bundle\Model\ResourceModel\Indexer\OptionQtyExpressionProvider">
+        <plugin name="join_reservations_table" type="Magento\InventoryBundleProductIndexer\Plugin\Bundle\Model\ResourceModel\Indexer\OptionQtyExpressionProviderPlugin" />
+    </type>
 </config>

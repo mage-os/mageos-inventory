@@ -259,7 +259,7 @@ class PlaceOrderOnDefaultStockTest extends TestCase
 
         $productLinks = $bundleProductOption->getProductLinks();
         $productLink = reset($productLinks);
-        $productLinkId = $productLink->getOptionId();
+        $productLinkId = $productLink->getId();
 
         return new DataObject(
             [

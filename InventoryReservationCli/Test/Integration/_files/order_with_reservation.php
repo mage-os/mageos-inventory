@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 use Magento\Sales\Model\Order\ShipmentFactory;
 
-require __DIR__ . '/../../../../../../../dev/tests/integration/testsuite/Magento/Sales/_files/order.php';
-
 $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
 /** @var \Magento\Sales\Model\Order $order */

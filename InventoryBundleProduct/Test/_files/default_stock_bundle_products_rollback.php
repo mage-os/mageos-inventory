@@ -10,7 +10,10 @@ declare(strict_types=1);
  * bundled items should not contain products with required custom options.
  * However, if to create such a bundle product, it will be always out of stock.
  */
-require __DIR__ . '/../../../../../../dev/tests/integration/testsuite/Magento/Catalog/_files/products_rollback.php';
+
+use Magento\TestFramework\Workaround\Override\Fixture\Resolver;
+
+Resolver::getInstance()->requireDataFixture('Magento/Catalog/_files/products_rollback.php');
 require __DIR__ . '/product_simple_out_of_stock_rollback.php';
 
 /** @var \Magento\Framework\Registry $registry */

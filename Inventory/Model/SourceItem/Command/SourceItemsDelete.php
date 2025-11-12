@@ -32,10 +32,8 @@ class SourceItemsDelete implements SourceItemsDeleteInterface
      * @param DeleteMultiple $deleteMultiple
      * @param LoggerInterface $logger
      */
-    public function __construct(
-        DeleteMultiple $deleteMultiple,
-        LoggerInterface $logger
-    ) {
+    public function __construct(DeleteMultiple $deleteMultiple, LoggerInterface $logger)
+    {
         $this->deleteMultiple = $deleteMultiple;
         $this->logger = $logger;
     }

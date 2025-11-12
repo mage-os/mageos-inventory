@@ -105,6 +105,14 @@ class AppendReservationsTest extends TestCase
         self::assertCount(0, $inconsistencies);
     }
 
+    public function testCompensateMissingOrderId()
+    {
+        $argument = '000000000:Test11:1:1';
+        $this->expectException(\InvalidArgumentException::class);
+        $reservation = $this->getReservationFromCompensationArgument->execute($argument);
+        $this->appendReservations->execute([$reservation]);
+    }
+
     /**
      * Load current Inconsistencies
      *

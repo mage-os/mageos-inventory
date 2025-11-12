@@ -134,6 +134,58 @@ class UpdateIndexSalabilityStatusTest extends TestCase
             StockSalesChannelsFixture::class,
             ['stock_id' => '$stock2.stock_id$', 'sales_channels' => ['base']]
         ),
+        DataFixture(
+            ProductFixture::class,
+            ['sku' => 'simple1', 'stock_item' => ['use_config_min_qty' => 0, 'min_qty' => 2]],
+            's1'
+        ),
+        DataFixture(DeleteSourceItemsFixture::class, [['sku' => '$s1.sku$', 'source_code' => 'default']]),
+        DataFixture(
+            SourceItemsFixture::class,
+            [['sku' => '$s1.sku$', 'source_code' => '$source2.source_code$', 'quantity' => 4]]
+        ),
+        DataFixture(
+            BundleSelectionFixture::class,
+            ['sku' => '$s1.sku$', 'qty' => 2, 'can_change_quantity' => 0],
+            'link1'
+        ),
+        DataFixture(BundleOptionFixture::class, ['product_links' => ['$link1$']], 'opt1'),
+        DataFixture(BundleProductFixture::class, ['sku' => 'bundle1', '_options' => ['$opt1$']], 'b1'),
+        DataFixture(GuestCartFixture::class, as: 'cart'),
+        DataFixture(AddProductToCartFixture::class, ['cart_id' => '$cart.id$', 'product_id' => '$s1.id$']),
+        DataFixture(SetBillingAddressFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetShippingAddressFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetGuestEmailFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetDeliveryMethodFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetPaymentMethodFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(PlaceOrderFixture::class, ['cart_id' => '$cart.id$'], 'order'),
+    ]
+    public function testStatusesAfterBuyingNotLastChildProduct(): void
+    {
+        /** @var StockInterface $stock */
+        $stock = $this->fixtures->get('stock2');
+
+        $this->consumer->process(2);
+
+        $childStockItem = $this->getStockItemData->execute('simple1', $stock->getStockId());
+        self::assertTrue((bool) $childStockItem[GetStockItemDataInterface::IS_SALABLE]);
+        $bundleStockItem = $this->getStockItemData->execute('bundle1', $stock->getStockId());
+        self::assertFalse((bool) $bundleStockItem[GetStockItemDataInterface::IS_SALABLE]);
+    }
+
+    #[
+        DbIsolation(false),
+        AppIsolation(true),
+        DataFixture(SourceFixture::class, as: 'source2'),
+        DataFixture(StockFixture::class, as: 'stock2'),
+        DataFixture(
+            StockSourceLinksFixture::class,
+            [['stock_id' => '$stock2.stock_id$', 'source_code' => '$source2.source_code$']]
+        ),
+        DataFixture(
+            StockSalesChannelsFixture::class,
+            ['stock_id' => '$stock2.stock_id$', 'sales_channels' => ['base']]
+        ),
         DataFixture(ProductFixture::class, ['sku' => 'simple1'], 's1'),
         DataFixture(DeleteSourceItemsFixture::class, [['sku' => '$s1.sku$', 'source_code' => 'default']]),
         DataFixture(

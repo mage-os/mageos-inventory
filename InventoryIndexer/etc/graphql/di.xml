@@ -9,7 +9,5 @@
     <preference for="Magento\InventorySalesApi\Api\IsProductSalableInterface" type="Magento\InventoryIndexer\Model\IsProductSalable"/>
     <preference for="Magento\InventorySalesApi\Model\GetStockItemDataInterface" type="Magento\InventoryIndexer\Model\ResourceModel\GetStockItemDataCache"/>
     <preference for="Magento\InventorySalesApi\Model\GetStockItemsDataInterface" type="Magento\InventoryIndexer\Model\ResourceModel\GetStockItemsDataCache"/>
-    <type name="Magento\InventorySales\Model\AreProductsSalable">
-        <plugin name="are_products_salable" type="Magento\InventoryIndexer\Plugin\InventorySales\AreProductsSalable"/>
-    </type>
+    <preference for="Magento\InventorySalesApi\Api\AreProductsSalableInterface" type="Magento\InventoryIndexer\Model\AreMultipleProductsSalable"/>
 </config>

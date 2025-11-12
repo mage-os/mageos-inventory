@@ -90,6 +90,10 @@
             <argument name="productTableName" xsi:type="string">catalog_product_entity</argument>
         </arguments>
     </type>
+    <!--
+    @deprecated
+    @see \Magento\InventoryIndexer\Model\AreMultipleProductsSalable
+    -->
     <virtualType name="Magento\InventoryIndexer\Model\AreProductsSalable" type="Magento\InventorySales\Model\AreProductsSalable">
         <arguments>
             <argument name="isProductSalable" xsi:type="object">Magento\InventoryIndexer\Model\IsProductSalable</argument>
@@ -97,7 +101,7 @@
     </virtualType>
     <type name="Magento\InventoryIndexer\Indexer\Stock\GetSalableStatuses">
         <arguments>
-            <argument name="areProductsSalable" xsi:type="object">Magento\InventoryIndexer\Model\AreProductsSalable</argument>
+            <argument name="areProductsSalable" xsi:type="object">Magento\InventoryIndexer\Model\AreMultipleProductsSalable</argument>
         </arguments>
     </type>
 </config>
