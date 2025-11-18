@@ -82,22 +82,24 @@ define([
          */
         getNearbyLocations: function (searchCriteria) {
             var self = this,
-                serviceUrl = resourceUrlManager.getUrlForNearbyPickupLocations(websiteCode, searchCriteria);
+                serviceUrl = resourceUrlManager.getUrlForNearbyPickupLocations(),
+                requestData = resourceUrlManager.getNearbyPickupLocationsRequestData(websiteCode, searchCriteria),
+                cacheKey = serviceUrl + JSON.stringify(requestData);
 
-            if (self.locationsCache[serviceUrl]) {
-                return $.Deferred().resolve(self.locationsCache[serviceUrl]).promise();
+            if (self.locationsCache[cacheKey]) {
+                return $.Deferred().resolve(self.locationsCache[cacheKey]).promise();
             }
 
             self.isLoading(true);
 
             return storage
-                .get(serviceUrl, {}, false)
+                .post(serviceUrl, JSON.stringify(requestData), false)
                 .then(function (result) {
-                    self.locationsCache[serviceUrl] = _.map(result.items, function (address) {
+                    self.locationsCache[cacheKey] = _.map(result.items, function (address) {
                         return self.formatAddress(address);
                     });
 
-                    return self.locationsCache[serviceUrl];
+                    return self.locationsCache[cacheKey];
                 })
                 .fail(function (response) {
                     self.processError(response);

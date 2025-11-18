@@ -13,4 +13,10 @@
             <resource ref="anonymous"/>
         </resources>
     </route>
+    <route url="/V1/inventory/in-store-pickup/pickup-locations/" method="POST">
+        <service class="Magento\InventoryInStorePickupApi\Api\GetPickupLocationsInterface" method="execute"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
 </routes>
