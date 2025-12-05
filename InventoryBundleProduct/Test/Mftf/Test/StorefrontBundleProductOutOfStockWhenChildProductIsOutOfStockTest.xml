@@ -212,6 +212,10 @@
             <deleteData createDataKey="product3" stepKey="deleteProduct3"/>
             <deleteData createDataKey="bundleProduct1" stepKey="deleteBundleProduct1"/>
             <deleteData createDataKey="bundleProduct2" stepKey="deleteBundleProduct2"/>
+            <!-- Deleting the parent website ensures a clean removal of all related store structures. -->
+            <actionGroup ref="AdminDeleteWebsiteActionGroup" stepKey="deleteWebsite">
+                <argument name="websiteName" value="{{customWebsite.name}}"/>
+            </actionGroup>
             <!-- Logout -->
             <actionGroup ref="CliIndexerReindexActionGroup" stepKey="reindexAndFlushCache">
                 <argument name="indices" value=""/>
