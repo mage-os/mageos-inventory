@@ -63,7 +63,7 @@ class ImportGeoNamesCommand extends Command
     /**
      * @inheritdoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $countries = $input->getArgument(self::COUNTRIES);
 
