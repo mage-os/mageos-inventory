@@ -9,8 +9,19 @@ namespace Magento\InventoryCatalog\Test\Integration\CatalogInventory\Helper\Stoc
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Test\Fixture\Product as ProductFixture;
 use Magento\CatalogInventory\Helper\Stock;
+use Magento\InventoryApi\Test\Fixture\Source as SourceFixture;
+use Magento\InventoryApi\Test\Fixture\SourceItems as SourceItemsFixture;
+use Magento\InventoryApi\Test\Fixture\Stock as StockFixture;
+use Magento\InventoryApi\Test\Fixture\StockSourceLinks as StockSourceLinksFixture;
+use Magento\InventorySalesApi\Test\Fixture\StockSalesChannels as StockSalesChannelsFixture;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\TestFramework\Fixture\AppArea;
+use Magento\TestFramework\Fixture\DataFixture;
+use Magento\TestFramework\Fixture\DataFixtureStorageManager;
+use Magento\TestFramework\Fixture\DbIsolation;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
 
@@ -137,6 +148,50 @@ class AssignStatusToProductTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    #[
+        DbIsolation(false),
+        AppArea('frontend'),
+        DataFixture(SourceFixture::class, as: 'src2'),
+        DataFixture(StockFixture::class, as: 'stk2'),
+        DataFixture(
+            StockSourceLinksFixture::class,
+            [
+                ['stock_id' => '$stk2.stock_id$', 'source_code' => '$src2.source_code$'],
+            ]
+        ),
+        DataFixture(StockSalesChannelsFixture::class, ['stock_id' => '$stk2.stock_id$', 'sales_channels' => ['base']]),
+        DataFixture(ProductFixture::class, ['sku' => 'SKU-%uniqid%'], 'product'),
+        DataFixture(
+            SourceItemsFixture::class,
+            [
+                ['sku' => '$product.sku$', 'source_code' => 'default', 'quantity' => 0],
+                ['sku' => '$product.sku$', 'source_code' => '$src2.source_code$', 'quantity' => 100],
+            ]
+        ),
+    ]
+    public function testAssignStatusToProductAfterChangingSkuCase(): void
+    {
+        $fixtures = DataFixtureStorageManager::getStorage();
+        $sku = $fixtures->get('product')->getSku();
+
+        // Check that product is salable before SKU case change
+        $product = $this->productRepository->get($sku);
+        $this->stockHelper->assignStatusToProduct($product);
+
+        self::assertTrue($product->isSalable());
+
+        // Update SKU to lowercase
+        $product = $this->productRepository->get($sku, true, Store::DEFAULT_STORE_ID, true);
+        $product->setSku(strtolower($sku));
+        $this->productRepository->save($product);
+
+        // Check that product is salable after SKU case change
+        $product = $this->productRepository->get(strtolower($sku));
+        $this->stockHelper->assignStatusToProduct($product);
+
+        self::assertTrue($product->isSalable());
     }
 
     /**
