@@ -58,3 +58,4 @@ StorefrontQuickOrderAddToCartTest
 StorefrontQuickOrderAddProductToCart
 GenerateConfigurationsByAttributeCodeActionGroup
 SingleShippingSection
+BillingAgreement
