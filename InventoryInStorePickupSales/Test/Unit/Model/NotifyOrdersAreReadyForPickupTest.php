@@ -9,6 +9,7 @@ namespace Magento\InventoryInStorePickupSales\Test\Unit\Model;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\InventoryInStorePickupSales\Model\NotifyOrdersAreReadyForPickup;
 use Magento\InventoryInStorePickupSales\Model\Order\AddStorePickupAttributesToOrder;
 use Magento\InventoryInStorePickupSales\Model\Order\CreateShippingDocument;
@@ -18,6 +19,7 @@ use Magento\InventoryInStorePickupSalesApi\Api\Data\ResultInterfaceFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\ShipmentRepositoryInterface;
 use Magento\Sales\Model\Order;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -27,6 +29,8 @@ use Psr\Log\LoggerInterface;
  */
 class NotifyOrdersAreReadyForPickupTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * @var NotifyOrdersAreReadyForPickup
      */
@@ -101,13 +105,10 @@ class NotifyOrdersAreReadyForPickupTest extends TestCase
         $this->resultFactory = $this->getMockBuilder(ResultInterfaceFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->shipmentRepository = $this->getMockBuilder(ShipmentRepositoryInterface::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getList','get','delete','save','create'])
-            ->addMethods([
-                'getTotalCount'
-            ])
-            ->getMock();
+        $this->shipmentRepository = $this->createPartialMockWithReflection(
+            ShipmentRepositoryInterface::class,
+            ['getList', 'get', 'delete', 'save', 'create', 'getTotalCount']
+        );
         $this->searchCriteriaBuilder = $this->getMockBuilder(SearchCriteriaBuilder::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['create','addFilter'])
@@ -140,10 +141,10 @@ class NotifyOrdersAreReadyForPickupTest extends TestCase
     }
 
     /**
-     * @dataProvider executeMethodEmailCheck
      * @param $exception
      * @return void
      */
+    #[DataProvider('executeMethodEmailCheck')]
     public function testExecuteForEmailNotify($exception): void
     {
         $this->orderMock->method('getExtensionAttributes')->willReturnSelf();

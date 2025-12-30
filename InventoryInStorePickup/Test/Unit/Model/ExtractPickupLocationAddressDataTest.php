@@ -10,9 +10,11 @@ namespace Magento\InventoryInStorePickup\Test\Unit\Model;
 use Magento\Directory\Model\Region;
 use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\DataObject\Copy;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\InventoryInStorePickup\Model\ExtractPickupLocationAddressData;
 use Magento\InventoryInStorePickup\Model\PickupLocation;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -21,6 +23,8 @@ use PHPUnit\Framework\TestCase;
  */
 class ExtractPickupLocationAddressDataTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * @var ExtractPickupLocationAddressData
      */
@@ -43,22 +47,21 @@ class ExtractPickupLocationAddressDataTest extends TestCase
     {
         $objectManagerHelper = new ObjectManager($this);
 
-        $this->regionMock = $this->getMockBuilder(Region::class)
-            ->addMethods(['getCode'])
-            ->onlyMethods(['load', 'getName', 'loadByName'])
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->regionMock = $this->createPartialMockWithReflection(
+            Region::class,
+            ['getCode', 'load', 'getName', 'loadByName']
+        );
         $this->regionMock->method('loadByName')->willReturnSelf();
 
         $this->objectCopyServiceMock = $this->getMockBuilder(Copy::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getDataFromFieldset'])
-            ->getMockForAbstractClass();
+            ->getMock();
 
         $regionFactoryMock = $this->getMockBuilder(RegionFactory::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['create'])
-            ->getMockForAbstractClass();
+            ->getMock();
 
         $regionFactoryMock->expects($this->any())
             ->method('create')->willReturn($this->regionMock);
@@ -77,9 +80,9 @@ class ExtractPickupLocationAddressDataTest extends TestCase
      *
      * @param string $translatedRegionName
      * @param string $expectedRegionName
-     * @dataProvider executeDataProvider
      * @return void
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(string $translatedRegionName, string $expectedRegionName): void
     {
         $this->objectCopyServiceMock->method('getDataFromFieldset')

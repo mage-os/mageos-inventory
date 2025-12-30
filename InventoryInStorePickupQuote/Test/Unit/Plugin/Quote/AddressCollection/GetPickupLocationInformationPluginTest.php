@@ -9,6 +9,7 @@ namespace Magento\InventoryInStorePickupQuote\Test\Unit\Plugin\Quote\AddressColl
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\InventoryInStorePickupApi\Api\Data\PickupLocationInterface;
 use Magento\InventoryInStorePickupQuote\Plugin\Quote\AddressCollection\GetPickupLocationInformationPlugin;
@@ -22,6 +23,8 @@ use PHPUnit\Framework\TestCase;
  */
 class GetPickupLocationInformationPluginTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * Test subject.
      *
@@ -47,12 +50,11 @@ class GetPickupLocationInformationPluginTest extends TestCase
         $this->addressExtensionInterfaceFactory = $this->getMockBuilder(AddressExtensionInterfaceFactory::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['create'])
-            ->getMockForAbstractClass();
-        $this->connection = $this->getMockBuilder(ResourceConnection::class)
-            ->onlyMethods(['getTableName'])
-            ->addMethods(['getSelect'])
-            ->disableOriginalConstructor()
             ->getMock();
+        $this->connection = $this->createPartialMockWithReflection(
+            ResourceConnection::class,
+            ['getTableName', 'getSelect']
+        );
         $objectManager = new ObjectManager($this);
         $this->getPickupLocationInformationPlugin = $objectManager->getObject(
             GetPickupLocationInformationPlugin::class,

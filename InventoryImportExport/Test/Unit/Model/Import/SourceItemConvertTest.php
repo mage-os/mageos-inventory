@@ -11,6 +11,7 @@ use Magento\InventoryImportExport\Model\Import\SourceItemConvert;
 use Magento\InventoryImportExport\Model\Import\Sources;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -37,8 +38,7 @@ class SourceItemConvertTest extends TestCase
     protected function setUp(): void
     {
         $this->sourceItemFactory = $this->createMock(SourceItemInterfaceFactory::class);
-        $this->sourceItem = $this->getMockBuilder(SourceItemInterface::class)
-            ->getMock();
+        $this->sourceItem = $this->createMock(SourceItemInterface::class);
         $this->sourceItemFactory->expects($this->any())
             ->method('create')
             ->willReturn($this->sourceItem);
@@ -50,8 +50,8 @@ class SourceItemConvertTest extends TestCase
      * @param int $expectedStatus
      *
      * @return void
-     * @dataProvider dataProviderConvert
      */
+    #[DataProvider('dataProviderConvert')]
     public function testConvert(array $bunch, int $expectedStatus) : void
     {
         $this->sourceItem->expects($this->once())

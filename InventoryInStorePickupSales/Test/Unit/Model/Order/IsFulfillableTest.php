@@ -13,6 +13,7 @@ use Magento\Framework\Api\ExtensionAttributesInterface;
 use Magento\Framework\Api\SearchCriteria;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\InventoryApi\Api\Data\SourceInterface;
 use Magento\InventoryApi\Api\Data\SourceItemSearchResultsInterface;
 use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
@@ -21,6 +22,7 @@ use Magento\InventoryInStorePickupSales\Model\Order\GetPickupLocationCode;
 use Magento\InventoryInStorePickupSales\Model\Order\IsFulfillable;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order\Item;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -30,6 +32,8 @@ use PHPUnit\Framework\TestCase;
  */
 class IsFulfillableTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * @var IsFulfillable
      */
@@ -124,20 +128,19 @@ class IsFulfillableTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->itemMock = $this->getMockBuilder(Item::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getQtyOrdered', 'getSku', 'getProduct'])
-            ->addMethods(['getHasChildren'])
-            ->getMock();
+        $this->itemMock = $this->createPartialMockWithReflection(
+            Item::class,
+            ['getQtyOrdered', 'getSku', 'getProduct', 'getHasChildren']
+        );
 
         $this->productMock = $this->getMockBuilder(Product::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->extensionAttributesMock = $this->getMockBuilder(ExtensionAttributesInterface::class)
-            ->disableOriginalConstructor()
-            ->addMethods(['getStockItem'])
-            ->getMock();
+        $this->extensionAttributesMock = $this->createPartialMockWithReflection(
+            ExtensionAttributesInterface::class,
+            ['getStockItem']
+        );
 
         $this->sourceMock = $this->getMockBuilder(SourceInterface::class)
             ->disableOriginalConstructor()
@@ -159,11 +162,10 @@ class IsFulfillableTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->abstractExtensibleObject = $this
-            ->getMockBuilder(AbstractExtensibleObject::class)
-            ->disableOriginalConstructor()
-            ->addMethods(['getQuantity', 'getStatus'])
-            ->getMock();
+        $this->abstractExtensibleObject = $this->createPartialMockWithReflection(
+            AbstractExtensibleObject::class,
+            ['getQuantity', 'getStatus']
+        );
 
         $this->searchCriteriaMock = $this
             ->getMockBuilder(SearchCriteria::class)
@@ -187,7 +189,6 @@ class IsFulfillableTest extends TestCase
     /**
      * Test the execute method of IsFulfillable model.
      *
-     * @dataProvider dataProvider
      * @param  bool $manageStock
      * @param bool $inStock
      * @param float $qtyOrdered
@@ -195,6 +196,7 @@ class IsFulfillableTest extends TestCase
      * @param bool $expectedResult
      * @return void
      */
+    #[DataProvider('dataProvider')]
     public function testExecute(
         bool $manageStock,
         bool $inStock,

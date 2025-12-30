@@ -17,6 +17,7 @@ use Magento\InventoryCatalog\Model\UpdateDefaultStock;
 use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
 use Magento\InventoryConfiguration\Model\GetLegacyStockItemsInterface;
 use Magento\InventoryIndexer\Model\ProductSalabilityChangeProcessorInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -68,10 +69,8 @@ class SetDataToLegacyCatalogInventoryTest extends TestCase
             ->onlyMethods(['execute'])->disableOriginalConstructor()->getMock();
         $this->getLegacyStockItems = $this->getMockBuilder(GetLegacyStockItemsInterface::class)
             ->onlyMethods(['execute'])->disableOriginalConstructor()->getMock();
-        $this->getProductIdsBySkus = $this->getMockBuilder(GetProductIdsBySkusInterface::class)
-            ->disableOriginalConstructor()->getMockForAbstractClass();
-        $this->stockStateProvider = $this->getMockBuilder(StockStateProviderInterface::class)
-            ->onlyMethods(['verifyStock'])->disableOriginalConstructor()->getMockForAbstractClass();
+        $this->getProductIdsBySkus = $this->createMock(GetProductIdsBySkusInterface::class);
+        $this->stockStateProvider = $this->createMock(StockStateProviderInterface::class);
         $this->updateDefaultStock = $this->createMock(UpdateDefaultStock::class);
         $this->productSalabilityChangeProcessor = $this->createMock(ProductSalabilityChangeProcessorInterface::class);
         $this->model = new SetDataToLegacyCatalogInventory(
@@ -85,9 +84,9 @@ class SetDataToLegacyCatalogInventoryTest extends TestCase
     }
 
     /**
-     * @dataProvider getDataProvider
      * @return void
      */
+    #[DataProvider('getDataProvider')]
     public function testExecute($productId, $sku, $quantity, $stockStatus): void
     {
         $skus = [$sku];

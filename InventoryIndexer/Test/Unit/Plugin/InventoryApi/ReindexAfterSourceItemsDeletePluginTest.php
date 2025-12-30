@@ -59,10 +59,10 @@ class ReindexAfterSourceItemsDeletePluginTest extends TestCase
         $skuListInStockMock = $this->createMock(SkuListInStock::class);
 
         $subjectMock = $this->createMock(SourceItemsDeleteInterface::class);
-        $proceedMock = $this->getMockBuilder(\stdclass::class)
-            ->addMethods(['__invoke'])
-            ->getMock();
-        $proceedMock->expects($this->once())->method('__invoke');
+        $proceedCalled = false;
+        $proceedMock = function () use (&$proceedCalled) {
+            $proceedCalled = true;
+        };
 
         $this->getSourceItemIdsMock->expects($this->once())
             ->method('execute')
@@ -77,5 +77,6 @@ class ReindexAfterSourceItemsDeletePluginTest extends TestCase
             ->with([$skuListInStockMock]);
 
         $this->plugin->aroundExecute($subjectMock, $proceedMock, [$sourceItemMock]);
+        $this->assertTrue($proceedCalled);
     }
 }

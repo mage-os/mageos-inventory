@@ -54,16 +54,11 @@ class SourceRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->commandSave = $this->getMockBuilder(SaveInterface::class)
-            ->getMock();
-        $this->commandGet = $this->getMockBuilder(GetInterface::class)
-            ->getMock();
-        $this->commandGetList = $this->getMockBuilder(GetListInterface::class)
-            ->getMock();
-        $this->source = $this->getMockBuilder(SourceInterface::class)
-            ->getMock();
-        $this->searchResult = $this->getMockBuilder(SourceSearchResultsInterface::class)
-            ->getMock();
+        $this->commandSave = $this->createMock(SaveInterface::class);
+        $this->commandGet = $this->createMock(GetInterface::class);
+        $this->commandGetList = $this->createMock(GetListInterface::class);
+        $this->source = $this->createMock(SourceInterface::class);
+        $this->searchResult = $this->createMock(SourceSearchResultsInterface::class);
 
         $this->sourceRepository = (new ObjectManager($this))->getObject(
             SourceRepository::class,
@@ -142,8 +137,7 @@ class SourceRepositoryTest extends TestCase
 
     public function testGetListWithSearchCriteria()
     {
-        $searchCriteria = $this->getMockBuilder(SearchCriteriaInterface::class)
-            ->getMock();
+        $searchCriteria = $this->createMock(SearchCriteriaInterface::class);
 
         $this->commandGetList
             ->expects($this->once())

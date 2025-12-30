@@ -43,10 +43,8 @@ class ValidatorChainTest extends TestCase
     protected function setUp(): void
     {
         $this->validationResultFactory = $this->createMock(ValidationResultFactory::class);
-        $this->qtyValidator = $this->getMockBuilder(ValidatorInterface::class)
-            ->getMock();
-        $this->skuValidator = $this->getMockBuilder(ValidatorInterface::class)
-            ->getMock();
+        $this->qtyValidator = $this->createMock(ValidatorInterface::class);
+        $this->skuValidator = $this->createMock(ValidatorInterface::class);
     }
 
     public function testValidateWithOutValidators()

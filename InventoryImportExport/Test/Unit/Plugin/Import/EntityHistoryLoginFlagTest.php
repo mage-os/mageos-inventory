@@ -36,9 +36,7 @@ class EntityHistoryLoginFlagTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->subjectMock = $this->getMockBuilder(EntityInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->subjectMock = $this->createMock(EntityInterface::class);
 
         $this->objectManagerHelper = new ObjectManagerHelper($this);
         $this->plugin = $this->objectManagerHelper->getObject(EntityHistoryLoginFlag::class);

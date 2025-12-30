@@ -22,6 +22,7 @@ use Magento\InventoryCatalog\Model\ResourceModel\SetDataToLegacyStockStatus;
 use Magento\InventoryCatalog\Plugin\InventoryApi\SynchronizeLegacyStockAfterDecrementStockPlugin;
 use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
 use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -87,44 +88,16 @@ class SynchronizeLegacyStockAfterDecrementStockPluginTest extends TestCase
 
     public function setUp(): void
     {
-        $this->subjectMock = $this->getMockBuilder(DecrementSourceItemQty::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->sourceItemMock = $this->getMockBuilder(SourceItemInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->decrementQuantityForLegacyCatalogInventoryMock = $this->getMockBuilder(DecrementQtyForLegacyStock::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->getProductIdsBySkusMock = $this->getMockBuilder(GetProductIdsBySkusInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->indexerProcessorMock = $this->getMockBuilder(Processor::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->setDataToLegacyStockStatusMock = $this->getMockBuilder(SetDataToLegacyStockStatus::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->legacyStockItemCriteriaFactoryMock = $this->getMockBuilder(StockItemCriteriaInterfaceFactory::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->legacyStockItemRepositoryMock = $this->getMockBuilder(StockItemRepositoryInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->stockStateProviderMock = $this->getMockBuilder(StockStateProviderInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->defaultSourceProviderMock = $this->getMockBuilder(DefaultSourceProviderInterface::class)
-            ->getMockForAbstractClass();
+        $this->subjectMock = $this->createMock(DecrementSourceItemQty::class);
+        $this->sourceItemMock = $this->createMock(SourceItemInterface::class);
+        $this->decrementQuantityForLegacyCatalogInventoryMock = $this->createMock(DecrementQtyForLegacyStock::class);
+        $this->getProductIdsBySkusMock = $this->createMock(GetProductIdsBySkusInterface::class);
+        $this->indexerProcessorMock = $this->createMock(Processor::class);
+        $this->setDataToLegacyStockStatusMock = $this->createMock(SetDataToLegacyStockStatus::class);
+        $this->legacyStockItemCriteriaFactoryMock = $this->createMock(StockItemCriteriaInterfaceFactory::class);
+        $this->legacyStockItemRepositoryMock = $this->createMock(StockItemRepositoryInterface::class);
+        $this->stockStateProviderMock = $this->createMock(StockStateProviderInterface::class);
+        $this->defaultSourceProviderMock = $this->createMock(DefaultSourceProviderInterface::class);
 
         $this->plugin = new SynchronizeLegacyStockAfterDecrementStockPlugin(
             $this->decrementQuantityForLegacyCatalogInventoryMock,
@@ -146,9 +119,9 @@ class SynchronizeLegacyStockAfterDecrementStockPluginTest extends TestCase
      * @param $itemSku
      * @param $qty
      * @param $stockStatus
-     * @dataProvider getDataProvider
      * @return void
      */
+    #[DataProvider('getDataProvider')]
     public function testAfterExecute($sourceCode, $productId, $itemSku, $qty, $stockStatus): void
     {
         $defaultSourceCode = 'default';
@@ -170,10 +143,7 @@ class SynchronizeLegacyStockAfterDecrementStockPluginTest extends TestCase
             $this->getProductIdsBySkusMock->expects($this->atLeastOnce())->method('execute')->with([$itemSku])
                 ->willReturn([$itemSku => $productId]);
 
-            $stockItemMock = $this->getMockBuilder(StockItemInterface::class)
-                ->onlyMethods(['getManageStock', 'setIsInStock', 'setQty'])
-                ->disableOriginalConstructor()
-                ->getMockForAbstractClass();
+            $stockItemMock = $this->createMock(StockItemInterface::class);
             $stockItemMock->expects($this->once())->method('getManageStock')->willReturn(true);
             $stockItemMock->expects($this->once())->method('setIsInStock')->willReturn($stockStatus);
             $stockItemMock->expects($this->once())->method('setQty')->willReturn($qty);

@@ -50,16 +50,14 @@ class OnlyXLeftInStockResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->getProductSalableQty = $this->getMockBuilder(GetProductSalableQtyInterface::class)->getMock();
-        $this->getStockIdForCurrentWebsite = $this->getMockBuilder(GetStockIdForCurrentWebsite::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->getStockItemConfiguration = $this->getMockBuilder(GetStockItemConfigurationInterface::class)->getMock();
-        $this->stockItemConfiguration = $this->getMockBuilder(StockItemConfigurationInterface::class)->getMock();
+        $this->getProductSalableQty = $this->createMock(GetProductSalableQtyInterface::class);
+        $this->getStockIdForCurrentWebsite = $this->createMock(GetStockIdForCurrentWebsite::class);
+        $this->getStockItemConfiguration = $this->createMock(GetStockItemConfigurationInterface::class);
+        $this->stockItemConfiguration = $this->createMock(StockItemConfigurationInterface::class);
 
-        $this->fieldMock = $this->getMockBuilder(Field::class)->disableOriginalConstructor()->getMock();
-        $this->resolveInfoMock = $this->getMockBuilder(ResolveInfo::class)->disableOriginalConstructor()->getMock();
-        $this->productMock = $this->getMockBuilder(ProductInterface::class)->getMock();
+        $this->fieldMock = $this->createMock(Field::class);
+        $this->resolveInfoMock = $this->createMock(ResolveInfo::class);
+        $this->productMock = $this->createMock(ProductInterface::class);
 
         $this->resolver = new OnlyXLeftInStockResolver(
             $this->getProductSalableQty,

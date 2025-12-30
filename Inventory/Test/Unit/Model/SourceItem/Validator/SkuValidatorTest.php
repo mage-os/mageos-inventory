@@ -14,6 +14,7 @@ use Magento\Inventory\Model\SourceItem;
 use Magento\Inventory\Model\SourceItem\Validator\SkuValidator;
 use Magento\Inventory\Model\Validators\NoSpaceBeforeAndAfterString;
 use Magento\Inventory\Model\Validators\NotAnEmptyString;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -86,10 +87,10 @@ class SkuValidatorTest extends TestCase
     }
 
     /**
-     * @dataProvider sourceDataProvider
      * @param array $source
      * @return void
      */
+    #[DataProvider('sourceDataProvider')]
     public function testValidate(array $source): void
     {
         $this->sourceItemMock->expects($this->atLeastOnce())->method('getSku')

@@ -14,6 +14,7 @@ use Magento\InventoryCache\Model\FlushCacheByCategoryIds;
 use Magento\InventoryCache\Model\FlushCacheByProductIds;
 use Magento\InventoryIndexer\Model\GetProductsIdsToProcess;
 use Magento\InventoryIndexer\Model\ResourceModel\GetCategoryIdsByProductIds;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -73,13 +74,13 @@ class CacheFlushProcessorTest extends TestCase
     }
 
     /**
-     * @dataProvider processDataProvider
      * @param array $beforeSalableList
      * @param array $afterSalableList
      * @param array $changedProductIds,
      * @param int $numberOfCacheCleans,
      * @return void
      */
+    #[DataProvider('processDataProvider')]
     public function testProcess(
         array $beforeSalableList,
         array $afterSalableList,

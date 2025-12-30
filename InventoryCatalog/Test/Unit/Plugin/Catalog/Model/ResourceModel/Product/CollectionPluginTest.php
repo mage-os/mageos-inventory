@@ -14,6 +14,7 @@ use Magento\CatalogInventory\Api\StockConfigurationInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\InventoryCatalog\Plugin\Catalog\Model\ResourceModel\Product\CollectionPlugin;
 use Magento\InventoryCatalogApi\Model\SortableBySaleabilityInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -57,16 +58,11 @@ class CollectionPluginTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->stockConfigurationMock = $this->getMockBuilder(StockConfigurationInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->stockConfigurationMock = $this->createMock(StockConfigurationInterface::class);
         $this->categoryHelperMock = $this->createMock(Data::class);
         $this->productCollectionMock = $this->createMock(Collection::class);
         $this->categoryMock = $this->createMock(Category::class);
-        $this->sortableBySaleabilityProviderMock =
-            $this->getMockBuilder(SortableBySaleabilityInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->sortableBySaleabilityProviderMock = $this->createMock(SortableBySaleabilityInterface::class);
 
         $this->plugin = (new ObjectManager($this))->getObject(
             CollectionPlugin::class,
@@ -84,8 +80,8 @@ class CollectionPluginTest extends TestCase
      * @param string $dir
      * @param int $automaticSorting
      * @return void
-     * @dataProvider dataProviderForAutomaticSorting
      */
+    #[DataProvider('dataProviderForAutomaticSorting')]
     public function testBeforeSetOrderWhenOutOfStockIsEnabled(
         string $attribute,
         string $dir,

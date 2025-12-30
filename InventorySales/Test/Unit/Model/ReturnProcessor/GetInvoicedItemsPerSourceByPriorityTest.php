@@ -24,6 +24,7 @@ use Magento\InventorySalesApi\Model\ReturnProcessor\Result\SourceDeductedOrderIt
 use Magento\InventorySalesApi\Model\ReturnProcessor\Result\SourceDeductedOrderItemsResultFactory;
 use Magento\InventorySalesApi\Model\ReturnProcessor\Result\SourceDeductedOrderItemsResult;
 use Magento\Store\Model\Store;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -81,13 +82,13 @@ class GetInvoicedItemsPerSourceByPriorityTest extends TestCase
     {
         parent::setUp();
         $objectManager = new ObjectManager($this);
-        $this->getSkuFromOrderItem = $this->getMockForAbstractClass(GetSkuFromOrderItemInterface::class);
-        $this->stockByWebsiteIdResolver = $this->getMockForAbstractClass(StockByWebsiteIdResolverInterface::class);
-        $this->getSourcesAssignedToStockOrderedByPriority = $this->getMockForAbstractClass(
+        $this->getSkuFromOrderItem = $this->createMock(GetSkuFromOrderItemInterface::class);
+        $this->stockByWebsiteIdResolver = $this->createMock(StockByWebsiteIdResolverInterface::class);
+        $this->getSourcesAssignedToStockOrderedByPriority = $this->createMock(
             GetSourcesAssignedToStockOrderedByPriorityInterface::class
         );
-        $this->getSourceItemsBySku = $this->getMockForAbstractClass(GetSourceItemsBySkuInterface::class);
-        $this->defaultSourceProvider = $this->getMockForAbstractClass(DefaultSourceProviderInterface::class);
+        $this->getSourceItemsBySku = $this->createMock(GetSourceItemsBySkuInterface::class);
+        $this->defaultSourceProvider = $this->createMock(DefaultSourceProviderInterface::class);
         $this->sourceDeductedOrderItemFactory = $this->createMock(SourceDeductedOrderItemFactory::class);
         $this->sourceDeductedOrderItemsResultFactory = $this->createMock(SourceDeductedOrderItemsResultFactory::class);
         $this->model = $objectManager->getObject(
@@ -105,7 +106,6 @@ class GetInvoicedItemsPerSourceByPriorityTest extends TestCase
     }
 
     /**
-     * @dataProvider executeDataProvider
      * @param array $returnToStockItems
      * @param string $itemSku
      * @param int $invoiceItemQty
@@ -113,6 +113,7 @@ class GetInvoicedItemsPerSourceByPriorityTest extends TestCase
      * @param int $stockId
      * @param string $defaultSourceCode
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         array $returnToStockItems,
         string $itemSku,
@@ -144,7 +145,7 @@ class GetInvoicedItemsPerSourceByPriorityTest extends TestCase
             ->willReturn($store);
         $this->getSkuFromOrderItem->method('execute')->with($orderItem)
             ->willReturn($itemSku);
-        $stock = $this->getMockForAbstractClass(StockInterface::class);
+        $stock = $this->createMock(StockInterface::class);
         $stock->method('getStockId')
             ->willReturn($stockId);
         $this->stockByWebsiteIdResolver->method('execute')

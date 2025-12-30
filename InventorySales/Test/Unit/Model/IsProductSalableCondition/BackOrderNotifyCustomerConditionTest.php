@@ -19,6 +19,7 @@ use Magento\InventorySalesApi\Api\Data\ProductSalableResultInterface;
 use Magento\InventorySalesApi\Api\Data\ProductSalableResultInterfaceFactory;
 use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
 use Magento\InventorySalesApi\Model\GetStockItemDataInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -68,7 +69,7 @@ class BackOrderNotifyCustomerConditionTest extends TestCase
         $productSalableResultFactory->method('create')
             ->willReturnCallback(
                 function ($args) {
-                    $mock = $this->getMockForAbstractClass(ProductSalableResultInterface::class);
+                    $mock = $this->createMock(ProductSalableResultInterface::class);
                     $mock->method('getErrors')->willReturn($args['errors'] ?? []);
                     $mock->method('isSalable')->willReturn(empty($args['errors']));
                     return $mock;
@@ -80,16 +81,16 @@ class BackOrderNotifyCustomerConditionTest extends TestCase
         $productSalabilityErrorFactory->method('create')
             ->willReturnCallback(
                 function ($args) {
-                    $mock = $this->getMockForAbstractClass(ProductSalabilityErrorInterface::class);
+                    $mock = $this->createMock(ProductSalabilityErrorInterface::class);
                     $mock->method('getCode')->willReturn($args['code']);
                     $mock->method('getMessage')->willReturn($args['message']->render());
                     return $mock;
                 }
             );
-        $getStockItemConfiguration = $this->getMockForAbstractClass(
+        $getStockItemConfiguration = $this->createMock(
             GetStockItemConfigurationInterface::class
         );
-        $this->stockItemConfiguration = $this->getMockForAbstractClass(
+        $this->stockItemConfiguration = $this->createMock(
             StockItemConfigurationInterface::class
         );
         $getStockItemConfiguration->method('execute')->willReturnCallback(
@@ -100,7 +101,7 @@ class BackOrderNotifyCustomerConditionTest extends TestCase
         $this->getBackorderQty = $this->createMock(
             GetBackorderQty::class
         );
-        $getStockItemData = $this->getMockForAbstractClass(
+        $getStockItemData = $this->createMock(
             GetStockItemDataInterface::class
         );
         $getStockItemData->method('execute')->willReturnCallback(
@@ -124,7 +125,6 @@ class BackOrderNotifyCustomerConditionTest extends TestCase
     /**
      * Test execute with different stock settings
      *
-     * @dataProvider executeDataProvider
      * @param array|null $stockData
      * @param int $reqQty
      * @param float $salableQty
@@ -134,6 +134,7 @@ class BackOrderNotifyCustomerConditionTest extends TestCase
      * @param array $errors
      * @throws LocalizedException
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         ?array $stockData,
         int $reqQty,

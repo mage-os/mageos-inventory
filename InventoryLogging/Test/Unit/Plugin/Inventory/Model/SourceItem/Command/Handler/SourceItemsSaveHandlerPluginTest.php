@@ -11,6 +11,7 @@ use Magento\Framework\Event\ManagerInterface;
 use Magento\Inventory\Model\SourceItem;
 use Magento\Inventory\Model\SourceItem\Command\Handler\SourceItemsSaveHandler;
 use Magento\InventoryLogging\Plugin\Inventory\Model\SourceItem\Command\Handler\SourceItemsSaveHandlerPlugin;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -86,8 +87,8 @@ class SourceItemsSaveHandlerPluginTest extends TestCase
      * @param mixed $invalidItem
      * @return void
      * @throws Exception
-     * @dataProvider invalidItemProvider
      */
+    #[DataProvider('invalidItemProvider')]
     public function testAfterExecuteThrowsForNonAbstractModelItems(mixed $invalidItem): void
     {
         $this->eventManager

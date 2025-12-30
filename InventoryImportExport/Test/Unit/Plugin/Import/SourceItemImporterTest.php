@@ -22,6 +22,7 @@ use Magento\InventoryCatalogApi\Model\IsSingleSourceModeInterface;
 use Magento\InventoryImportExport\Plugin\Import\SourceItemImporter;
 use Magento\InventoryIndexer\Indexer\CompositeProductsIndexer;
 use Magento\InventoryIndexer\Indexer\SourceItem\SourceItemIndexer;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -111,8 +112,6 @@ class SourceItemImporterTest extends TestCase
     }
 
     /**
-     * @dataProvider sourceItemDataProvider
-     *
      * @param string $sku
      * @param string $sourceCode
      * @param float $quantity
@@ -122,6 +121,7 @@ class SourceItemImporterTest extends TestCase
      * @throws InputException
      * @throws ValidationException
      */
+    #[DataProvider('sourceItemDataProvider')]
     public function testAfterImportForMultipleSource(
         string $sku,
         string $sourceCode,

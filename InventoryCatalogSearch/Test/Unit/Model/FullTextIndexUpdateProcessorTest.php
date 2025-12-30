@@ -10,6 +10,7 @@ namespace Magento\InventoryCatalogSearch\Test\Unit\Model;
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Processor;
 use Magento\InventoryCatalogSearch\Model\FullTextIndexUpdateProcessor;
 use Magento\InventoryIndexer\Model\GetProductsIdsToProcess;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -42,13 +43,13 @@ class FullTextIndexUpdateProcessorTest extends TestCase
     }
 
     /**
-     * @dataProvider processDataProvider
      * @param array $beforeSalableList
      * @param array $afterSalableList
      * @param array $changedProductIds,
      * @param int $numberOfIndexUpdates,
      * @return void
      */
+    #[DataProvider('processDataProvider')]
     public function testAroundExecuteList(
         array $beforeSalableList,
         array $afterSalableList,

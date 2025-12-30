@@ -10,6 +10,7 @@ namespace Magento\InventoryIndexer\Test\Unit\Model;
 use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
 use Magento\InventoryIndexer\Model\GetProductsIdsToProcess;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class GetProductsIdsToProcessTest extends TestCase
@@ -46,9 +47,8 @@ class GetProductsIdsToProcessTest extends TestCase
      * @param bool $force
      * @param array $expectedResult
      * @return void
-     *
-     * @dataProvider dataProvider
      */
+    #[DataProvider('dataProvider')]
     public function testExecute(array $before, array $after, bool $force, array $expectedResult): void
     {
         $actualResult = $this->model->execute($before, $after, $force);

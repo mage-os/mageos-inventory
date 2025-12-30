@@ -10,6 +10,7 @@ namespace Magento\InventoryCatalog\Test\Unit\Model;
 use Magento\Catalog\Model\Indexer\Product\Price\Processor;
 use Magento\InventoryCatalog\Model\PriceIndexUpdateProcessor;
 use Magento\InventoryIndexer\Model\GetProductsIdsToProcess;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -42,13 +43,13 @@ class PriceIndexUpdateProcessorTest extends TestCase
     }
 
     /**
-     * @dataProvider processDataProvider
      * @param array $beforeSalableList
      * @param array $afterSalableList
-     * @param array $changedProductIds,
-     * @param int $numberReindexCalls,
+     * @param array $changedProductIds
+     * @param int $numberReindexCalls
      * @return void
      */
+    #[DataProvider('processDataProvider')]
     public function testProcess(
         array $beforeSalableList,
         array $afterSalableList,

@@ -17,6 +17,7 @@ use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
@@ -98,9 +99,7 @@ class IsSalableOptionPluginTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider productSalabilityDataProvider
-     */
+    #[DataProvider('productSalabilityDataProvider')]
     public function testSomeProductsAreNotSalable(bool $isShowOutOfStock, int $expectedCount)
     {
         $this->stockConfigurationMock->method('isShowOutOfStock')->willReturn($isShowOutOfStock);

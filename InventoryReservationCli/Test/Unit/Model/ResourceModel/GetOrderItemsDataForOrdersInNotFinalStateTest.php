@@ -113,7 +113,7 @@ class GetOrderItemsDataForOrdersInNotFinalStateTest extends TestCase
      */
     private function createConnectionMock(MockObject $select): MockObject
     {
-        $connection = $this->getMockForAbstractClass(AdapterInterface::class);
+        $connection = $this->createMock(AdapterInterface::class);
         $connection->method('select')
             ->willReturn($select);
         return $connection;

@@ -14,6 +14,7 @@ use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
 use Magento\InventorySalesApi\Api\Data\IsProductSalableResultInterface;
 use Magento\InventorySalesApi\Model\GetStockItemsDataInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -80,8 +81,8 @@ class GetSalabilityDataForUpdateTest extends TestCase
      * @param array $skus
      * @param array $parentSkus
      * @param array $result
-     * @dataProvider executeDataProvider
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(
         array $skus,
         array $parentSkus,

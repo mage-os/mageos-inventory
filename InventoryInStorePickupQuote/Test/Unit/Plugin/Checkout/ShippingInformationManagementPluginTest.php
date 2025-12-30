@@ -9,6 +9,7 @@ namespace Magento\InventoryInStorePickupQuote\Test\Unit\Plugin\Checkout;
 
 use Magento\Checkout\Api\Data\ShippingInformationInterface;
 use Magento\Checkout\Model\ShippingInformationManagement;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\InventoryInStorePickupQuote\Plugin\Checkout\ShippingInformationManagementPlugin;
 use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\AddressExtensionInterface;
@@ -20,6 +21,8 @@ use PHPUnit\Framework\TestCase;
  */
 class ShippingInformationManagementPluginTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * Test subject.
      *
@@ -57,35 +60,14 @@ class ShippingInformationManagementPluginTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->subject = $this->getMockBuilder(ShippingInformationManagement::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->addressInformation = $this->getMockBuilder(ShippingInformationInterface::class)
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-        $this->shippingAddress = $this->getMockBuilder(AddressInterface::class)
-            ->onlyMethods(['getExtensionAttributes'])
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-        $this->billingAddress = $this->getMockBuilder(AddressInterface::class)
-            ->onlyMethods(
-                [
-                    'getFirstname',
-                    'getLastname',
-                    'getStreet',
-                    'getCity',
-                    'getPostcode',
-                    'getTelephone',
-                    'getRegionId',
-                    'getCountryId'
-                ]
-            )
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-        $this->extensionAttributes = $this->getMockBuilder(AddressExtensionInterface::class)
-            ->addMethods(['getPickupLocationCode'])
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
+        $this->subject = $this->createMock(ShippingInformationManagement::class);
+        $this->addressInformation = $this->createMock(ShippingInformationInterface::class);
+        $this->shippingAddress = $this->createMock(AddressInterface::class);
+        $this->billingAddress = $this->createMock(AddressInterface::class);
+        $this->extensionAttributes = $this->createPartialMockWithReflection(
+            AddressExtensionInterface::class,
+            ['getPickupLocationCode']
+        );
         $this->plugin = new ShippingInformationManagementPlugin();
     }
 
