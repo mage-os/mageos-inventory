@@ -156,7 +156,6 @@ class MassDeleteTest extends TestCase
         if (!$property) {
             $this->fail('Property not found: ' . $prop);
         }
-        $property->setAccessible(true);
         $property->setValue($obj, $value);
     }
 
@@ -164,7 +163,6 @@ class MassDeleteTest extends TestCase
     {
         $ref = new \ReflectionClass($this->controller);
         $method = $ref->getMethod('deleteSources');
-        $method->setAccessible(true);
         $method->invoke($this->controller, $collection);
     }
 }

@@ -76,7 +76,8 @@ class ProcessSourceItemsObserver implements ObserverInterface
                 && is_array($sources['assigned_sources'])
                     ? $this->prepareAssignedSources($product, $sources['assigned_sources'])
                     : [];
-            $this->sourceItemsProcessor->execute((string)$productData['sku'], $assignedSources);
+            $sku = $productData['sku'] ?? $product->getSku();
+            $this->sourceItemsProcessor->execute((string)$sku, $assignedSources);
         } else {
             $sourceItems = $this->getSourceItemsWithoutDefault($product->getSku());
             $sourceItems[] = $this->getDefaultSourceData($product);

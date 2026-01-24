@@ -270,7 +270,8 @@ class PlaceOrderOnNotDefaultStockTest extends TestCase
      */
     private function getProductBySku(string $sku): ProductInterface
     {
-        return $this->productRepository->get($sku, false, 'store_for_us_website');
+        $storeId = (int) $this->storeRepository->get('store_for_us_website')->getId();
+        return $this->productRepository->get($sku, false, $storeId);
     }
 
     /**
