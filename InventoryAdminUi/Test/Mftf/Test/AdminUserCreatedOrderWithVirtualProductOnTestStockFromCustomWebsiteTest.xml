@@ -25,9 +25,6 @@
                 <requiredEntity createDataKey="simpleCategory"/>
             </createData>
         </before>
-        <after>
-
-        </after>
         <!-- remove storefront steps -->
         <remove keyForRemoval="openProductPageUsingStoreCodeInUrl"/>
         <remove keyForRemoval="fillCorrectQuantity"/>

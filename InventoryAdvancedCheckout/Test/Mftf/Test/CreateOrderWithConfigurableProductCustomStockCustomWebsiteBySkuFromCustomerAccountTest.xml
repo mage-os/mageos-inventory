@@ -93,6 +93,8 @@
             <actionGroup ref="AdminDeleteWebsiteActionGroup" stepKey="deleteWebsite" before="logout">
                 <argument name="websiteName" value="{{customWebsite.name}}"/>
             </actionGroup>
+            <!--Delete all customers via API-->
+            <helper class="Magento\Customer\Test\Mftf\Helper\CustomerApiHelper" method="deleteAllCustomersApi" stepKey="deleteAllCustomersViaApi"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logout" before="deleteStock"/>
             <deleteData createDataKey="additionalStock" stepKey="deleteStock" before="deleteConfigChildProductOne"/>
             <!--Revert "Add Store Code To URL" configuration.-->
