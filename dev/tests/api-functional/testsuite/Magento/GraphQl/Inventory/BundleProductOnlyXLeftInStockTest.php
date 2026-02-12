@@ -21,6 +21,7 @@ use Magento\TestFramework\Fixture\DataFixtureStorage;
 use Magento\TestFramework\Fixture\DataFixtureStorageManager;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\TestCase\GraphQlAbstract;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Test for bundle product only x left in stock
@@ -80,8 +81,8 @@ class BundleProductOnlyXLeftInStockTest extends GraphQlAbstract
      * @return void
      *
      * @throws \Exception
-     * @dataProvider stockThresholdQtyProvider
      */
+    #[DataProvider('stockThresholdQtyProvider')]
     public function testOnlyXLeftInStockBundleProduct(string $stockThresholdQty): void
     {
         $this->scopeConfig->setValue('cataloginventory/options/stock_threshold_qty', $stockThresholdQty);
@@ -112,7 +113,7 @@ QUERY;
      *
      * @return array[]
      */
-    public function stockThresholdQtyProvider(): array
+    public static function stockThresholdQtyProvider(): array
     {
         return [
             ['0'],

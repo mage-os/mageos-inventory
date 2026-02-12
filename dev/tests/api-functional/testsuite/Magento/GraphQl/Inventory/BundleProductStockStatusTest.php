@@ -28,6 +28,7 @@ use Magento\TestFramework\Fixture\DataFixtureStorage;
 use Magento\TestFramework\Fixture\DataFixtureStorageManager;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\TestCase\GraphQlAbstract;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 
 /**
@@ -92,8 +93,8 @@ class BundleProductStockStatusTest extends GraphQlAbstract
      * @throws InputException
      * @throws NoSuchEntityException
      * @throws StateException
-     * @dataProvider stockStatusProvider
      */
+    #[DataProvider('stockStatusProvider')]
     public function testStockStatusBundleProduct(bool $inStock, string $expected): void
     {
         $product = $this->productRepository->get($this->fixtures->get('product1')->getSku());
@@ -128,7 +129,7 @@ class BundleProductStockStatusTest extends GraphQlAbstract
      *
      * @return array[]
      */
-    public function stockStatusProvider(): array
+    public static function stockStatusProvider(): array
     {
         return [
             [true, 'IN_STOCK'],

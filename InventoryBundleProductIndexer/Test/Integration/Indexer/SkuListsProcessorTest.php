@@ -2,6 +2,8 @@
 /**
  * Copyright 2023 Adobe
  * All Rights Reserved.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 declare(strict_types=1);
 
@@ -31,8 +33,12 @@ use Magento\TestFramework\Fixture\DataFixtureStorageManager;
 use Magento\TestFramework\Fixture\DbIsolation;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 #[
     CoversClass(SelectBuilder::class),
 ]
@@ -158,9 +164,9 @@ class SkuListsProcessorTest extends TestCase
             BundleProductFixture::class,
             ['sku' => 'bundle1', '_options' => ['$opt1$', '$opt2$', '$opt3$'], 'shipment_type' => 1]
         ),
+        DataProvider('executeListDataProvider')
     ]
     /**
-     * @dataProvider executeListDataProvider
      * @param array $newSourceData
      * @param bool $expectedStockStatus
      * @return void
