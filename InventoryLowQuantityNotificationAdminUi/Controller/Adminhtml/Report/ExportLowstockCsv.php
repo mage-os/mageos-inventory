@@ -19,7 +19,7 @@ class ExportLowstockCsv extends ProductReportController implements HttpGetAction
      *
      * @see _isAllowed()
      */
-    public const ADMIN_RESOURCE = 'Magento_Reports::report_products';
+    public const ADMIN_RESOURCE = 'Magento_Reports::lowstock';
 
     /**
      * Export low stock products report to CSV format

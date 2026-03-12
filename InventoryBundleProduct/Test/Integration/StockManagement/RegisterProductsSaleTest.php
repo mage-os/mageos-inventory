@@ -65,7 +65,7 @@ class RegisterProductsSaleTest extends TestCase
      * Test reservations will not be created and qty won't be subtracted during registration product sale
      * for bundle product.
      *
-     * @magentoDataFixture ../../../../dev/tests/integration/testsuite/Magento/Bundle/_files/product.php
+     * @magentoDataFixture Magento/Bundle/_files/product.php
      * @return void
      */
     public function testRegisterProductsSale()
