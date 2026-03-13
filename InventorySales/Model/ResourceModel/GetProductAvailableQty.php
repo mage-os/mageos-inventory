@@ -5,43 +5,32 @@
  */
 declare(strict_types=1);
 
-namespace Magento\InventorySales\Model;
+namespace Magento\InventorySales\Model\ResourceModel;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Inventory\Model\ResourceModel\Source;
 use Magento\Inventory\Model\ResourceModel\SourceItem;
 use Magento\Inventory\Model\ResourceModel\StockSourceLink;
-use Magento\Inventory\Model\ResourceModel\Source;
 use Magento\InventoryApi\Api\Data\SourceInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\StockSourceLinkInterface;
+use Magento\InventorySalesApi\Model\GetProductAvailableQtyInterface;
 use Zend_Db_Expr;
 
-/**
- * Service which returns aggregated quantity of a product across all active sources in the provided stock
- */
-class GetProductAvailableQty
+class GetProductAvailableQty implements GetProductAvailableQtyInterface
 {
-    /**
-     * @var ResourceConnection
-     */
-    private $resourceConnection;
-
     /**
      * @param ResourceConnection $resourceConnection
      */
-    public function __construct(ResourceConnection $resourceConnection)
-    {
-        $this->resourceConnection = $resourceConnection;
+    public function __construct(
+        private readonly ResourceConnection $resourceConnection
+    ) {
     }
 
     /**
-     * Get available quantity for given SKU and Stock
-     *
-     * @param string $sku
-     * @param int $stockId
-     * @return float
+     * @inheritDoc
      */
-    public function execute(string $sku, int $stockId): float
+    public function execute(string $sku, int $stockId): ?float
     {
         $connection = $this->resourceConnection->getConnection();
         $select = $connection->select()->from(
@@ -68,9 +57,14 @@ class GetProductAvailableQty
             sprintf('isi.%s = ?', SourceItemInterface::STATUS),
             SourceItemInterface::STATUS_IN_STOCK
         )->columns(
-            ['quantity' => new Zend_Db_Expr(sprintf('SUM(isi.%s)', SourceItemInterface::QUANTITY))]
+            [
+                'count' => new \Zend_Db_Expr('COUNT(*)'),
+                'quantity' => new Zend_Db_Expr(sprintf('SUM(isi.%s)', SourceItemInterface::QUANTITY)),
+            ]
         );
 
-        return (float) $connection->fetchOne($select);
+        $row = $connection->fetchRow($select);
+
+        return $row && $row['count'] > 0 ? (float) $row['quantity'] : null;
     }
 }
