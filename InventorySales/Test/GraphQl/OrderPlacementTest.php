@@ -10,6 +10,7 @@ namespace Magento\InventorySales\Test\GraphQl;
 use Magento\Catalog\Test\Fixture\Product as ProductFixture;
 use Magento\Checkout\Test\Fixture\SetBillingAddress as SetBillingAddressFixture;
 use Magento\Checkout\Test\Fixture\SetDeliveryMethod as SetDeliveryMethodFixture;
+use Magento\Checkout\Test\Fixture\SetGuestEmail as SetGuestEmailFixture;
 use Magento\Checkout\Test\Fixture\SetPaymentMethod as SetPaymentMethodFixture;
 use Magento\Checkout\Test\Fixture\SetShippingAddress as SetShippingAddressFixture;
 use Magento\Customer\Test\Fixture\Customer as CustomerFixture;
@@ -22,6 +23,7 @@ use Magento\InventoryApi\Test\Fixture\StockSourceLinks as StockSourceLinksFixtur
 use Magento\InventorySalesApi\Test\Fixture\StockSalesChannels as StockSalesChannelsFixture;
 use Magento\Quote\Test\Fixture\AddProductToCart as AddProductToCartFixture;
 use Magento\Quote\Test\Fixture\CustomerCart as CustomerCartFixture;
+use Magento\Quote\Test\Fixture\GuestCart as GuestCartFixture;
 use Magento\Quote\Test\Fixture\QuoteIdMask;
 use Magento\TestFramework\Fixture\DataFixture;
 use Magento\TestFramework\Fixture\DataFixtureStorage;
@@ -34,7 +36,7 @@ use Magento\TestFramework\TestCase\GraphQlAbstract;
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class PreventOversellingDuringConcurrentOrdersTest extends GraphQlAbstract
+class OrderPlacementTest extends GraphQlAbstract
 {
     /**
      * @var DataFixtureStorage
@@ -251,14 +253,34 @@ class PreventOversellingDuringConcurrentOrdersTest extends GraphQlAbstract
         $this->assertArrayHasKey('order_number', $response2['placeOrder']['order']);
     }
 
+    #[
+        DataFixture(ProductFixture::class, ['sku' => '4669'], as: 'product'),
+        DataFixture(GuestCartFixture::class, as: 'cart'),
+        DataFixture(QuoteIdMask::class, ['cart_id' => '$cart.id$'], as: 'cartMask'),
+        DataFixture(AddProductToCartFixture::class, ['cart_id' => '$cart.id$', 'product_id' => '$product.id$']),
+        DataFixture(SetBillingAddressFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetShippingAddressFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetDeliveryMethodFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetGuestEmailFixture::class, ['cart_id' => '$cart.id$']),
+        DataFixture(SetPaymentMethodFixture::class, ['cart_id' => '$cart.id$']),
+    ]
+    public function testPlaceOrderWithNumericSku(): void
+    {
+        $response = $this->placeOrder($this->fixtures->get('cartMask')->getMaskedId());
+        $this->assertArrayHasKey('placeOrder', $response);
+        $this->assertArrayHasKey('order', $response['placeOrder']);
+        $this->assertArrayHasKey('order_number', $response['placeOrder']['order']);
+        $this->assertNotEmpty($response['placeOrder']['order']['order_number']);
+    }
+
     /**
      * Place order via GraphQL mutation
      *
      * @param string $maskedCartId
-     * @param string $customerToken
+     * @param string|null $customerToken
      * @return array
      */
-    private function placeOrder(string $maskedCartId, string $customerToken): array
+    private function placeOrder(string $maskedCartId, ?string $customerToken = null): array
     {
         $query = <<<QUERY
 mutation {
@@ -274,7 +296,7 @@ QUERY;
             $query,
             [],
             '',
-            ['Authorization' => 'Bearer ' . $customerToken]
+            $customerToken ? ['Authorization' => 'Bearer ' . $customerToken] : []
         );
     }
 }
