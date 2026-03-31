@@ -41,6 +41,11 @@ class SiblingProductsProvider implements SiblingProductsProviderInterface
                 'sibling_link.linked_product_id = child_product_entity.' . $metadata->getIdentifierField(),
                 []
             )->joinInner(
+                ['link_type' => $this->resourceConnection->getTableName('catalog_product_link_type')],
+                'link_type.link_type_id = sibling_link.link_type_id'
+                . ' AND link_type.code = ' . $connection->quote('super'),
+                []
+            )->joinInner(
                 ['sibling_product_entity' => $this->resourceConnection->getTableName('catalog_product_entity')],
                 'sibling_product_entity.' . $metadata->getLinkField() . ' = sibling_link.product_id',
                 ['sku' => 'sibling_product_entity.sku']
