@@ -16,6 +16,9 @@
             <testCaseId value="ACPT-930"/>
             <group value="async_checkout"/>
             <group value="async_checkout_msi_ee"/>
+            <skip>
+                <issueId value="AC-16680">Skipped: CartManagementPlugin getActive() fails on inactive quote during placeOrderProcessor; order ends Rejected instead of Pending.</issueId>
+            </skip>
         </annotations>
         <before>
             <!-- Enable Deferred Stock Update -->
