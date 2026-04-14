@@ -22,6 +22,7 @@ use Magento\InventoryIndexer\Model\ResourceModel\GetStockItemData;
 use Magento\InventorySalesApi\Test\Fixture\StockSalesChannels as StockSalesChannelsFixture;
 use Magento\TestFramework\Fixture\AppIsolation;
 use Magento\TestFramework\Fixture\DataFixture;
+use Magento\TestFramework\Fixture\DataFixtureStorageManager as DataFixtureStorageManager;
 use Magento\TestFramework\Fixture\DbIsolation;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
@@ -67,6 +68,11 @@ class SkuListsProcessorTest extends TestCase
      */
     private $resource;
 
+    /**
+     * @var int
+     */
+    private $stockId;
+
     protected function setUp(): void
     {
         $this->sourceItemIndexer = Bootstrap::getObjectManager()->get(SourceItemIndexer::class);
@@ -79,11 +85,13 @@ class SkuListsProcessorTest extends TestCase
     }
 
     /**
-     * We broke transaction during indexation so we need to clean db state manually
+     * @inheritdoc
      */
     protected function tearDown(): void
     {
-        $this->removeIndexData->execute([2]);
+        $this->removeIndexData->execute([$this->stockId]);
+
+        parent::tearDown();
     }
 
     /**
@@ -119,15 +127,20 @@ class SkuListsProcessorTest extends TestCase
     ]
     public function testReindexListForRelatedProducts()
     {
+        $fixtures = DataFixtureStorageManager::getStorage();
+
+        $stock = $fixtures->get('stock2');
+        $this->stockId = $stock->getStockID();
+        $tableName = 'inventory_stock_' . $this->stockId;
+
         $connection = $this->resource->getConnection();
         $select = $connection->select()
-            ->from($this->resource->getTableName('inventory_stock_2'))
+            ->from($this->resource->getTableName($tableName))
             ->order('sku ASC');
         $inventoryData = $connection->fetchAll($select);
 
         // All products should be in inventory_stock_2 table, none should be deleted at reindex.
         // Reindex is triggered when source is assigned to products
-        assertCount(4, $inventoryData, 'All 4 products should be present in inventory_stock_2 table');
+        assertCount(4, $inventoryData, 'All 4 products should be present in' . $tableName . ' table');
     }
 }
-
