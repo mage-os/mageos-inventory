@@ -8,17 +8,12 @@ declare(strict_types=1);
 namespace Magento\InventoryIndexer\Test\Integration\Indexer\Stock;
 
 use Magento\Catalog\Test\Fixture\Product as ProductFixture;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\App\ResourceConnection;
-use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
 use Magento\InventoryApi\Test\Fixture\Source as SourceFixture;
 use Magento\InventoryApi\Test\Fixture\SourceItems as SourceItemsFixture;
 use Magento\InventoryApi\Test\Fixture\Stock as StockFixture;
 use Magento\InventoryApi\Test\Fixture\StockSourceLinks as StockSourceLinksFixture;
-use Magento\InventoryIndexer\Indexer\SourceItem\GetSourceItemIds;
-use Magento\InventoryIndexer\Indexer\SourceItem\SourceItemIndexer;
-use Magento\InventoryIndexer\Test\Integration\Indexer\RemoveIndexData as RemoveIndexData;
 use Magento\InventoryIndexer\Model\ResourceModel\GetStockItemData;
+use Magento\InventorySalesApi\Model\GetStockItemDataInterface;
 use Magento\InventorySalesApi\Test\Fixture\StockSalesChannels as StockSalesChannelsFixture;
 use Magento\TestFramework\Fixture\AppIsolation;
 use Magento\TestFramework\Fixture\DataFixture;
@@ -26,7 +21,6 @@ use Magento\TestFramework\Fixture\DataFixtureStorageManager as DataFixtureStorag
 use Magento\TestFramework\Fixture\DbIsolation;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
-use function PHPUnit\Framework\assertCount;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -34,69 +28,17 @@ use function PHPUnit\Framework\assertCount;
 class SkuListsProcessorTest extends TestCase
 {
     /**
-     * @var SourceItemIndexer
-     */
-    private $sourceItemIndexer;
-
-    /**
      * @var GetStockItemData
      */
     private $getStockItemData;
 
-    /**
-     * @var GetSourceItemIds
-     */
-    private $getSourceItemIds;
-
-    /**
-     * @var RemoveIndexData
-     */
-    private $removeIndexData;
-
-    /**
-     * @var SourceItemRepositoryInterface
-     */
-    private $sourceItemRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    private $searchCriteriaBuilder;
-
-    /**
-     * @var ResourceConnection
-     */
-    private $resource;
-
-    /**
-     * @var int
-     */
-    private $stockId;
-
     protected function setUp(): void
     {
-        $this->sourceItemIndexer = Bootstrap::getObjectManager()->get(SourceItemIndexer::class);
         $this->getStockItemData = Bootstrap::getObjectManager()->get(GetStockItemData::class);
-        $this->getSourceItemIds = Bootstrap::getObjectManager()->get(GetSourceItemIds::class);
-        $this->sourceItemRepository = Bootstrap::getObjectManager()->get(SourceItemRepositoryInterface::class);
-        $this->searchCriteriaBuilder = Bootstrap::getObjectManager()->get(SearchCriteriaBuilder::class);
-        $this->removeIndexData = Bootstrap::getObjectManager()->get(RemoveIndexData::class);
-        $this->resource = Bootstrap::getObjectManager()->get(ResourceConnection::class);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function tearDown(): void
-    {
-        $this->removeIndexData->execute([$this->stockId]);
-
-        parent::tearDown();
     }
 
     /**
      * Product should stay in inventory stock if related product is updated and reindex is run.
-     *
      */
     #[
         DbIsolation(false),
@@ -130,17 +72,34 @@ class SkuListsProcessorTest extends TestCase
         $fixtures = DataFixtureStorageManager::getStorage();
 
         $stock = $fixtures->get('stock2');
-        $this->stockId = $stock->getStockID();
-        $tableName = 'inventory_stock_' . $this->stockId;
+        $stockId = $stock->getStockId();
 
-        $connection = $this->resource->getConnection();
-        $select = $connection->select()
-            ->from($this->resource->getTableName($tableName))
-            ->order('sku ASC');
-        $inventoryData = $connection->fetchAll($select);
+        $sku1 = $fixtures->get('p1')->getSku();
+        $sku2 = $fixtures->get('p2')->getSku();
+        $sku3 = $fixtures->get('p3')->getSku();
+        $sku4 = $fixtures->get('p4')->getSku();
 
         // All products should be in inventory_stock_2 table, none should be deleted at reindex.
         // Reindex is triggered when source is assigned to products
-        assertCount(4, $inventoryData, 'All 4 products should be present in' . $tableName . ' table');
+        self::assertEquals(
+            [GetStockItemDataInterface::QUANTITY => 100, GetStockItemDataInterface::IS_SALABLE => 1],
+            $this->getStockItemData->execute($sku1, $stockId),
+            "First product should be present in inventory_stock_" . $stockId
+        );
+        self::assertEquals(
+            [GetStockItemDataInterface::QUANTITY => 200, GetStockItemDataInterface::IS_SALABLE => 1],
+            $this->getStockItemData->execute($sku2, $stockId),
+            "Second product should be present in inventory_stock_" . $stockId
+        );
+        self::assertEquals(
+            [GetStockItemDataInterface::QUANTITY => 300, GetStockItemDataInterface::IS_SALABLE => 1],
+            $this->getStockItemData->execute($sku3, $stockId),
+            "Third product should be present in inventory_stock_" . $stockId
+        );
+        self::assertEquals(
+            [GetStockItemDataInterface::QUANTITY => 400, GetStockItemDataInterface::IS_SALABLE => 1],
+            $this->getStockItemData->execute($sku4, $stockId),
+            "Fourth product should be present in inventory_stock_" . $stockId
+        );
     }
 }
