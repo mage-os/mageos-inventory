@@ -77,7 +77,7 @@ class Stock implements RevertibleDataFixtureInterface
 
         $connection = $this->resourceConnection->getConnection();
         $tableName = 'inventory_stock_' . $stockId;
-        $connection -> dropTable($tableName);
+        $connection->dropTable($tableName);
     }
 
     /**
