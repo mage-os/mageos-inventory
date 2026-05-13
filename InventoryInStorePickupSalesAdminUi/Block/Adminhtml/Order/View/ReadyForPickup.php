@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -26,6 +26,7 @@ class ReadyForPickup extends Container
 {
     /**
      * @inheritdoc
+     * @var string
      */
     protected $_blockGroup = 'Magento_Sales';
 
@@ -100,7 +101,7 @@ class ReadyForPickup extends Container
                 'class' => 'action-default ready-for-pickup',
                 'onclick' => sprintf(
                     "confirmSetLocation('%s', '%s')",
-                    $message,
+                    $this->_escaper->escapeJs($this->_escaper->escapeHtml($message)),
                     $this->viewBlock->getUrl('sales/*/notifyPickup')
                 ),
             ]
