@@ -8,6 +8,9 @@ declare(strict_types=1);
 namespace Magento\InventoryCatalog\Test\Integration;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\CatalogInventory\Api\StockItemCriteriaInterface;
+use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
+use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
 use Magento\CatalogInventory\Api\StockStatusCriteriaInterface;
 use Magento\CatalogInventory\Api\StockStatusCriteriaInterfaceFactory;
 use Magento\CatalogInventory\Api\StockStatusRepositoryInterface;
@@ -20,7 +23,7 @@ use Magento\InventoryCatalogApi\Api\DefaultSourceProviderInterface;
 use PHPUnit\Framework\TestCase;
 use Magento\TestFramework\Helper\Bootstrap;
 
-class SetOutOfStockToLegacyStockStatusAtSourceItemsDeleteTest extends TestCase
+class LegacyStockAfterSourceItemsDeleteTest extends TestCase
 {
     /**
      * @var ProductRepositoryInterface
@@ -57,6 +60,16 @@ class SetOutOfStockToLegacyStockStatusAtSourceItemsDeleteTest extends TestCase
      */
     private $defaultSourceProvider;
 
+    /**
+     * @var StockItemCriteriaInterfaceFactory
+     */
+    private $legacyStockItemCriteriaFactory;
+
+    /**
+     * @var StockItemRepositoryInterface
+     */
+    private $legacyStockItemRepository;
+
     protected function setUp(): void
     {
         $this->productRepository = Bootstrap::getObjectManager()->get(ProductRepositoryInterface::class);
@@ -71,6 +84,11 @@ class SetOutOfStockToLegacyStockStatusAtSourceItemsDeleteTest extends TestCase
 
         $this->sourceItemsDelete = Bootstrap::getObjectManager()->get(SourceItemsDeleteInterface::class);
         $this->defaultSourceProvider = Bootstrap::getObjectManager()->get(DefaultSourceProviderInterface::class);
+
+        $this->legacyStockItemCriteriaFactory = Bootstrap::getObjectManager()->get(
+            StockItemCriteriaInterfaceFactory::class
+        );
+        $this->legacyStockItemRepository = Bootstrap::getObjectManager()->get(StockItemRepositoryInterface::class);
     }
 
     /**
@@ -84,6 +102,24 @@ class SetOutOfStockToLegacyStockStatusAtSourceItemsDeleteTest extends TestCase
         $product = $this->productRepository->get($productSku);
         $productId = $product->getId();
         $websiteId = 0;
+
+        /** @var StockItemCriteriaInterface $legacyStockItemCriteria */
+        $legacyStockItemCriteria = $this->legacyStockItemCriteriaFactory->create();
+        $legacyStockItemCriteria->setProductsFilter($productId);
+        $legacyStockItemCriteria->setScopeFilter($websiteId);
+        $legacyStockItems = $this->legacyStockItemRepository->getList($legacyStockItemCriteria)->getItems();
+        self::assertCount(1, $legacyStockItems);
+
+        $legacyStockItem = reset($legacyStockItems);
+        self::assertTrue($legacyStockItem->getIsInStock());
+        self::assertEquals(5.5, $legacyStockItem->getQty());
+
+        $searchCriteria = $this->searchCriteriaBuilder
+            ->addFilter(SourceItemInterface::SKU, $productSku)
+            ->addFilter(SourceItemInterface::SOURCE_CODE, $this->defaultSourceProvider->getCode())
+            ->create();
+        $sourceItems = $this->sourceItemRepository->getList($searchCriteria)->getItems();
+        self::assertCount(1, $sourceItems);
 
         /** @var StockStatusCriteriaInterface $legacyStockStatusCriteria */
         $legacyStockStatusCriteria = $this->legacyStockStatusCriteriaFactory->create();
@@ -104,6 +140,13 @@ class SetOutOfStockToLegacyStockStatusAtSourceItemsDeleteTest extends TestCase
         self::assertCount(1, $sourceItems);
 
         $this->sourceItemsDelete->execute($sourceItems);
+
+        $legacyStockItems = $this->legacyStockItemRepository->getList($legacyStockItemCriteria)->getItems();
+        self::assertCount(1, $legacyStockItems);
+
+        $legacyStockItem = reset($legacyStockItems);
+        self::assertFalse($legacyStockItem->getIsInStock());
+        self::assertEquals(0, $legacyStockItem->getQty());
 
         $legacyStockStatuses = $this->legacyStockStatusRepository->getList($legacyStockStatusCriteria)->getItems();
         self::assertCount(1, $legacyStockStatuses);
