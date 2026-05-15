@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- /**
-  * Copyright © Magento, Inc. All rights reserved.
-  * See COPYING.txt for license details.
-  */
+/**
+ * Copyright 2020 Adobe
+ * All Rights Reserved.
+ */
 -->
 
 <tests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:mftf:Test/etc/testSchema.xsd">
@@ -17,7 +17,6 @@
             <group value="msi"/>
             <group value="multi_mode"/>
         </annotations>
-
         <before>
             <!--Create test data.-->
             <createData entity="FlatRateShippingMethodDefault" stepKey="setDefaultFlatRateShippingMethod"/>
@@ -112,12 +111,13 @@
                 <argument name="websiteName" value="{{customWebsite.name}}"/>
             </actionGroup>
             <deleteData createDataKey="stock" stepKey="deleteStock"/>
+            <!--Delete all customers via API-->
+            <helper class="Magento\Customer\Test\Mftf\Helper\CustomerApiHelper" method="deleteAllCustomersApi" stepKey="deleteAllCustomersViaApi"/>
             <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
             <actionGroup ref="CliIndexerReindexActionGroup" stepKey="reindex">
                 <argument name="indices" value=""/>
             </actionGroup>
         </after>
-
         <!--Get bundle product option.-->
         <amOnPage url="{{AdminProductEditPage.url($bundleProduct.id$)}}" stepKey="openBundleProductEditPage"/>
         <grabTextFrom selector="{{AdminProductFormBundleSection.currentBundleOption}}" stepKey="grabBundleOption"/>

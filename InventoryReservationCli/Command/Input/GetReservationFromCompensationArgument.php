@@ -93,6 +93,12 @@ class GetReservationFromCompensationArgument
         );
         $order = current($results->getItems());
 
+        if (!$order) {
+            throw new InvalidArgumentException(
+                sprintf('Order with increment id "%s" does not exist.', $argumentParts['increment_id'])
+            );
+        }
+
         return $this->reservationBuilder
             ->setSku((string)$argumentParts['sku'])
             ->setQuantity((float)$argumentParts['quantity'])

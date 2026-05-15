@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2020 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -70,7 +70,7 @@ class GetOrdersTotalCountTest extends TestCase
      */
     private function createConnectionMock(MockObject $select): MockObject
     {
-        $connection = $this->getMockForAbstractClass(AdapterInterface::class);
+        $connection = $this->createMock(AdapterInterface::class);
         $connection->method('select')
             ->willReturn($select);
         return $connection;

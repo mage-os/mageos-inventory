@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2017 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -43,10 +43,8 @@ class ValidatorChainTest extends TestCase
     protected function setUp(): void
     {
         $this->validationResultFactory = $this->createMock(ValidationResultFactory::class);
-        $this->qtyValidator = $this->getMockBuilder(ValidatorInterface::class)
-            ->getMock();
-        $this->skuValidator = $this->getMockBuilder(ValidatorInterface::class)
-            ->getMock();
+        $this->qtyValidator = $this->createMock(ValidatorInterface::class);
+        $this->skuValidator = $this->createMock(ValidatorInterface::class);
     }
 
     public function testValidateWithOutValidators()

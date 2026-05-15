@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -9,6 +9,7 @@ namespace Magento\InventorySalesApi\Test\Api;
 
 use Magento\TestFramework\TestCase\WebapiAbstract;
 use Magento\Framework\Webapi\Rest\Request;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @see https://app.hiptest.com/projects/69435/test-plan/folders/530616/scenarios/1824145
@@ -42,10 +43,10 @@ class IsProductSalableTest extends WebapiAbstract
      * @magentoApiDataFixture Magento_InventoryApi::Test/_files/stock_source_links.php
      * @magentoApiDataFixture Magento_InventoryIndexer::Test/_files/reindex_inventory.php
      * @magentoConfigFixture default_store cataloginventory/item_options/manage_stock 0
-     * @dataProvider executeDataProvider
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeDataProvider')]
     public function testDeleteSourceItemConfiguration(
         string $sku,
         int $stockId,

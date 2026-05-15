@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2022 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -32,6 +31,7 @@ use Magento\TestFramework\Fixture\DataFixtureStorage;
 use Magento\TestFramework\Fixture\DataFixtureStorageManager;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Tests for products sorting on category page.
@@ -119,7 +119,6 @@ class SortingTest extends TestCase
     /**
      * Test product list ordered by product name with out-of-stock configurable product options.
      *
-     * @dataProvider productListWithShowOutOfStockSortOrderDataProvider
      * @param string $sortBy
      * @param string $direction
      * @param array $expected
@@ -130,6 +129,7 @@ class SortingTest extends TestCase
      * @throws StateException|LocalizedException
      */
     #[
+        DataProvider('productListWithShowOutOfStockSortOrderDataProvider'),
         Config(Configuration::XML_PATH_SHOW_OUT_OF_STOCK, 1, ScopeInterface::SCOPE_STORE, 'default'),
         DataFixture(CategoryFixture::class, ['name' => 'Category1', 'parent_id' => '2'], 'c11'),
         DataFixture(

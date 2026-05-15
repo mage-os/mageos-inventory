@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -36,9 +36,7 @@ class EntityHistoryLoginFlagTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->subjectMock = $this->getMockBuilder(EntityInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->subjectMock = $this->createMock(EntityInterface::class);
 
         $this->objectManagerHelper = new ObjectManagerHelper($this);
         $this->plugin = $this->objectManagerHelper->getObject(EntityHistoryLoginFlag::class);

@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -65,7 +65,7 @@ class RegisterProductsSaleTest extends TestCase
      * Test reservations will not be created and qty won't be subtracted during registration product sale
      * for bundle product.
      *
-     * @magentoDataFixture ../../../../dev/tests/integration/testsuite/Magento/Bundle/_files/product.php
+     * @magentoDataFixture Magento/Bundle/_files/product.php
      * @return void
      */
     public function testRegisterProductsSale()

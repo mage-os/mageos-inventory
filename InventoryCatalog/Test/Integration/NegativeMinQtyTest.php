@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -15,6 +14,7 @@ use Magento\InventorySalesApi\Api\AreProductsSalableForRequestedQtyInterface;
 use Magento\InventorySalesApi\Api\Data\IsProductSalableForRequestedQtyRequestInterfaceFactory;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class NegativeMinQtyTest extends TestCase
 {
@@ -63,7 +63,6 @@ class NegativeMinQtyTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/stocks.php
      * @magentoDataFixture Magento_InventoryApi::Test/_files/stock_source_links.php
      * @magentoDataFixture Magento_InventoryApi::Test/_files/source_items.php
-     * @dataProvider isProductSalableForRequestedQtyWithBackordersEnabledAtProductLevelDataProvider
      *
      * @magentoDbIsolation disabled
      * @param string $sku
@@ -73,6 +72,7 @@ class NegativeMinQtyTest extends TestCase
      * @param bool $expectedSaleability
      * @return void
      */
+    #[DataProvider('isProductSalableForRequestedQtyWithBackordersEnabledAtProductLevelDataProvider')]
     public function testIsProductSalableForRequestedQtyWithBackordersEnabledAtProductLevel(
         string $sku,
         int $stockId,
@@ -123,7 +123,6 @@ class NegativeMinQtyTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/source_items.php
      * @magentoConfigFixture default_store cataloginventory/item_options/min_qty -4.5
      * @magentoConfigFixture default_store cataloginventory/item_options/backorders 1
-     * @dataProvider isProductSalableForRequestedQtyWithBackordersEnabledGloballyDataProvider
      *
      * @magentoDbIsolation disabled
      * @param string $sku
@@ -132,6 +131,7 @@ class NegativeMinQtyTest extends TestCase
      * @param bool $expectedSaleability
      * @return void
      */
+    #[DataProvider('isProductSalableForRequestedQtyWithBackordersEnabledGloballyDataProvider')]
     public function testIsProductSalableForRequestedQtyWithBackordersEnabledGlobally(
         string $sku,
         int $stockId,

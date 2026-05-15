@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -134,7 +134,8 @@ class AddSalesQuoteItemOnNotDefaultStockTest extends TestCase
      */
     private function getProductBySku(string $sku): ProductInterface
     {
-        return $this->productRepository->get($sku, false, 'store_for_us_website');
+        $storeId = (int) $this->storeRepository->get('store_for_us_website')->getId();
+        return $this->productRepository->get($sku, false, $storeId);
     }
 
     /**

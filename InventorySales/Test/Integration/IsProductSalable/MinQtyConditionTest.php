@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -10,6 +9,7 @@ namespace Magento\InventorySales\Test\Integration\IsProductSalable;
 
 use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class MinQtyConditionTest extends TestCase
@@ -43,10 +43,9 @@ class MinQtyConditionTest extends TestCase
      * @param bool $expectedResult
      * @return void
      *
-     * @dataProvider executeWithMinQtyDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithMinQtyDataProvider')]
     public function testExecuteWithMinQty(string $sku, int $stockId, bool $expectedResult): void
     {
         $result = $this->areProductsSalable->execute([$sku], $stockId);
@@ -88,10 +87,9 @@ class MinQtyConditionTest extends TestCase
      * @param bool $expectedResult
      * @return void
      *
-     * @dataProvider executeWithManageStockFalseAndMinQty
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithManageStockFalseAndMinQty')]
     public function testExecuteWithManageStockFalseAndMinQty(string $sku, int $stockId, bool $expectedResult)
     {
         $result = $this->areProductsSalable->execute([$sku], $stockId);

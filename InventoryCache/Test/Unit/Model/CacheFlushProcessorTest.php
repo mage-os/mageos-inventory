@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -15,6 +14,7 @@ use Magento\InventoryCache\Model\FlushCacheByCategoryIds;
 use Magento\InventoryCache\Model\FlushCacheByProductIds;
 use Magento\InventoryIndexer\Model\GetProductsIdsToProcess;
 use Magento\InventoryIndexer\Model\ResourceModel\GetCategoryIdsByProductIds;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -57,23 +57,13 @@ class CacheFlushProcessorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->flushCacheByIds = $this->getMockBuilder(FlushCacheByProductIds::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->getCategoryIdsByProductIds = $this->getMockBuilder(GetCategoryIdsByProductIds::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->flushCategoryByCategoryIds = $this->getMockBuilder(FlushCacheByCategoryIds::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->getProductsIdsToProcess = $this->getMockBuilder(GetProductsIdsToProcess::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->indexer = $this->getMockBuilder(IndexerInterface::class)
-            ->getMockForAbstractClass();
-        $this->indexerRegistry = $this->getMockBuilder(IndexerRegistry::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->flushCacheByIds = $this->createMock(FlushCacheByProductIds::class);
+        $this->getCategoryIdsByProductIds = $this->createMock(GetCategoryIdsByProductIds::class);
+        $this->flushCategoryByCategoryIds = $this->createMock(FlushCacheByCategoryIds::class);
+        $this->getProductsIdsToProcess = $this->createMock(GetProductsIdsToProcess::class);
+        $this->indexer = $this->createMock(IndexerInterface::class);
+        $this->indexerRegistry = $this->createMock(IndexerRegistry::class);
+
         $this->cacheFlushProcessor = new CacheFlushProcessor(
             $this->flushCacheByIds,
             $this->getCategoryIdsByProductIds,
@@ -84,16 +74,14 @@ class CacheFlushProcessorTest extends TestCase
     }
 
     /**
-     * @dataProvider processDataProvider
-     * @param array $sourceItemIds
      * @param array $beforeSalableList
      * @param array $afterSalableList
      * @param array $changedProductIds,
      * @param int $numberOfCacheCleans,
      * @return void
      */
+    #[DataProvider('processDataProvider')]
     public function testProcess(
-        array $sourceItemIds,
         array $beforeSalableList,
         array $afterSalableList,
         array $changedProductIds,
@@ -120,7 +108,7 @@ class CacheFlushProcessorTest extends TestCase
         $this->flushCategoryByCategoryIds->expects($this->exactly($numberOfCacheCleans))
             ->method('execute');
 
-        $this->cacheFlushProcessor->process($sourceItemIds, $beforeSalableList, $afterSalableList);
+        $this->cacheFlushProcessor->process($beforeSalableList, $afterSalableList);
     }
 
     /**
@@ -129,8 +117,8 @@ class CacheFlushProcessorTest extends TestCase
     public static function processDataProvider(): array
     {
         return [
-            [[1], ['sku1' => [1 => true]], ['sku1' => [1 => true]], [], 0],
-            [[1], ['sku1' => [1 => true]], ['sku1' => [1 => false]], [1], 1]
+            [['sku1' => [1 => true]], ['sku1' => [1 => true]], [], 0],
+            [['sku1' => [1 => true]], ['sku1' => [1 => false]], [1], 1]
         ];
     }
 }

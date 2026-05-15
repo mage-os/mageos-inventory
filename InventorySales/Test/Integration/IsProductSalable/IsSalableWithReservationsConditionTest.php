@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -19,6 +18,7 @@ use Magento\InventoryReservationsApi\Model\CleanupReservationsInterface;
 use Magento\InventoryReservationsApi\Model\ReservationBuilderInterface;
 use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class IsSalableWithReservationsConditionTest extends TestCase
@@ -107,10 +107,9 @@ class IsSalableWithReservationsConditionTest extends TestCase
      * @param bool $isSalable
      * @return void
      *
-     * @dataProvider productIsSalableDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('productIsSalableDataProvider')]
     public function testProductIsSalable(string $sku, int $stockId, bool $isSalable): void
     {
         $result = $this->areProductsSalable->execute([$sku], $stockId);

@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2021 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -13,6 +12,7 @@ use Magento\CatalogInventory\Model\System\Config\Backend\Minqty;
 use Magento\Config\Model\Config\BackendFactory;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -48,12 +48,12 @@ class AllowNegativeMinQtyInConfigPluginTest extends TestCase
     }
 
     /**
-     * @dataProvider beforeSaveDataProvider
      * @magentoConfigFixture default/cataloginventory/item_options/min_qty 1
      * @param string $value
      * @param string $expectedMinQty
      * @return void
      */
+    #[DataProvider('beforeSaveDataProvider')]
     public function testBeforeSave(string $value, string $expectedMinQty): void
     {
         $this->minQty->addData([

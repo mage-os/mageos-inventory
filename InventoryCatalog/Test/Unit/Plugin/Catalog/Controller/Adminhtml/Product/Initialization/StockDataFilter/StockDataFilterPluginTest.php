@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -31,17 +31,14 @@ class StockDataFilterPluginTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->subjectMock = $this->getMockBuilder(StockDataFilter::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
+        $this->subjectMock = $this->createMock(StockDataFilter::class);
         $this->stockDataFilterPlugin = new StockDataFilterPlugin();
     }
 
     /**
      * Test for min_qty, qty filter
      */
-    public function testAfterFilter()
+    public function testAfterFilter(): void
     {
         $result = [
             'min_qty' => -1,

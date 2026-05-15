@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -12,8 +12,9 @@ declare(strict_types=1);
  */
 
 use Magento\Catalog\Model\Product\Type;
+use Magento\TestFramework\Workaround\Override\Fixture\Resolver;
 
-require __DIR__ . '/../../../../../../dev/tests/integration/testsuite/Magento/Catalog/_files/products.php';
+Resolver::getInstance()->requireDataFixture('Magento/Catalog/_files/products.php');
 require __DIR__ . '/product_simple_out_of_stock.php';
 
 /** @var $objectManager \Magento\TestFramework\ObjectManager */

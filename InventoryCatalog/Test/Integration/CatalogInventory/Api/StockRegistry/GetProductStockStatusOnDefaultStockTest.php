@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -12,6 +12,7 @@ use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class GetProductStockStatusOnDefaultStockTest extends TestCase
 {
@@ -46,9 +47,8 @@ class GetProductStockStatusOnDefaultStockTest extends TestCase
      *
      * @param string $sku
      * @param int $status
-     *
-     * @dataProvider getStatusDataProvider
      */
+    #[DataProvider('getStatusDataProvider')]
     public function testGetStatusIfScopeIdParameterIsNotPassed(string $sku, int $status): void
     {
         $productId = $this->getProductIdsBySkus->execute([$sku])[$sku];
@@ -63,9 +63,8 @@ class GetProductStockStatusOnDefaultStockTest extends TestCase
      *
      * @param string $sku
      * @param int $status
-     *
-     * @dataProvider getStatusDataProvider
      */
+    #[DataProvider('getStatusDataProvider')]
     public function testGetStatusIfScopeIdParameterIsPassed(string $sku, int $status): void
     {
         $productId = $this->getProductIdsBySkus->execute([$sku])[$sku];

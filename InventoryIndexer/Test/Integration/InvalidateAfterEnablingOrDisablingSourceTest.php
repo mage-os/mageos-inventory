@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -13,6 +12,7 @@ use Magento\Framework\Indexer\IndexerRegistry;
 use Magento\InventoryApi\Api\SourceRepositoryInterface;
 use Magento\InventoryIndexer\Indexer\InventoryIndexer;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -48,13 +48,13 @@ class InvalidateAfterEnablingOrDisablingSourceTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/stock_source_links.php
      * @magentoDataFixture Magento_InventoryIndexer::Test/_files/reindex_inventory.php
      *
-     * @dataProvider indexerInvalidationDataProvider
      * @param string $sourceCode
      * @param bool $enable
      * @param bool $expectedValid
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('indexerInvalidationDataProvider')]
     public function testIndexerInvalidation(string $sourceCode, bool $enable, bool $expectedValid)
     {
         $this->setSourceEnabledStatus($sourceCode, $enable);
@@ -81,11 +81,11 @@ class InvalidateAfterEnablingOrDisablingSourceTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/sources.php
      * @magentoDataFixture Magento_InventoryIndexer::Test/_files/reindex_inventory.php
      *
-     * @dataProvider sourceDoesNotHaveAllRelationsDataProvider
      * @param string $sourceCode
      * @param bool $enable
      * @param bool $expectedValid
      */
+    #[DataProvider('sourceDoesNotHaveAllRelationsDataProvider')]
     public function testIndexerInvalidationIfSourceDoesNotHaveAnyRelations(
         string $sourceCode,
         bool $enable,
@@ -104,11 +104,11 @@ class InvalidateAfterEnablingOrDisablingSourceTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/source_items.php
      * @magentoDataFixture Magento_InventoryIndexer::Test/_files/reindex_inventory.php
      *
-     * @dataProvider sourceDoesNotHaveAllRelationsDataProvider
      * @param string $sourceCode
      * @param bool $enable
      * @param bool $expectedValid
      */
+    #[DataProvider('sourceDoesNotHaveAllRelationsDataProvider')]
     public function testIndexerInvalidationIfSourceDoesNotHaveStockLinks(
         string $sourceCode,
         bool $enable,
@@ -127,13 +127,13 @@ class InvalidateAfterEnablingOrDisablingSourceTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/stock_source_links.php
      * @magentoDataFixture Magento_InventoryIndexer::Test/_files/reindex_inventory.php
      *
-     * @dataProvider sourceDoesNotHaveAllRelationsDataProvider
      * @param string $sourceCode
      * @param bool $enable
      * @param bool $expectedValid
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('sourceDoesNotHaveAllRelationsDataProvider')]
     public function testIndexerInvalidationIfSourceDoesNotHaveSourceItems(
         string $sourceCode,
         bool $enable,

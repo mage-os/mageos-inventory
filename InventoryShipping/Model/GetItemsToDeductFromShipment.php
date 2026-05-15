@@ -189,7 +189,7 @@ class GetItemsToDeductFromShipment
     private function castQty(OrderItem $item, $qty)
     {
         if ($item->getIsQtyDecimal()) {
-            $qty = (double)$qty;
+            $qty = (float)$qty;
         } else {
             $qty = (int)$qty;
         }

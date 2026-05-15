@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -11,6 +10,7 @@ namespace Magento\InventoryIndexer\Test\Unit\Model;
 use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
 use Magento\InventoryIndexer\Model\GetProductsIdsToProcess;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class GetProductsIdsToProcessTest extends TestCase
@@ -47,9 +47,8 @@ class GetProductsIdsToProcessTest extends TestCase
      * @param bool $force
      * @param array $expectedResult
      * @return void
-     *
-     * @dataProvider dataProvider
      */
+    #[DataProvider('dataProvider')]
     public function testExecute(array $before, array $after, bool $force, array $expectedResult): void
     {
         $actualResult = $this->model->execute($before, $after, $force);

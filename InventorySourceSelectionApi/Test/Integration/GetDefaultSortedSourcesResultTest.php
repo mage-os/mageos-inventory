@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -14,6 +13,7 @@ use Magento\InventorySourceSelectionApi\Api\Data\ItemRequestInterfaceFactory;
 use Magento\InventorySourceSelectionApi\Model\Algorithms\Result\GetDefaultSortedSourcesResult;
 use PHPUnit\Framework\TestCase;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class GetDefaultSortedSourcesResultTest extends TestCase
 {
@@ -133,6 +133,19 @@ class GetDefaultSortedSourcesResultTest extends TestCase
                 ],
                 true
             ],
+            [
+                20,
+                [
+                    ['sku' => 'SKU-2', 'qty' => 1], ['sku' => 'SKU-2', 'qty' => 2],
+                ],
+                [
+                    'us-1',
+                ],
+                [
+                    'us-1/SKU-2' => ['deduct' => 3, 'avail' => 5],
+                ],
+                true
+            ],
         ];
     }
 
@@ -141,7 +154,6 @@ class GetDefaultSortedSourcesResultTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/source_items.php
      * @magentoDataFixture Magento_InventoryApi::Test/_files/stocks.php
      * @magentoDataFixture Magento_InventoryApi::Test/_files/stock_source_links.php
-     * @dataProvider shouldReturnDefaultResultsDataProvider
      * @param int $stockId
      * @param array $requestItemsData
      * @param array $sortedSourcesCodes
@@ -149,6 +161,7 @@ class GetDefaultSortedSourcesResultTest extends TestCase
      * @param bool $expectIsShippable
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
+    #[DataProvider('shouldReturnDefaultResultsDataProvider')]
     public function testShouldReturnDefaultResults(
         int $stockId,
         array $requestItemsData,

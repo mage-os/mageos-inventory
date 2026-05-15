@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -15,6 +14,7 @@ use Magento\Framework\Validation\ValidationResultFactory;
 use Magento\InventoryReservations\Model\ReservationBuilder;
 use Magento\InventoryReservations\Model\SnakeToCamelCaseConverter;
 use Magento\InventoryReservationsApi\Model\ReservationInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -50,15 +50,10 @@ class ReservationBuilderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->objectManager = $this->getMockBuilder(ObjectManagerInterface::class)
-            ->getMock();
-        $this->snakeToCamelCaseConverter = $this->getMockBuilder(SnakeToCamelCaseConverter::class)
-            ->getMock();
-        $this->reservation = $this->getMockBuilder(ReservationInterface::class)
-            ->getMock();
-        $this->validationResult = $this->getMockBuilder(ValidationResult::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->objectManager = $this->createMock(ObjectManagerInterface::class);
+        $this->snakeToCamelCaseConverter = $this->createMock(SnakeToCamelCaseConverter::class);
+        $this->reservation = $this->createMock(ReservationInterface::class);
+        $this->validationResult = $this->createMock(ValidationResult::class);
         $this->validationResultFactory = $this->createMock(ValidationResultFactory::class);
 
         $this->reservationBuilder = (new ObjectManager($this))->getObject(
@@ -122,8 +117,8 @@ class ReservationBuilderTest extends TestCase
     /**
      * @param array $firstSetter
      * @param array $secondSetter
-     * @dataProvider getSettersAndValues
      */
+    #[DataProvider('getSettersAndValues')]
     public function testThrowValidationException(array $firstSetter, array $secondSetter)
     {
         $this->expectException('Magento\Framework\Validation\ValidationException');

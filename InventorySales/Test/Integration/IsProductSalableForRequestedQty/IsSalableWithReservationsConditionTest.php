@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -17,6 +16,7 @@ use Magento\InventoryReservationsApi\Model\ReservationBuilderInterface;
 use Magento\InventorySalesApi\Api\AreProductsSalableForRequestedQtyInterface;
 use Magento\InventorySalesApi\Api\Data\IsProductSalableForRequestedQtyRequestInterfaceFactory;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class IsSalableWithReservationsConditionTest extends TestCase
@@ -90,10 +90,9 @@ class IsSalableWithReservationsConditionTest extends TestCase
      * @param int $stockId
      * @param bool $isSalable
      *
-     * @dataProvider productIsSalableDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('productIsSalableDataProvider')]
     public function testProductIsSalable(string $sku, int $stockId, float $qty, bool $isSalable)
     {
         $request = $this->isProductSalableForRequestedQtyRequestFactory->create(
@@ -139,10 +138,9 @@ class IsSalableWithReservationsConditionTest extends TestCase
      * @param int $stockId
      * @param bool $isSalable
      *
-     * @dataProvider productIsSalableWithUseConfigMinQtyDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('productIsSalableWithUseConfigMinQtyDataProvider')]
     public function testProductIsSalableWithUseConfigMinQty(string $sku, int $stockId, float $qty, bool $isSalable)
     {
         /** @var StockItemConfigurationInterface $stockItemConfiguration */
@@ -190,10 +188,9 @@ class IsSalableWithReservationsConditionTest extends TestCase
      * @param int $stockId
      * @param bool $isSalable
      *
-     * @dataProvider productIsSalableWithMinQtyDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('productIsSalableWithMinQtyDataProvider')]
     public function testProductIsSalableWithMinQty(string $sku, int $stockId, float $qty, bool $isSalable)
     {
         /** @var StockItemConfigurationInterface $stockItemConfiguration */

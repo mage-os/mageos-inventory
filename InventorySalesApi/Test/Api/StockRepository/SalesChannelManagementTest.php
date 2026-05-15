@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2017 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -13,6 +13,7 @@ use Magento\Framework\Webapi\Rest\Request;
 use Magento\InventoryApi\Api\Data\StockInterface;
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\TestFramework\TestCase\WebapiAbstract;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class SalesChannelManagementTest extends WebapiAbstract
 {
@@ -66,9 +67,8 @@ class SalesChannelManagementTest extends WebapiAbstract
      *
      * @magentoApiDataFixture ../../../../app/code/Magento/InventorySalesApi/Test/_files/websites_with_stores.php
      * @magentoApiDataFixture ../../../../app/code/Magento/InventorySalesApi/Test/_files/stock_with_sales_channels.php
-     *
-     * @dataProvider deleteSalesChannelDataProvider
      */
+    #[DataProvider('deleteSalesChannelDataProvider')]
     public function testValidateDeleteSalesChannelFromStock(array $salesChannels, array $beforeSave, array $afterSave)
     {
         $defaultStockData = $this->getStockDataById(1);
@@ -146,9 +146,8 @@ class SalesChannelManagementTest extends WebapiAbstract
      * @param array $expectedErrorData
      *
      * @magentoApiDataFixture ../../../../app/code/Magento/InventoryApi/Test/_files/stock.php
-     *
-     * @dataProvider dataProviderSalesChannelsAssignment
      */
+    #[DataProvider('dataProviderSalesChannelsAssignment')]
     public function testFailedValidationSalesChannelsAssignment(array $salesChannels, array $expectedErrorData)
     {
         $stockId = 10;

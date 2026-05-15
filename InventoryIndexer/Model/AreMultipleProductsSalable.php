@@ -1,49 +1,37 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
 namespace Magento\InventoryIndexer\Model;
 
 use Magento\Framework\Exception\LocalizedException;
+use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
+use Magento\InventorySalesApi\Api\Data\IsProductSalableResultInterfaceFactory;
 use Magento\InventorySalesApi\Model\GetStockItemsDataInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * Determine the salability of multiple products in a specified stock.
  */
-class AreMultipleProductsSalable
+class AreMultipleProductsSalable implements AreProductsSalableInterface
 {
     /**
-     * @var GetStockItemsDataInterface
-     */
-    private GetStockItemsDataInterface $getStockItemsData;
-
-    /**
-     * @var LoggerInterface
-     */
-    private LoggerInterface $logger;
-
-    /**
      * @param GetStockItemsDataInterface $getStockItemsData
+     * @param IsProductSalableResultInterfaceFactory $isProductSalableResultFactory
      * @param LoggerInterface $logger
      */
     public function __construct(
-        GetStockItemsDataInterface $getStockItemsData,
-        LoggerInterface $logger
+        private readonly GetStockItemsDataInterface $getStockItemsData,
+        private readonly IsProductSalableResultInterfaceFactory $isProductSalableResultFactory,
+        private readonly LoggerInterface $logger,
     ) {
-        $this->getStockItemsData = $getStockItemsData;
-        $this->logger = $logger;
     }
 
     /**
-     * Define if multiple products are salable for a specified stock.
-     *
-     * @param array $skus
-     * @param int $stockId
-     * @return array
+     * @inheritdoc
      */
     public function execute(array $skus, int $stockId): array
     {
@@ -70,6 +58,17 @@ class AreMultipleProductsSalable
             }
         }
 
-        return $isSalableResults;
+        $results = [];
+        foreach ($isSalableResults as $sku => $isSalable) {
+            $results[] = $this->isProductSalableResultFactory->create(
+                [
+                    'sku' => $sku,
+                    'stockId' => $stockId,
+                    'isSalable' => $isSalable,
+                ]
+            );
+        }
+
+        return $results;
     }
 }
