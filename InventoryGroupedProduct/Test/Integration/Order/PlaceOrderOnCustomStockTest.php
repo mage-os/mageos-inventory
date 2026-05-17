@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -61,8 +61,8 @@ class PlaceOrderOnCustomStockTest extends TestCase
      * Tests adding Grouped product without Source items in default source.
      *
      * @return void
-     * @magentoDataFixture Magento/GroupedProduct/_files/product_grouped_with_simple_out_of_stock.php
      * @magentoDataFixture Magento_InventoryApi::Test/_files/change_stock_for_base_website.php
+     * @magentoDataFixture Magento/GroupedProduct/_files/product_grouped_with_simple_out_of_stock.php
      * @magentoDbIsolation disabled
      */
     public function testAddGroupedProductWithoutItemsInDefaultSource(): void

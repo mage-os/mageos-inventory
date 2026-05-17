@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2017 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -13,6 +13,7 @@ use Magento\Framework\Webapi\Rest\Request;
 use Magento\InventoryApi\Api\Data\StockInterface;
 use Magento\TestFramework\Assert\AssertArrayContains;
 use Magento\TestFramework\TestCase\WebapiAbstract;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class GetListTest extends WebapiAbstract
 {
@@ -28,8 +29,8 @@ class GetListTest extends WebapiAbstract
      * @param array $searchCriteria
      * @param int $expectedTotalCount
      * @param array $expectedItemsData
-     * @dataProvider dataProviderGetList
      */
+    #[DataProvider('dataProviderGetList')]
     public function testGetList(array $searchCriteria, int $expectedTotalCount, array $expectedItemsData)
     {
         $requestData = ['searchCriteria' => $searchCriteria];

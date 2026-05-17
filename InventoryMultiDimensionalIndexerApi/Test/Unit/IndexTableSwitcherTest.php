@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -56,8 +56,8 @@ class IndexTableSwitcherTest extends TestCase
         $objectManager = new ObjectManager($this);
         $this->indexName = $this->createMock(IndexName::class);
         $this->resourceConnection = $this->createMock(ResourceConnection::class);
-        $this->indexNameResolver = $this->getMockForAbstractClass(IndexNameResolverInterface::class);
-        $this->adapter = $this->getMockForAbstractClass(AdapterInterface::class);
+        $this->indexNameResolver = $this->createMock(IndexNameResolverInterface::class);
+        $this->adapter = $this->createMock(AdapterInterface::class);
 
         $this->indexTableSwitcher = $objectManager->getObject(
             IndexTableSwitcher::class,

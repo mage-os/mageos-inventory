@@ -96,7 +96,7 @@ class GetDefaultSortedSourcesResult
         $itemsTdDeliver = [];
         foreach ($inventoryRequest->getItems() as $item) {
             $normalizedSku = $this->normalizeSku(trim($item->getSku()));
-            $itemsTdDeliver[$normalizedSku] = $item->getQty();
+            $itemsTdDeliver[$normalizedSku] = ($itemsTdDeliver[$normalizedSku] ?? 0) + $item->getQty();
         }
 
         $sortedSourceCodes = [];

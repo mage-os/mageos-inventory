@@ -2,7 +2,7 @@
     "name": "magento/module-inventory-sales",
     "description": "N/A",
     "require": {
-        "php": "~8.2.0||~8.3.0||~8.4.0",
+        "php": "~8.3.0||~8.4.0||~8.5.0",
         "magento/framework": "*",
         "magento/module-catalog-inventory": "*",
         "magento/module-catalog": "*",
@@ -14,6 +14,7 @@
         "magento/module-inventory-sales-api": "*",
         "magento/module-inventory-source-deduction-api": "*",
         "magento/module-inventory-source-selection-api": "*",
+        "magento/module-quote": "*",
         "magento/module-sales-inventory": "*",
         "magento/module-store": "*",
         "magento/module-sales": "*"

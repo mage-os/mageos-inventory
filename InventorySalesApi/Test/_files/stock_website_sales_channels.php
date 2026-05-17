@@ -1,13 +1,15 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
+use Magento\Framework\ObjectManager\ResetAfterRequestInterface;
 use Magento\InventoryApi\Api\StockRepositoryInterface;
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterfaceFactory;
+use Magento\InventorySalesApi\Api\GetStockBySalesChannelInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 
 /** @var StockRepositoryInterface $stockRepository */
@@ -35,4 +37,13 @@ foreach ($salesChannelData as $stockId => $websiteCode) {
 
     $extensionAttributes->setSalesChannels($salesChannels);
     $stockRepository->save($stock);
+}
+
+/**
+ * Invalidate GetStockBySalesChannelCache to ensure fresh stock resolution.
+ */
+/** @var GetStockBySalesChannelInterface $getStockBySalesChannel */
+$getStockBySalesChannel = Bootstrap::getObjectManager()->get(GetStockBySalesChannelInterface::class);
+if ($getStockBySalesChannel instanceof ResetAfterRequestInterface) {
+    $getStockBySalesChannel->_resetState();
 }

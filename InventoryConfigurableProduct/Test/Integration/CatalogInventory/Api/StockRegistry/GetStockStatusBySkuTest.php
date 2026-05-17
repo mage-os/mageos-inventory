@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -11,6 +11,7 @@ use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class GetStockStatusBySkuTest extends TestCase
 {
@@ -51,13 +52,12 @@ class GetStockStatusBySkuTest extends TestCase
      * @magentoDataFixture Magento_InventoryIndexer::Test/_files/reindex_inventory.php
      * @magentoDbIsolation disabled
      *
-     * @dataProvider getStatusDataProvider
-     *
      * @param string $storeCode
      * @param int $status
      * @param float $qty
      * @return void
      */
+    #[DataProvider('getStatusDataProvider')]
     public function testGetStatusIfScopeIdParameterIsNotPassed(
         string $storeCode,
         int $status,
@@ -83,13 +83,13 @@ class GetStockStatusBySkuTest extends TestCase
      * @magentoDataFixture Magento_InventoryIndexer::Test/_files/reindex_inventory.php
      * @magentoDbIsolation disabled
      *
-     * @dataProvider getStatusDataProvider
      *
      * @param string $storeCode
      * @param int $status
      * @param float $qty
      * @return void
      */
+    #[DataProvider('getStatusDataProvider')]
     public function testGetStatusIfScopeIdParameterIsPassed(
         string $storeCode,
         int $status,

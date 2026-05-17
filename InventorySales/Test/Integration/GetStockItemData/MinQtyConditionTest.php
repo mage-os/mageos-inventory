@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -10,6 +9,7 @@ namespace Magento\InventorySales\Test\Integration\GetStockItemData;
 
 use Magento\InventorySalesApi\Model\GetStockItemDataInterface;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class MinQtyConditionTest extends TestCase
@@ -43,10 +43,9 @@ class MinQtyConditionTest extends TestCase
      * @param $expectedData
      * @return void
      *
-     * @dataProvider executeWithMinQtyDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithMinQtyDataProvider')]
     public function testExecuteWithMinQty(string $sku, int $stockId, $expectedData)
     {
         $stockItemData = $this->getStockItemData->execute($sku, $stockId);
@@ -87,10 +86,9 @@ class MinQtyConditionTest extends TestCase
      * @param $expectedData
      * @return void
      *
-     * @dataProvider executeWithManageStockFalseAndMinQty
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithManageStockFalseAndMinQty')]
     public function testExecuteWithManageStockFalseAndMinQty(string $sku, int $stockId, $expectedData)
     {
         $stockItemData = $this->getStockItemData->execute($sku, $stockId);

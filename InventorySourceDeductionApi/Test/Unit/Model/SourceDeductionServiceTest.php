@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -21,6 +20,8 @@ use Magento\InventorySourceDeductionApi\Model\GetSourceItemBySourceCodeAndSku;
 use Magento\InventorySourceDeductionApi\Model\ItemToDeductInterface;
 use Magento\InventorySourceDeductionApi\Model\SourceDeductionRequestInterface;
 use Magento\InventorySourceDeductionApi\Model\SourceDeductionService;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -32,6 +33,8 @@ use PHPUnit\Framework\TestCase;
  */
 class SourceDeductionServiceTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * @var GetSourceItemBySourceCodeAndSku|(GetSourceItemBySourceCodeAndSku&MockObject)|MockObject
      */
@@ -80,9 +83,8 @@ class SourceDeductionServiceTest extends TestCase
      * @param bool $isCanBackInStock
      * @return void
      * @throws LocalizedException
-     *
-     * @dataProvider executeDataProvider
      */
+    #[DataProvider('executeDataProvider')]
     public function testExecute(array $itemsData, bool $isCanBackInStock): void
     {
         $sourceCode = 'test_source_code';
@@ -97,15 +99,15 @@ class SourceDeductionServiceTest extends TestCase
             $items[] = $item;
 
             $itemConfigurationData = $itemData['stockItemConfigurationData'];
-            $itemConfiguration = $this->getMockForAbstractClass(StockItemConfigurationInterface::class);
+            $itemConfiguration = $this->createMock(StockItemConfigurationInterface::class);
             $itemConfiguration->method('isManageStock')->willReturn($itemConfigurationData['isManageStock']);
             $itemConfiguration->method('getMinQty')->willReturn($itemConfigurationData['getMinQty']);
             $itemConfiguration->method('getBackorders')->willReturn($itemConfigurationData['getBackorders']);
 
-            $extensionAttributes = $this->getMockBuilder(StockItemConfigurationExtensionInterface::class)
-                ->disableOriginalConstructor()
-                ->addMethods(['getIsInStock'])
-                ->getMockForAbstractClass();
+            $extensionAttributes = $this->createPartialMockWithReflection(
+                StockItemConfigurationExtensionInterface::class,
+                ['getIsInStock']
+            );
             $extensionAttributes->method('getIsInStock')->willReturn($itemConfigurationData['isInStock']);
             $itemConfiguration->method('getExtensionAttributes')->willReturn($extensionAttributes);
             $itemConfigurations[$itemData['sku']] = $itemConfiguration;

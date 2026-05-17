@@ -17,6 +17,7 @@ use Magento\InventorySalesApi\Model\GetStockItemsDataInterface;
 use Magento\InventorySalesApi\Model\StockByWebsiteIdResolverInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Api\StoreRepositoryInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -76,7 +77,6 @@ class ProductDataMapperPluginTest extends TestCase
     /**
      * Test for `afterMap` when additional product data mapper attribute added
      *
-     * @dataProvider stockDataProvider
      * @param int $storeId
      * @param int $websiteId
      * @param int $stockId
@@ -84,6 +84,7 @@ class ProductDataMapperPluginTest extends TestCase
      * @return void
      * @throws NoSuchEntityException|LocalizedException
      */
+    #[DataProvider('stockDataProvider')]
     public function testAfterMap(int $storeId, int $websiteId, int $stockId, int $salability): void
     {
         $productId = 123;

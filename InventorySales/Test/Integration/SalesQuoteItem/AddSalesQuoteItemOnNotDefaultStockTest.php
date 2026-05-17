@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -25,6 +24,7 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -92,10 +92,9 @@ class AddSalesQuoteItemOnNotDefaultStockTest extends TestCase
      * @throws InputException
      * @throws ValidationException
      *
-     * @dataProvider productsInStockDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('productsInStockDataProvider')]
     public function testAddInStockProductToQuote(
         string $sku,
         int $stockId,
@@ -145,10 +144,9 @@ class AddSalesQuoteItemOnNotDefaultStockTest extends TestCase
      * @throws InputException
      * @throws ValidationException
      *
-     * @dataProvider notSalableProductsDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('notSalableProductsDataProvider')]
     public function testAddOutOffStockProductToQuote(
         string $sku,
         int $stockId,

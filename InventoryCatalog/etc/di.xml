@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2017 Adobe
+ * All Rights Reserved.
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
@@ -12,10 +12,13 @@
     <preference for="Magento\InventoryCatalogApi\Model\GetProductTypesBySkusInterface" type="Magento\InventoryCatalog\Model\ResourceModel\GetProductTypesBySkusCache" />
     <preference for="Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface" type="Magento\InventoryCatalog\Model\GetSkusByProductIdsCache"/>
     <preference for="Magento\InventoryCatalogApi\Model\GetParentSkusOfChildrenSkusInterface" type="Magento\InventoryCatalog\Model\GetParentSkusOfChildrenSkus"/>
+    <preference for="Magento\InventoryCatalogApi\Model\GetChildrenSkusOfParentSkusInterface" type="Magento\InventoryCatalog\Model\GetChildrenSkusOfParentSkus"/>
     <preference for="Magento\InventoryCatalogApi\Model\IsSingleSourceModeInterface" type="Magento\InventoryCatalog\Model\IsSingleSourceModeCache"/>
     <preference for="Magento\InventoryCatalogApi\Model\SourceItemsProcessorInterface" type="Magento\InventoryCatalog\Model\SourceItemsProcessor"/>
     <preference for="Magento\CatalogInventory\Model\StockStatusApplierInterface" type="Magento\InventoryCatalog\Model\StockStatusApplier" />
     <preference for="Magento\CatalogInventory\Observer\SaveInventoryDataObserver" type="Magento\InventoryCatalog\Observer\SaveInventoryDataObserver"/>
+    <preference for="Magento\InventoryCatalogApi\Model\CompositeProductTypesProviderInterface" type="Magento\InventoryCatalog\Model\CompositeProductTypesProvider"/>
+
     <type name="Magento\InventoryApi\Api\StockRepositoryInterface">
         <plugin name="prevent_default_stock_deleting"
                 type="Magento\InventoryCatalog\Plugin\InventoryApi\StockRepository\PreventDeleting\DefaultStockPlugin"/>
@@ -104,7 +107,6 @@
         <plugin name="adapt_get_stock_status_by_sku" type="Magento\InventoryCatalog\Plugin\CatalogInventory\Api\StockRegistry\AdaptGetStockStatusBySkuPlugin"/>
         <plugin name="adapt_get_product_stock_status" type="Magento\InventoryCatalog\Plugin\CatalogInventory\Api\StockRegistry\AdaptGetProductStockStatusPlugin"/>
         <plugin name="adapt_get_product_stock_status_by_sku" type="Magento\InventoryCatalog\Plugin\CatalogInventory\Api\StockRegistry\AdaptGetProductStockStatusBySkuPlugin"/>
-        <plugin name="inventory_catalog_add_qty_to_legacy_stock" type="Magento\InventoryCatalog\Plugin\CatalogInventory\Api\StockRegistry\SetQtyToLegacyStock"/>
     </type>
     <!-- Mass Source Assignment -->
     <preference for="Magento\InventoryCatalogApi\Api\BulkSourceAssignInterface"
@@ -200,7 +202,7 @@
             <argument name="sortOrder" xsi:type="number">10</argument>
         </arguments>
     </type>
-    <type name="Magento\InventoryIndexer\Indexer\SourceItem\Strategy\Sync">
+    <type name="Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor">
         <arguments>
             <argument name="saleabilityChangesProcessorsPool" xsi:type="array">
                 <item name="priceIndexUpdateProcessor" xsi:type="object">Magento\InventoryCatalog\Model\PriceIndexUpdateProcessor</item>

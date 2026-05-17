@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -14,6 +13,7 @@ use Magento\InventoryConfigurationApi\Api\SaveStockItemConfigurationInterface;
 use Magento\InventorySalesApi\Api\AreProductsSalableForRequestedQtyInterface;
 use Magento\InventorySalesApi\Api\Data\IsProductSalableForRequestedQtyRequestInterfaceFactory;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -88,10 +88,10 @@ class IsCorrectQtyConditionTest extends TestCase
      * @return void
      *
      * @throws \Magento\Framework\Exception\LocalizedException
-     * @dataProvider executeWithMissingConfigurationDataProvider
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithMissingConfigurationDataProvider')]
     public function testExecuteWithMissingConfiguration(
         string $sku,
         int $stockId,
@@ -135,10 +135,10 @@ class IsCorrectQtyConditionTest extends TestCase
      * @return void
      *
      * @throws \Magento\Framework\Exception\LocalizedException
-     * @dataProvider executeWithDecimalQtyDataProvider
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithDecimalQtyDataProvider')]
     public function testExecuteWithDecimalQty(
         string $sku,
         int $stockId,
@@ -185,11 +185,10 @@ class IsCorrectQtyConditionTest extends TestCase
      *
      * @return void
      *
-     * @dataProvider executeWithUseConfigMinSaleQtyDataProvider
-     *
      * @magentoDbIsolation disabled
      * @throws \Magento\Framework\Exception\LocalizedException
      */
+    #[DataProvider('executeWithUseConfigMinSaleQtyDataProvider')]
     public function testExecuteWithUseConfigMinSaleQty(
         string $sku,
         int $stockId,
@@ -252,10 +251,10 @@ class IsCorrectQtyConditionTest extends TestCase
      * @return void
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\InventoryConfigurationApi\Exception\SkuIsNotAssignedToStockException
-     * @dataProvider executeWithMinSaleQtyDataProvider
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithMinSaleQtyDataProvider')]
     public function testExecuteWithMinSaleQty(
         string $sku,
         int $stockId,
@@ -318,11 +317,10 @@ class IsCorrectQtyConditionTest extends TestCase
      *
      * @return void
      *
-     * @dataProvider executeWithUseConfigMaxSaleQtyDataProvider
-     *
      * @magentoDbIsolation disabled
      * @throws \Magento\Framework\Exception\LocalizedException
      */
+    #[DataProvider('executeWithUseConfigMaxSaleQtyDataProvider')]
     public function testExecuteWithUseConfigMaxSaleQty(
         string $sku,
         int $stockId,
@@ -388,10 +386,10 @@ class IsCorrectQtyConditionTest extends TestCase
      *
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\InventoryConfigurationApi\Exception\SkuIsNotAssignedToStockException
-     * @dataProvider executeWithMaxSaleQtyDataProvider
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithMaxSaleQtyDataProvider')]
     public function testExecuteWithMaxSaleQty(
         string $sku,
         int $stockId,
@@ -457,11 +455,10 @@ class IsCorrectQtyConditionTest extends TestCase
      *
      * @return void
      *
-     * @dataProvider executeWithUseConfigQtyIncrementsDataProvider
-     *
      * @magentoDbIsolation disabled
      * @throws \Magento\Framework\Exception\LocalizedException
      */
+    #[DataProvider('executeWithUseConfigQtyIncrementsDataProvider')]
     public function testExecuteWithUseConfigQtyIncrements(
         string $sku,
         int $stockId,
@@ -529,10 +526,10 @@ class IsCorrectQtyConditionTest extends TestCase
      *
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\InventoryConfigurationApi\Exception\SkuIsNotAssignedToStockException
-     * @dataProvider executeWithQtyIncrementsDataProvider
      *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithQtyIncrementsDataProvider')]
     public function testExecuteWithQtyIncrements(
         string $sku,
         int $stockId,

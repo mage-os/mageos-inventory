@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -63,11 +62,7 @@ class IsSalableWithReservationsCondition implements IsProductSalableForRequested
             if ((int)$this->scopeConfig->getValue(
                 'cataloginventory/options/not_available_message'
             ) === NotAvailableMessage::VALUE_ONLY_X_OF_Y) {
-                $message = (__(sprintf(
-                    'Only %s of %s available',
-                    $qtyLeftInStock,
-                    $requestedQty
-                )));
+                $message = __('Only %1 of %2 available', $qtyLeftInStock, $requestedQty);
             }
             $errors = [
                 $this->productSalabilityErrorFactory->create([

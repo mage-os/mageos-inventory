@@ -1,15 +1,20 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
-require __DIR__ . '/../../../../../../dev/tests/integration/testsuite/Magento/ConfigurableProduct/_files/product_configurable.php';
+use Magento\TestFramework\Workaround\Override\Fixture\Resolver;
+
+Resolver::getInstance()->requireDataFixture(
+    'Magento/ConfigurableProduct/_files/product_configurable.php'
+);
 
 $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
-$addressData = include __DIR__ . '/../../../../../../dev/tests/integration/testsuite/Magento/Sales/_files/address_data.php';
+// phpcs:ignore Generic.Files.LineLength.TooLong
+$addressData = include INTEGRATION_TESTS_DIR . '/testsuite/Magento/Sales/_files/address_data.php';
 
 $billingAddress = $objectManager->create(\Magento\Sales\Model\Order\Address::class, ['data' => $addressData]);
 $billingAddress->setAddressType('billing');

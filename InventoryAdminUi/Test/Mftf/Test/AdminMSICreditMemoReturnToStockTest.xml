@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright 2025 Adobe
+ * All Rights Reserved.
+ */
+-->
+
+<tests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="urn:magento:mftf:Test/etc/testSchema.xsd">
+    <test name="AdminMSICreditMemoReturnToStockTest">
+        <annotations>
+            <stories value="MSI Source Creation and Return Flow"/>
+            <title value="Credit memo for order with 2 Simple products on Test stock after full invoice and shipment created in Admin"/>
+            <description value="Admin validates credit memo for order with two Simple products on Test stock after full invoice and shipment created"/>
+            <testCaseId value="AC-6589"/>
+            <severity value="CRITICAL"/>
+            <group value="msi"/>
+            <group value="WYSIWYGDisabled"/>
+        </annotations>
+        <before>
+            <!--  Precondition Step 1: Login to Admin Panel -->
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
+            <!--  Precondition Step 2: Create New Source -->
+            <createData entity="FullSource1" stepKey="createSource1"/>
+            <createData entity="FullSource2" stepKey="createSource2"/>
+        </before>
+        <after>
+            <actionGroup ref="DisableAllSourcesActionGroup" stepKey="disableAllSources"/>
+            <!--Assign Main Website to Default stock -->
+            <actionGroup ref="AssignWebsiteToStockActionGroup" stepKey="assignMainWebsiteToDefaultStock">
+                <argument name="stockName" value="{{_defaultStock.name}}"/>
+                <argument name="websiteName" value="{{_defaultWebsite.name}}"/>
+            </actionGroup>
+            <!-- Logout from Storefront-->
+            <actionGroup ref="StorefrontCustomerLogoutActionGroup" stepKey="logoutCustomer"/>
+            <!--Delete test data.-->
+            <deleteData createDataKey="createCustomer" stepKey="deleteCustomer"/>
+            <deleteData createDataKey="createStock" stepKey="deleteCustomStock"/>
+            <deleteData createDataKey="createSubCategory" stepKey="deleteCategory"/>
+            <deleteData createDataKey="createMSISimpleProduct1" stepKey="deleteProduct"/>
+            <deleteData createDataKey="createMSISimpleProduct2" stepKey="deleteProduct2"/>
+            <!--Admin Logout-->
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutOfAdmin"/>
+        </after>
+        <!--  Step 1: Create New Category -->
+        <createData entity="SimpleSubCategory" stepKey="createSubCategory"/>
+        <!--  Step 3: New Stock created with New Source assigned and with Main Website assigned as Sales Channel  -->
+        <createData entity="BasicMsiStockWithMainWebsite1" stepKey="createStock"/>
+        <!--  Step 4 & 5: Select "Test Source 1" in sources list and Click button "Done" -->
+        <createData entity="SourceStockLinked1" stepKey="linkSourceToStock">
+            <requiredEntity createDataKey="createStock"/>
+            <requiredEntity createDataKey="createSource1"/>
+        </createData>
+        <!-- Step 7: Run full reindex and flush cache -->
+        <actionGroup ref="CliIndexerReindexActionGroup" stepKey="performReindex">
+            <argument name="indices" value=""/>
+        </actionGroup>
+        <!--  Step 8: 2 Simple Products with additional Source assigned created -->
+        <createData entity="ApiSimpleProduct" stepKey="createMSISimpleProduct1">
+            <requiredEntity createDataKey="createSubCategory"/>
+            <field key="price">10</field>
+        </createData>
+        <createData entity="ApiSimpleProduct" stepKey="createMSISimpleProduct2">
+            <requiredEntity createDataKey="createSubCategory"/>
+            <field key="price">10</field>
+        </createData>
+        <actionGroup ref="AdminProductPageOpenByIdActionGroup" stepKey="openSimpleProductForEdit">
+            <argument name="productId" value="$createMSISimpleProduct1.id$"/>
+        </actionGroup>
+        <actionGroup ref="AdminAssignSourceToProductAndSetSourceQuantityActionGroup" stepKey="assignTestSourceToCreatedProduct">
+            <argument name="sourceCode" value="$$createSource1.source[source_code]$$"/>
+        </actionGroup>
+        <actionGroup ref="AdminOpenContentSectionOnProductPageActionGroup" stepKey="openContentTab"/>
+        <waitForElementVisible selector="{{AdminProductContentSection.descriptionTextArea}}" stepKey="clickOnSaveAndContinue1"/>
+        <actionGroup ref="AdminFillInProductDescriptionActionGroup" stepKey="editDescription">
+            <argument name="description" value="{{ApiProductDescription.value}}"/>
+        </actionGroup>
+        <actionGroup ref="AdminFormSaveAndCloseActionGroup" stepKey="saveAndClose"/>
+        <actionGroup ref="AdminProductPageOpenByIdActionGroup" stepKey="openProductForEdit">
+            <argument name="productId" value="$createMSISimpleProduct2.id$"/>
+        </actionGroup>
+        <actionGroup ref="AdminAssignSourceToProductAndSetSourceQuantityActionGroup" stepKey="assignTestSourceToCreatedProduct2">
+            <argument name="sourceCode" value="$$createSource1.source[source_code]$$"/>
+        </actionGroup>
+
+        <actionGroup ref="AdminOpenContentSectionOnProductPageActionGroup" stepKey="openContent"/>
+        <actionGroup ref="AdminFillInProductDescriptionActionGroup" stepKey="editLongDescription">
+            <argument name="description" value="{{ApiProductDescription.value}}"/>
+        </actionGroup>
+        <actionGroup ref="AdminFormSaveAndCloseActionGroup" stepKey="saveAndCloseButton"/>
+        <actionGroup ref="AdminOpenProductIndexPageActionGroup" stepKey="openProductIndexPage1"/>
+        <actionGroup ref="FilterProductGridByNameActionGroup" stepKey="searchForProduct1">
+            <argument name="product" value="$createMSISimpleProduct1$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="verifyProductNameInGrid">
+            <argument name="column" value="Name"/>
+            <argument name="value" value="$createMSISimpleProduct1.name$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="verifyProductSkuInGrid">
+            <argument name="column" value="SKU"/>
+            <argument name="value" value="$createMSISimpleProduct1.sku$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="verifyProductPriceInGrid">
+            <argument name="column" value="Price"/>
+            <argument name="value" value="$10.00"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="verifyProductWebsiteInGrid">
+            <argument name="column" value="Websites"/>
+            <argument name="value" value="{{_defaultWebsite.name}}"/>
+        </actionGroup>
+        <actionGroup ref="FilterProductGridByNameActionGroup" stepKey="searchForProduct2">
+            <argument name="product" value="$createMSISimpleProduct2$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="assertProductNameInGrid">
+            <argument name="column" value="Name"/>
+            <argument name="value" value="$createMSISimpleProduct2.name$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="verifyItemSkuInGrid">
+            <argument name="column" value="SKU"/>
+            <argument name="value" value="$createMSISimpleProduct2.sku$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="assertProductPriceInGrid">
+            <argument name="column" value="Price"/>
+            <argument name="value" value="$10.00"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminProductGridCellActionGroup" stepKey="assertProductWebsiteInGrid">
+            <argument name="column" value="Websites"/>
+            <argument name="value" value="{{_defaultWebsite.name}}"/>
+        </actionGroup>
+        <!--  Step 9: Customer created from Main website -->
+        <createData entity="Simple_US_Customer" stepKey="createCustomer"/>
+        <!--  Step 10: Logged in Customer create order with 2 Simple products -->
+        <actionGroup ref="LoginToStorefrontActionGroup" stepKey="loginToStorefront">
+            <argument name="Customer" value="$$createCustomer$$"/>
+        </actionGroup>
+        <actionGroup ref="StorefrontOpenProductEntityPageActionGroup" stepKey="navigateToProduct1ProductDetailsPage">
+            <argument name="product" value="$createMSISimpleProduct1$"/>
+        </actionGroup>
+        <actionGroup ref="StorefrontProductPageAddSimpleProductToCartActionGroup" stepKey="addSimpleProductToCart"/>
+        <waitForPageLoad stepKey="waitForCartPageToLoad"/>
+        <actionGroup ref="StorefrontOpenProductEntityPageActionGroup" stepKey="navigateToProduct2ProductDetailsPage">
+            <argument name="product" value="$createMSISimpleProduct2$"/>
+        </actionGroup>
+        <actionGroup ref="StorefrontProductPageAddSimpleProductToCartActionGroup" stepKey="addSimpleProduct1ToCart"/>
+        <actionGroup ref="StorefrontOpenMiniCartActionGroup" stepKey="clickOnMiniCart"/>
+        <waitForElementClickable selector="{{StorefrontMinicartSection.goToCheckout}}" stepKey="waitToClickCheckout"/>
+        <click selector="{{StorefrontMinicartSection.goToCheckout}}" stepKey="goToCheckout"/>
+        <actionGroup ref="StorefrontCheckoutClickNextOnShippingStepActionGroup" stepKey="clickNext"/>
+        <!-- Checkout select Check/Money Order payment -->
+        <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="selectCheckMoneyPayment"/>
+        <actionGroup ref="ClickPlaceOrderActionGroup" stepKey="clickPlaceOrder"/>
+        <actionGroup ref="StorefrontClickOrderLinkFromCheckoutSuccessPageActionGroup" stepKey="clickOrderLink"/>
+        <grabFromCurrentUrl regex="~/order_id/(\d+)/~" stepKey="orderId"/>
+        <!-- Verify order -->
+        <actionGroup ref="AdminOpenOrderByEntityIdActionGroup" stepKey="openOrder">
+            <argument name="entityId" value="{$orderId}"/>
+        </actionGroup>
+        <!--  Step 11: Invoice created for whole order -->
+        <actionGroup ref="StartCreateInvoiceFromOrderPageActionGroup" stepKey="startCreateInvoice"/>
+        <!--  Step 12: Click button "Submit Invoice" -->
+        <actionGroup ref="SubmitInvoiceActionGroup" stepKey="submitInvoice"/>
+        <grabTextFrom selector="|Order # (\d+)|" stepKey="grabOrderNumber"/>
+        <actionGroup ref="AdminOpenInvoiceTabFromOrderPageActionGroup" stepKey="openInvoiceTab"/>
+        <waitForElementClickable selector="{{AdminOrderInvoicesTabSection.viewInvoice}}" stepKey="waitForInvoicesTabOpened"/>
+        <click selector="{{AdminOrderInvoicesTabSection.viewInvoice}}" stepKey="clickViewInvoice"/>
+        <waitForElementClickable selector="{{AdminInvoiceTotalSection.backButton}}" stepKey="waitForBackButtonToBeClicked"/>
+        <click selector="{{AdminInvoiceTotalSection.backButton}}" stepKey="clickOnBackButton"/>
+        <!--  Step 13: Shipment created for whole order after invoice -->
+        <actionGroup ref="GoToShipmentIntoOrderActionGroup" stepKey="startCreateShipment"/>
+        <!--  Step 14:  Click button "Submit Shipment" -->
+        <actionGroup ref="SubmitShipmentIntoOrderActionGroup" stepKey="submitShipment"/>
+        <waitForText selector="{{AdminOrderDetailsInformationSection.orderStatus}}" userInput="{{OrderState.complete}}" stepKey="seeOrderComplete"/>
+        <!--Create Credit Memo-->
+        <actionGroup ref="AdminOpenOrderByEntityIdActionGroup" stepKey="openOrderAgain">
+            <argument name="entityId" value="{$orderId}"/>
+        </actionGroup>
+        <!--  Step 15: Credit Memo created with 'Return to stock' for one product only-->
+        <actionGroup ref="AdminCreateCreditMemoReturnToStockActionGroup" stepKey="createCreditMemo"/>
+        <actionGroup ref="SubmitCreditMemoActionGroup" stepKey="submitCreditMemo"/>
+        <waitForPageLoad stepKey="waitForTabLoad"/>
+        <actionGroup ref="AdminGoToCreditMemoTabActionGroup" stepKey="openCreditMemoFromOrderPageActionGroup"/>
+        <grabTextFrom selector="{{AdminCreditMemosGridSection.memoId}}" stepKey="grabMemoId"/>
+        <assertNotEmpty stepKey="assertMemoIdIsNotEmpty" after="grabMemoId">
+            <actualResult type="const">$grabMemoId</actualResult>
+        </assertNotEmpty>
+        <waitForElementClickable selector="{{AdminCreditMemosGridSection.memoId}}" stepKey="waitToClickView"/>
+        <click selector="{{AdminCreditMemosGridSection.memoId}}" stepKey="clickView"/>
+        <waitForPageLoad stepKey="waitForCreditMemo"/>
+        <scrollTo selector="{{AdminCreditMemoViewTotalSection.subtotal}}" stepKey="scrollToTotal"/>
+        <actionGroup ref="AssertAdminCreditMemoViewPageTotalsActionGroup" stepKey="assertCreditMemoViewPageTotals">
+            <argument name="subtotal" value="$20.00"/>
+            <argument name="adjustmentRefund" value="$0.00"/>
+            <argument name="adjustmentFee" value="$0.00"/>
+            <argument name="grandTotal" value="$30.00"/>
+        </actionGroup>
+        <!-- Assert CreditMemo items -->
+        <scrollTo selector="{{AdminCreditMemoViewItemsSection.blockItemsRefunded}}" stepKey="scrollToRefundedItems"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemName('1')}}" userInput="$$createMSISimpleProduct1.name$$" stepKey="seeProductName"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemPrice('1')}}" userInput="$10.00" stepKey="seePricePerItem"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemSubtotal('1')}}" userInput="$10.00" stepKey="seeProductSubtotalInCreditMemo"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemTotal('1')}}" userInput="$10.00" stepKey="seeProductTotalInCreditMemo"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemName('2')}}" userInput="$$createMSISimpleProduct2.name$$" stepKey="assertProductNameInCreditMemo"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemPrice('2')}}" userInput="$10.00" stepKey="assertProductPriceInCreditMemo"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemSubtotal('2')}}" userInput="$10.00" stepKey="assertProductSubtotalInCreditMemo"/>
+        <waitForText selector="{{AdminCreditMemoItemsSection.itemTotal('2')}}" userInput="$10.00" stepKey="assertProductTotalInCreditMemo"/>
+        <!--Assert refund in refunds grid-->
+        <actionGroup ref="AdminAssertRefundInRefundsGridActionGroup" stepKey="assertRefund">
+            <argument name="orderId" value="{$grabOrderNumber}"/>
+            <argument name="memoId" value="{$grabMemoId}"/>
+            <argument name="refundStatus" value="{{BillingAgreement.refund_status}}"/>
+            <argument name="refundedTotal" value="$30.00"/>
+        </actionGroup>
+        <!--  Step 16: Verify that items of Simple products on Test stock returned correctly after making refund -->
+        <actionGroup ref="AdminOpenProductIndexPageActionGroup" stepKey="openProductIndexPage"/>
+        <actionGroup ref="FilterProductGridByNameActionGroup" stepKey="searchForProduct">
+            <argument name="product" value="$createMSISimpleProduct1$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminSalableProductQtyActionGroup" stepKey="verifyProductQuantityAfterCreditMemo">
+            <argument name="sourceName" value="$createSource1.source[name]$"/>
+            <argument name="stockName" value="$createStock.stock[name]$"/>
+            <argument name="sourceQty" value="{{defaultProductQty.value}}"/>
+            <argument name="stockQty" value="{{defaultProductQty.value}}"/>
+        </actionGroup>
+        <actionGroup ref="FilterProductGridByNameActionGroup" stepKey="searchForSimpleProduct2">
+            <argument name="product" value="$createMSISimpleProduct2$"/>
+        </actionGroup>
+        <actionGroup ref="AssertAdminSalableProductQtyActionGroup" stepKey="verifyProductQuantity">
+            <argument name="sourceName" value="$createSource1.source[name]$"/>
+            <argument name="stockName" value="$createStock.stock[name]$"/>
+            <argument name="sourceQty" value="{{defaultProductQtyBoughtWithOnePiece.value}}"/>
+            <argument name="stockQty" value="{{defaultProductQtyBoughtWithOnePiece.value}}"/>
+        </actionGroup>
+    </test>
+</tests>

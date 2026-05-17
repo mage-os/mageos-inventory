@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -12,6 +12,7 @@ use Magento\CatalogInventory\Model\ResourceModel\Stock\Status as StockStatus;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Test catalog search with different stocks
@@ -61,10 +62,9 @@ class AddStockDataToCollectionTest extends TestCase
      * @param bool $isFilterInStock
      * @return void
      *
-     * @dataProvider addStockDataToCollectionDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('addStockDataToCollectionDataProvider')]
     public function testAddStockDataToCollection(string $store, int $expectedSize, bool $isFilterInStock)
     {
         $this->storeManager->setCurrentStore($store);

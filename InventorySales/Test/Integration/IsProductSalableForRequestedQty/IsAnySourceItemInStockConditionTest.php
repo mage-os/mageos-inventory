@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2019 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -15,6 +14,7 @@ use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
 use Magento\InventorySalesApi\Api\AreProductsSalableForRequestedQtyInterface;
 use Magento\InventorySalesApi\Api\Data\IsProductSalableForRequestedQtyRequestInterfaceFactory;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class IsAnySourceItemInStockConditionTest extends TestCase
@@ -68,8 +68,6 @@ class IsAnySourceItemInStockConditionTest extends TestCase
      * @magentoDataFixture Magento_InventoryApi::Test/_files/stock_source_links.php
      * @magentoDataFixture Magento_InventoryApi::Test/_files/source_items.php
      *
-     * @dataProvider sourceItemsStockData
-     *
      * @magentoDbIsolation disabled
      *
      * @param string $sku
@@ -80,6 +78,7 @@ class IsAnySourceItemInStockConditionTest extends TestCase
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
+    #[DataProvider('sourceItemsStockData')]
     public function testSourceItemsAreOutOfStock(string $sku, int $stockId, bool $expected): void
     {
         $product = $this->productRepository->get($sku);

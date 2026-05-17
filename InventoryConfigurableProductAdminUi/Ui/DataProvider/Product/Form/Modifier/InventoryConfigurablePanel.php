@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -56,7 +56,7 @@ class InventoryConfigurablePanel extends AbstractModifier
     public function modifyData(array $data)
     {
         if ($this->isSingleSourceMode->execute() === false) {
-            $productId = $this->locator->getProduct()->getId();
+            $productId = $this->locator->getProduct()->getId() ?? '';
 
             if (isset($data[$productId][ConfigurablePanel::CONFIGURABLE_MATRIX])) {
                 foreach ($data[$productId][ConfigurablePanel::CONFIGURABLE_MATRIX] as $key => $productArray) {

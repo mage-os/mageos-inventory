@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -10,6 +10,7 @@ namespace Magento\InventoryCatalog\Test\Integration\CatalogInventory\Api\StockRe
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class GetStockStatusBySkuTest extends TestCase
@@ -55,8 +56,8 @@ class GetStockStatusBySkuTest extends TestCase
      * @param int $status
      * @param float $qty
      *
-     * @dataProvider getStatusDataProvider
      */
+    #[DataProvider('getStatusDataProvider')]
     public function testGetStatusIfScopeIdParameterIsNotPassed(
         string $storeCode,
         string $sku,
@@ -87,8 +88,8 @@ class GetStockStatusBySkuTest extends TestCase
      * @param int $status
      * @param float $qty
      *
-     * @dataProvider getStatusDataProvider
      */
+    #[DataProvider('getStatusDataProvider')]
     public function testGetStatusIfScopeIdParameterIsPassed(
         string $storeCode,
         string $sku,

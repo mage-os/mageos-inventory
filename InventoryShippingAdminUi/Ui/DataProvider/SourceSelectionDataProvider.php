@@ -233,7 +233,7 @@ class SourceSelectionDataProvider extends AbstractDataProvider
     private function castQty(Item $item, $qty)
     {
         if ($item->getIsQtyDecimal()) {
-            $qty = (double)$qty;
+            $qty = (float)$qty;
         } else {
             $qty = (int)$qty;
         }

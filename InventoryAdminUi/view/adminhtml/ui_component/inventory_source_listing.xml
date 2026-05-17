@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 -->
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
@@ -80,6 +80,17 @@
                     <url path="inventory/source/massDisable"/>
                     <type>disable</type>
                     <label translate="true">Disable</label>
+                </settings>
+            </action>
+            <action name="delete">
+                <settings>
+                    <confirm>
+                        <message translate="true">Are you sure you want to delete selected source?</message>
+                        <title translate="true">Delete items</title>
+                    </confirm>
+                    <url path="inventory/source/massDelete"/>
+                    <type>delete</type>
+                    <label translate="true">Delete</label>
                 </settings>
             </action>
         </massaction>

@@ -1,8 +1,7 @@
 <?php
 /**
- * Copyright 2024 Adobe
- * All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2018 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -10,6 +9,7 @@ namespace Magento\InventorySales\Test\Integration\IsProductSalable;
 
 use Magento\InventorySalesApi\Api\AreProductsSalableInterface;
 use Magento\TestFramework\Helper\Bootstrap;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ManageStockConditionTest extends TestCase
@@ -43,10 +43,9 @@ class ManageStockConditionTest extends TestCase
      * @param bool $expectedResult
      * @return void
      *
-     * @dataProvider executeWithManageStockFalseDataProvider
-     *
      * @magentoDbIsolation disabled
      */
+    #[DataProvider('executeWithManageStockFalseDataProvider')]
     public function testExecuteWithManageStockFalse(string $sku, int $stockId, bool $expectedResult)
     {
         $result = $this->areProductsSalable->execute([$sku], $stockId);

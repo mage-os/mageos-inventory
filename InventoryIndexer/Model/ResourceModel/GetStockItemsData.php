@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -107,6 +107,7 @@ class GetStockItemsData implements GetStockItemsDataInterface
                         GetStockItemsDataInterface::IS_SALABLE => $row['is_salable'],
                     ];
                 }
+                $results = $this->normalizeResults($skus, $results);
             } else {
                 /**
                  * Fallback to the legacy cataloginventory_stock_item table.
@@ -125,5 +126,42 @@ class GetStockItemsData implements GetStockItemsDataInterface
         }
 
         return $results;
+    }
+
+    /**
+     * Return results with original SKUs as keys.
+     *
+     * @param array $originalSkus
+     * @param array $results
+     * @return array
+     */
+    private function normalizeResults(array $originalSkus, array $results): array
+    {
+        $normalizedResults = [];
+        foreach ($results as $sku => $result) {
+            $normalizedResults[$this->normalizeSku((string) $sku)] = $result;
+        }
+        
+        $finalResults = [];
+        foreach (array_unique($originalSkus) as $sku) {
+            $normalizedSku = $this->normalizeSku((string) $sku);
+            if (isset($results[$sku])) {
+                $finalResults[$sku] = $results[$sku];
+            } elseif (isset($normalizedResults[$normalizedSku])) {
+                $finalResults[$sku] = $normalizedResults[$normalizedSku];
+            }
+        }
+        return $finalResults;
+    }
+
+    /**
+     * Normalize SKU by converting it to lowercase.
+     *
+     * @param string $sku
+     * @return string
+     */
+    private function normalizeSku(string $sku): string
+    {
+        return mb_convert_case($sku, MB_CASE_LOWER, 'UTF-8');
     }
 }

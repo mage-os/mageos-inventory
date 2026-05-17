@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2022 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -174,7 +174,9 @@ class Reservations
                     ['parent_item' => null]
                 );
             }
-            $parentItem = $orderItems[$parentItemId] ?? null;
+            $parentItem = ($parentItemId !== null && isset($orderItems[$parentItemId]))
+                ? $orderItems[$parentItemId]
+                : null;
             $orderItems[$itemId] = $this->quoteItemToOrderItem->convert($quoteItem, ['parent_item' => $parentItem]);
         }
         return array_values($orderItems);

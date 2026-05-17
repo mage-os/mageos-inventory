@@ -1,7 +1,7 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2023 Adobe
+ * All Rights Reserved.
  */
 declare(strict_types=1);
 
@@ -10,6 +10,7 @@ namespace Magento\InventoryCatalog\Test\Unit\Model;
 use Magento\Catalog\Model\Indexer\Product\Price\Processor;
 use Magento\InventoryCatalog\Model\PriceIndexUpdateProcessor;
 use Magento\InventoryIndexer\Model\GetProductsIdsToProcess;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -32,12 +33,8 @@ class PriceIndexUpdateProcessorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->priceIndexProcessor = $this->getMockBuilder(Processor::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->getProductsIdsToProcess = $this->getMockBuilder(GetProductsIdsToProcess::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->priceIndexProcessor = $this->createMock(Processor::class);
+        $this->getProductsIdsToProcess = $this->createMock(GetProductsIdsToProcess::class);
 
         $this->priceIndexUpdateProcessor = new PriceIndexUpdateProcessor(
             $this->priceIndexProcessor,
@@ -46,16 +43,14 @@ class PriceIndexUpdateProcessorTest extends TestCase
     }
 
     /**
-     * @dataProvider processDataProvider
-     * @param array $sourceItemIds
      * @param array $beforeSalableList
      * @param array $afterSalableList
-     * @param array $changedProductIds,
-     * @param int $numberReindexCalls,
+     * @param array $changedProductIds
+     * @param int $numberReindexCalls
      * @return void
      */
+    #[DataProvider('processDataProvider')]
     public function testProcess(
-        array $sourceItemIds,
         array $beforeSalableList,
         array $afterSalableList,
         array $changedProductIds,
@@ -69,7 +64,7 @@ class PriceIndexUpdateProcessorTest extends TestCase
             ->method('reindexList')
             ->with($changedProductIds, true);
 
-        $this->priceIndexUpdateProcessor->process($sourceItemIds, $beforeSalableList, $afterSalableList);
+        $this->priceIndexUpdateProcessor->process($beforeSalableList, $afterSalableList);
     }
 
     /**
@@ -78,8 +73,8 @@ class PriceIndexUpdateProcessorTest extends TestCase
     public static function processDataProvider(): array
     {
         return [
-            [[1], ['sku1' => [1 => true]], ['sku1' => [1 => true]], [], 0],
-            [[1], ['sku1' => [1 => true]], ['sku1' => [1 => false]], [1], 1]
+            [['sku1' => [1 => true]], ['sku1' => [1 => true]], [], 0],
+            [['sku1' => [1 => true]], ['sku1' => [1 => false]], [1], 1]
         ];
     }
 }
