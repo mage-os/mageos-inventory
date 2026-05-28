@@ -61,4 +61,5 @@ SingleShippingSection
 BillingAgreement
 AdminLeftNavigationMenuSubTitlesVisibleTest
 AdminMenuSection
+AdminOrdersGridClearFiltersActionGroup
 NewProduct

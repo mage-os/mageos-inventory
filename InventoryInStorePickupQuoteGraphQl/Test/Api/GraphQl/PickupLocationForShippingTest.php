@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\GraphQl\InventoryInStorePickupQuote;
+namespace Magento\InventoryInStorePickupQuoteGraphQl\Test\Api\GraphQl;
 
 use Magento\Catalog\Test\Fixture\Product as ProductFixture;
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -13,6 +13,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Validation\ValidationException;
 use Magento\InventoryApi\Api\SourceRepositoryInterface;
+use Magento\InventoryApi\Test\Fixture\Source as SourceFixture;
 use Magento\InventoryApi\Test\Fixture\SourceItems as SourceItemsFixture;
 use Magento\InventoryApi\Test\Fixture\Stock as StockFixture;
 use Magento\InventoryApi\Test\Fixture\StockSourceLinks as StockSourceLinksFixture;
@@ -20,7 +21,6 @@ use Magento\InventoryInStorePickupApi\Model\GetPickupLocationInterface;
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
 use Magento\InventorySalesApi\Test\Fixture\StockSalesChannels as StockSalesChannelsFixture;
 use Magento\Quote\Test\Fixture\AddProductToCart as AddProductToCartFixture;
-use Magento\InventoryApi\Test\Fixture\Source as SourceFixture;
 use Magento\Quote\Test\Fixture\GuestCart as GuestCartFixture;
 use Magento\Quote\Test\Fixture\QuoteIdMask as QuoteMaskFixture;
 use Magento\Store\Model\StoreManagerInterface;
@@ -35,6 +35,8 @@ use Magento\TestFramework\TestCase\GraphQlAbstract;
 /**
  * Test coverage of extension of Quote Graph Ql.
  * Test possibility to pass Pickup Location Code to Shipping Address.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class PickupLocationForShippingTest extends GraphQlAbstract
 {

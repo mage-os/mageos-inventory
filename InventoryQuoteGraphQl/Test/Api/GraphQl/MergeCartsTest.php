@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\GraphQl\InventoryQuote;
+namespace Magento\InventoryQuoteGraphQl\Test\Api\GraphQl;
 
 use Magento\Catalog\Test\Fixture\Product as ProductFixture;
 use Magento\Customer\Test\Fixture\Customer as CustomerFixture;

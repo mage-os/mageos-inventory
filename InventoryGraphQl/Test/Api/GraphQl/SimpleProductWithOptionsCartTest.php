@@ -5,11 +5,12 @@
  */
 declare(strict_types=1);
 
-namespace Magento\GraphQl\Inventory;
+namespace Magento\InventoryGraphQl\Test\Api\GraphQl;
 
 use Exception;
 use Magento\Catalog\Api\Data\ProductCustomOptionInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Test\Fixture\Product;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\Framework\DataObject;
@@ -21,7 +22,6 @@ use Magento\TestFramework\Fixture\DataFixtureStorage;
 use Magento\TestFramework\Fixture\DataFixtureStorageManager;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\TestCase\GraphQlAbstract;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 
 /**
  * Product stock_status test

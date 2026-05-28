@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\TestModuleInventoryStateCache\Plugin\CatalogInventory\Model\StockRegistryProvider;
 
+use Closure;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
@@ -57,7 +58,7 @@ class GetNonCachedStockItemPlugin
      * Get non cached stock items for product.
      *
      * @param StockRegistryProviderInterface $subject
-     * @param \Closure $proceed
+     * @param Closure $proceed
      * @param int|null $productId
      * @param int|null $stockId
      * @return StockItemInterface
@@ -65,7 +66,7 @@ class GetNonCachedStockItemPlugin
      */
     public function aroundGetStockItem(
         StockRegistryProviderInterface $subject,
-        \Closure $proceed,
+        Closure $proceed,
         ?int $productId,
         ?int $stockId
     ): StockItemInterface {

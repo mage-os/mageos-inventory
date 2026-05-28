@@ -5,8 +5,9 @@
  */
 declare(strict_types=1);
 
-namespace Magento\GraphQl\Inventory;
+namespace Magento\InventoryGraphQl\Test\Api\GraphQl;
 
+use Exception;
 use Magento\Bundle\Test\Fixture\AddProductToCart as AddBundleProductToCart;
 use Magento\Bundle\Test\Fixture\Link as BundleSelectionFixture;
 use Magento\Bundle\Test\Fixture\Option as BundleOptionFixture;
@@ -25,6 +26,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Test for bundle product only x left in stock
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class BundleProductOnlyXLeftInStockTest extends GraphQlAbstract
 {
@@ -39,7 +42,7 @@ class BundleProductOnlyXLeftInStockTest extends GraphQlAbstract
     private $fixtures;
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     protected function setUp(): void
     {
@@ -80,7 +83,7 @@ class BundleProductOnlyXLeftInStockTest extends GraphQlAbstract
      * @param string $stockThresholdQty
      * @return void
      *
-     * @throws \Exception
+     * @throws Exception
      */
     #[DataProvider('stockThresholdQtyProvider')]
     public function testOnlyXLeftInStockBundleProduct(string $stockThresholdQty): void
