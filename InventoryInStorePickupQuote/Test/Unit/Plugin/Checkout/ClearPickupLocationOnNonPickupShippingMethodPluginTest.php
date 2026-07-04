@@ -26,6 +26,8 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
 {
     /**
      * Test subject
+     *
+     * @var ClearPickupLocationOnNonPickupShippingMethodPlugin
      */
     private ClearPickupLocationOnNonPickupShippingMethodPlugin $plugin;
 
