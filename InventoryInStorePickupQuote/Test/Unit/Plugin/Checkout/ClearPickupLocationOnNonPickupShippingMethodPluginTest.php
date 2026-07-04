@@ -24,6 +24,9 @@ use PHPUnit\Framework\TestCase;
  */
 class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
 {
+    /**
+     * Test subject
+     */
     private ClearPickupLocationOnNonPickupShippingMethodPlugin $plugin;
 
     /** @var ShippingInformationManagement&MockObject */
