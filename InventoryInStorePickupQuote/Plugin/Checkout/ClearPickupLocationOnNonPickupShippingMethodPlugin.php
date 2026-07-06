@@ -53,15 +53,22 @@ class ClearPickupLocationOnNonPickupShippingMethodPlugin
         if ($carrierCode . '_' . $methodCode === InStorePickup::DELIVERY_METHOD) {
             return [$cartId, $addressInformation];
         }
+        $shippingAddress = $addressInformation->getShippingAddress();
         $quote = $this->cartRepository->getActive($cartId);
         $quoteShippingAddress = $quote->getShippingAddress();
-        $shippingAddress = $addressInformation->getShippingAddress();
-        $shouldResetPickupAddress = $this->shouldResetInStorePickupAddress($shippingAddress, $quoteShippingAddress);
+        $quoteIsInStorePickup = $this->isQuoteInStorePickupOrder($quoteShippingAddress);
+
+        // The request is establishing in-store pickup (it carries a pickup location) on a cart that is
+        // not yet a pickup order, so honor it instead of treating it as a switch to home delivery.
+        if (!$quoteIsInStorePickup && $this->hasPickupLocationCode($shippingAddress)) {
+            return [$cartId, $addressInformation];
+        }
+
         $this->clearPickupLocationFromAddress($shippingAddress);
         if ($quoteShippingAddress !== null && $quoteShippingAddress !== $shippingAddress) {
             $this->clearPickupLocationFromAddress($quoteShippingAddress);
         }
-        if ($shouldResetPickupAddress) {
+        if ($quoteIsInStorePickup) {
             $this->resetInStorePickupAddress($shippingAddress);
             if ($quoteShippingAddress !== null && $quoteShippingAddress !== $shippingAddress) {
                 $this->resetInStorePickupAddress($quoteShippingAddress);
@@ -71,19 +78,14 @@ class ClearPickupLocationOnNonPickupShippingMethodPlugin
     }
 
     /**
-     * Check if the in-store pickup address should be clear or not
+     * Check whether the cart is currently an in-store pickup order.
      *
-     * @param AddressInterface|null $shippingAddress
      * @param AddressInterface|null $quoteShippingAddress
      * @return bool
      */
-    private function shouldResetInStorePickupAddress(
-        ?AddressInterface $shippingAddress,
+    private function isQuoteInStorePickupOrder(
         ?AddressInterface $quoteShippingAddress
     ): bool {
-        if ($this->hasPickupLocationCode($shippingAddress)) {
-            return true;
-        }
         if ($this->hasPickupLocationCode($quoteShippingAddress)) {
             return true;
         }

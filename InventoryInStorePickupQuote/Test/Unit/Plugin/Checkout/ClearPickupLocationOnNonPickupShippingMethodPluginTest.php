@@ -97,9 +97,47 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
     }
 
     /**
+     * The request is establishing in-store pickup (it carries a pickup location) on a cart that is
+     * not yet a pickup order, so the plugin must keep the address even with a placeholder carrier.
+     *
      * @return void
      */
-    public function testClearsPickupCodeAndResetsAddressWhenSwitchingToFlatrate(): void
+    public function testKeepsPickupStateWhenRequestEstablishesPickupOnNonPickupQuote(): void
+    {
+        $cartId = 42;
+        $incomingExtension = $this->createExtensionMock('apple-store');
+        $incomingAddress = $this->createAddressMock($incomingExtension);
+        $quoteExtension = $this->createExtensionMock(null);
+        $quoteShippingAddress = $this->createAddressMock($quoteExtension);
+        $quoteShippingAddress->method('getShippingMethod')->willReturn(null);
+
+        $incomingExtension->expects($this->never())->method('setPickupLocationCode');
+        $incomingAddress->expects($this->never())->method('setFirstname');
+        $incomingAddress->expects($this->never())->method('setStreet');
+        $incomingAddress->expects($this->never())->method('setCity');
+
+        $this->configureFlatrateMethod();
+        $quote = $this->createMock(Quote::class);
+        $quote->method('getShippingAddress')->willReturn($quoteShippingAddress);
+        $this->cartRepository->method('getActive')->with($cartId)->willReturn($quote);
+        $this->addressInformation->method('getShippingAddress')->willReturn($incomingAddress);
+
+        $result = $this->plugin->beforeSaveAddressInformation(
+            $this->subject,
+            $cartId,
+            $this->addressInformation
+        );
+
+        $this->assertSame([$cartId, $this->addressInformation], $result);
+    }
+
+    /**
+     * Switching an existing in-store pickup order to home delivery must clear the pickup location and
+     * reset the store address even though the reused quote address still carries the pickup code.
+     *
+     * @return void
+     */
+    public function testClearsPickupWhenSwitchingExistingPickupOrderToDelivery(): void
     {
         $cartId = 42;
         $extension = $this->createExtensionMock('apple-store');
