@@ -324,7 +324,11 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
      */
     private function createExtensionMock(?string $pickupLocationCode): MockObject
     {
-        $extension = $this->createMock(AddressExtensionInterface::class);
+        $builder = $this->getMockBuilder(AddressExtensionInterface::class);
+        if (!method_exists(AddressExtensionInterface::class, 'getPickupLocationCode')) {
+            $builder->addMethods(['getPickupLocationCode', 'setPickupLocationCode']);
+        }
+        $extension = $builder->getMock();
         $extension->method('getPickupLocationCode')->willReturn($pickupLocationCode);
 
         return $extension;

@@ -45,36 +45,89 @@ class ClearPickupLocationOnNonPickupShippingMethodPlugin
         int $cartId,
         ShippingInformationInterface $addressInformation
     ): array {
-        $carrierCode = $addressInformation->getShippingCarrierCode();
-        $methodCode = $addressInformation->getShippingMethodCode();
-        if ($carrierCode === null || $methodCode === null) {
-            return [$cartId, $addressInformation];
-        }
-        if ($carrierCode . '_' . $methodCode === InStorePickup::DELIVERY_METHOD) {
+        if ($this->shouldSkipForShippingMethod($addressInformation)) {
             return [$cartId, $addressInformation];
         }
         $shippingAddress = $addressInformation->getShippingAddress();
-        $quote = $this->cartRepository->getActive($cartId);
-        $quoteShippingAddress = $quote->getShippingAddress();
+        $quoteShippingAddress = $this->cartRepository->getActive($cartId)->getShippingAddress();
         $quoteIsInStorePickup = $this->isQuoteInStorePickupOrder($quoteShippingAddress);
-
-        // The request is establishing in-store pickup (it carries a pickup location) on a cart that is
-        // not yet a pickup order, so honor it instead of treating it as a switch to home delivery.
-        if (!$quoteIsInStorePickup && $this->hasPickupLocationCode($shippingAddress)) {
+        if ($this->shouldPreservePickupAssignment($quoteIsInStorePickup, $shippingAddress)) {
             return [$cartId, $addressInformation];
         }
+        $this->cleanupPickupFromAddresses($shippingAddress, $quoteShippingAddress, $quoteIsInStorePickup);
+        return [$cartId, $addressInformation];
+    }
 
+    /**
+     * Skip cleanup when shipping method is missing or already in-store pickup.
+     *
+     * @param ShippingInformationInterface $addressInformation
+     * @return bool
+     */
+    private function shouldSkipForShippingMethod(ShippingInformationInterface $addressInformation): bool
+    {
+        $carrierCode = $addressInformation->getShippingCarrierCode();
+        $methodCode = $addressInformation->getShippingMethodCode();
+        if ($carrierCode === null || $methodCode === null) {
+            return true;
+        }
+        return $carrierCode . '_' . $methodCode === InStorePickup::DELIVERY_METHOD;
+    }
+
+    /**
+     * Skip cleanup when the request is establishing pickup on a non-pickup quote.
+     *
+     * @param bool $quoteIsInStorePickup
+     * @param AddressInterface|null $shippingAddress
+     * @return bool
+     */
+    private function shouldPreservePickupAssignment(
+        bool $quoteIsInStorePickup,
+        ?AddressInterface $shippingAddress
+    ): bool {
+        return !$quoteIsInStorePickup && $this->hasPickupLocationCode($shippingAddress);
+    }
+
+    /**
+     * Clear pickup association and optionally reset store address fields.
+     *
+     * @param AddressInterface|null $shippingAddress
+     * @param AddressInterface|null $quoteShippingAddress
+     * @param bool $quoteIsInStorePickup
+     * @return void
+     */
+    private function cleanupPickupFromAddresses(
+        ?AddressInterface $shippingAddress,
+        ?AddressInterface $quoteShippingAddress,
+        bool $quoteIsInStorePickup
+    ): void {
         $this->clearPickupLocationFromAddress($shippingAddress);
-        if ($quoteShippingAddress !== null && $quoteShippingAddress !== $shippingAddress) {
+        if ($this->isDistinctQuoteAddress($quoteShippingAddress, $shippingAddress)) {
             $this->clearPickupLocationFromAddress($quoteShippingAddress);
         }
-        if ($quoteIsInStorePickup) {
-            $this->resetInStorePickupAddress($shippingAddress);
-            if ($quoteShippingAddress !== null && $quoteShippingAddress !== $shippingAddress) {
-                $this->resetInStorePickupAddress($quoteShippingAddress);
-            }
+
+        if (!$quoteIsInStorePickup) {
+            return;
         }
-        return [$cartId, $addressInformation];
+
+        $this->resetInStorePickupAddress($shippingAddress);
+        if ($this->isDistinctQuoteAddress($quoteShippingAddress, $shippingAddress)) {
+            $this->resetInStorePickupAddress($quoteShippingAddress);
+        }
+    }
+
+    /**
+     * Check whether quote shipping address is a different object from the incoming address.
+     *
+     * @param AddressInterface|null $quoteShippingAddress
+     * @param AddressInterface|null $shippingAddress
+     * @return bool
+     */
+    private function isDistinctQuoteAddress(
+        ?AddressInterface $quoteShippingAddress,
+        ?AddressInterface $shippingAddress
+    ): bool {
+        return $quoteShippingAddress !== null && $quoteShippingAddress !== $shippingAddress;
     }
 
     /**
