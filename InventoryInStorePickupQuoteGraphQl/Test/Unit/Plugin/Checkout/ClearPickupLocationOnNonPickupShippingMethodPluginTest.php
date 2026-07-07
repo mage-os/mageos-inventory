@@ -34,17 +34,17 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
      */
     private ClearPickupLocationOnNonPickupShippingMethodPlugin $plugin;
 
-    /** @var ShippingInformationManagement&MockObject */
-    private MockObject $subject;
+    /** @var ShippingInformationManagement|MockObject */
+    private $subject;
 
-    /** @var ShippingInformationInterface&MockObject */
-    private MockObject $addressInformation;
+    /** @var ShippingInformationInterface|MockObject */
+    private $addressInformation;
 
-    /** @var CartRepositoryInterface&MockObject */
-    private MockObject $cartRepository;
+    /** @var CartRepositoryInterface|MockObject */
+    private $cartRepository;
 
-    /** @var AddressExtensionFactory&MockObject */
-    private MockObject $addressExtensionFactory;
+    /** @var AddressExtensionFactory|MockObject */
+    private $addressExtensionFactory;
 
     /**
      * @inheritDoc
@@ -272,7 +272,7 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
     }
 
     /**
-     * @param Address&MockObject $address
+     * @param Address|MockObject $address
      * @return void
      */
     private function expectAddressReset(MockObject $address): void
@@ -287,7 +287,7 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
 
     /**
      * @param int $cartId
-     * @param Address&MockObject $shippingAddress
+     * @param Address|MockObject $shippingAddress
      * @return void
      */
     private function configureQuoteWithShippingAddress(int $cartId, MockObject $shippingAddress): void
@@ -308,8 +308,8 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
     }
 
     /**
-     * @param AddressExtensionInterface&MockObject|null $extension
-     * @return Address&MockObject
+     * @param AddressExtensionInterface|MockObject|null $extension
+     * @return Address|MockObject
      */
     private function createAddressMock(?MockObject $extension): MockObject
     {
@@ -323,7 +323,7 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
 
     /**
      * @param string|null $pickupLocationCode
-     * @return AddressExtensionInterface&MockObject
+     * @return AddressExtensionInterface|MockObject
      */
     private function createExtensionMock(?string $pickupLocationCode): MockObject
     {

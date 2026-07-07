@@ -31,29 +31,29 @@ class ShippingInformationManagementPluginTest extends TestCase
     private $plugin;
 
     /**
-     * @var ShippingInformationManagement&MockObject
+     * @var ShippingInformationManagement|MockObject
      */
-    private MockObject $subject;
+    private $subject;
 
     /**
-     * @var ShippingInformationInterface&MockObject
+     * @var ShippingInformationInterface|MockObject
      */
-    private MockObject $addressInformation;
+    private $addressInformation;
 
     /**
-     * @var AddressInterface&MockObject
+     * @var AddressInterface|MockObject
      */
-    private MockObject $shippingAddress;
+    private $shippingAddress;
 
     /**
-     * @var AddressInterface&MockObject
+     * @var AddressInterface|MockObject
      */
-    private MockObject $billingAddress;
+    private $billingAddress;
 
     /**
-     * @var AddressExtensionInterface&MockObject
+     * @var AddressExtensionInterface|MockObject
      */
-    private MockObject $extensionAttributes;
+    private $extensionAttributes;
 
     /**
      * @inheritDoc
