@@ -9,6 +9,7 @@ namespace Magento\InventoryInStorePickupQuoteGraphQl\Test\Unit\Plugin\Checkout;
 
 use Magento\Checkout\Api\Data\ShippingInformationInterface;
 use Magento\Checkout\Model\ShippingInformationManagement;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\InventoryInStorePickupQuoteGraphQl\Plugin\Checkout\ClearPickupLocationOnNonPickupShippingMethodPlugin;
 use Magento\InventoryInStorePickupShippingApi\Model\Carrier\InStorePickup;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -24,6 +25,8 @@ use PHPUnit\Framework\TestCase;
  */
 class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * Test subject
      *
@@ -324,7 +327,10 @@ class ClearPickupLocationOnNonPickupShippingMethodPluginTest extends TestCase
      */
     private function createExtensionMock(?string $pickupLocationCode): MockObject
     {
-        $extension = $this->createMock(AddressExtensionStubInterface::class);
+        $extension = $this->createPartialMockWithReflection(
+            AddressExtensionInterface::class,
+            ['getPickupLocationCode', 'setPickupLocationCode']
+        );
         $extension->method('getPickupLocationCode')->willReturn($pickupLocationCode);
 
         return $extension;

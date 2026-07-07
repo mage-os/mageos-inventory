@@ -9,17 +9,20 @@ namespace Magento\InventoryInStorePickupQuote\Test\Unit\Plugin\Checkout;
 
 use Magento\Checkout\Api\Data\ShippingInformationInterface;
 use Magento\Checkout\Model\ShippingInformationManagement;
+use Magento\Framework\TestFramework\Unit\Helper\MockCreationTrait;
 use Magento\InventoryInStorePickupQuote\Plugin\Checkout\ShippingInformationManagementPlugin;
 use Magento\Quote\Api\Data\AddressExtensionInterface;
+use Magento\Quote\Api\Data\AddressInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\Quote\Api\Data\AddressInterface;
 
 /**
  * Unit test for ShippingInformationManagementPlugin.
  */
 class ShippingInformationManagementPluginTest extends TestCase
 {
+    use MockCreationTrait;
+
     /**
      * Test subject.
      *
@@ -27,19 +30,29 @@ class ShippingInformationManagementPluginTest extends TestCase
      */
     private $plugin;
 
-    /** @var ShippingInformationManagement&MockObject */
+    /**
+     * @var ShippingInformationManagement&MockObject
+     */
     private MockObject $subject;
 
-    /** @var ShippingInformationInterface&MockObject */
+    /**
+     * @var ShippingInformationInterface&MockObject
+     */
     private MockObject $addressInformation;
 
-    /** @var AddressInterface&MockObject */
+    /**
+     * @var AddressInterface&MockObject
+     */
     private MockObject $shippingAddress;
 
-    /** @var AddressInterface&MockObject */
+    /**
+     * @var AddressInterface&MockObject
+     */
     private MockObject $billingAddress;
 
-    /** @var AddressExtensionInterface&MockObject */
+    /**
+     * @var AddressExtensionInterface&MockObject
+     */
     private MockObject $extensionAttributes;
 
     /**
@@ -51,7 +64,10 @@ class ShippingInformationManagementPluginTest extends TestCase
         $this->addressInformation = $this->createMock(ShippingInformationInterface::class);
         $this->shippingAddress = $this->createMock(AddressInterface::class);
         $this->billingAddress = $this->createMock(AddressInterface::class);
-        $this->extensionAttributes = $this->createMock(AddressExtensionInterface::class);
+        $this->extensionAttributes = $this->createPartialMockWithReflection(
+            AddressExtensionInterface::class,
+            ['getPickupLocationCode']
+        );
         $this->plugin = new ShippingInformationManagementPlugin();
     }
 
