@@ -17,10 +17,19 @@ use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
  */
 class GetProductQtyLeft
 {
+    /**
+     * @var GetProductSalableQtyInterface
+     */
     private GetProductSalableQtyInterface $getProductSalableQty;
 
+    /**
+     * @var IsSalableQtyThresholdReached
+     */
     private IsSalableQtyThresholdReached $isSalableQtyThresholdReached;
 
+    /**
+     * @var GetStockItemConfigurationInterface
+     */
     private GetStockItemConfigurationInterface $getStockItemConfig;
 
     /**
@@ -38,7 +47,8 @@ class GetProductQtyLeft
         $this->getProductSalableQty = $getProductSalableQty;
         $this->isSalableQtyThresholdReached = $isSalableQtyThresholdReached
             ?? ObjectManager::getInstance()->get(IsSalableQtyThresholdReached::class);
-        $this->getStockItemConfig = $getStockItemConfig ?? ObjectManager::getInstance()->get(GetStockItemConfigurationInterface::class);
+        $this->getStockItemConfig = $getStockItemConfig
+            ?? ObjectManager::getInstance()->get(GetStockItemConfigurationInterface::class);
     }
 
     /**

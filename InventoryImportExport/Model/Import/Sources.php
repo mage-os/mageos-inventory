@@ -33,6 +33,9 @@ class Sources extends AbstractEntity
     public const COL_QTY = SourceItemInterface::QUANTITY;
     public const COL_STATUS = SourceItemInterface::STATUS;
 
+    /**
+     * @var string[]
+     */
     protected $validColumnNames = [
         self::COL_SKU,
         self::COL_SOURCE_CODE,

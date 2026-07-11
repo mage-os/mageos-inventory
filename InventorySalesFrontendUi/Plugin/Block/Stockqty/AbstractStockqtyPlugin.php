@@ -23,14 +23,29 @@ use Magento\InventoryCatalogFrontendUi\Model\IsSalableQtyAvailableForDisplaying;
  */
 class AbstractStockqtyPlugin
 {
+    /**
+     * @var GetStockItemConfigurationInterface
+     */
     private GetStockItemConfigurationInterface $getStockItemConfiguration;
 
+    /**
+     * @var StockByWebsiteIdResolverInterface
+     */
     private StockByWebsiteIdResolverInterface $stockByWebsiteId;
 
+    /**
+     * @var GetProductSalableQtyInterface
+     */
     private GetProductSalableQtyInterface $getProductSalableQty;
 
+    /**
+     * @var IsSourceItemManagementAllowedForProductTypeInterface
+     */
     private IsSourceItemManagementAllowedForProductTypeInterface $isSourceItemManagementAllowedForProductType;
 
+    /**
+     * @var IsSalableQtyThresholdReached
+     */
     private IsSalableQtyThresholdReached $qtyLeftChecker;
 
     /**
@@ -77,8 +92,10 @@ class AbstractStockqtyPlugin
             )->getStockId();
             $stockItemConfig = $this->getStockItemConfiguration->execute($sku, $stockId);
 
+            $salableQty = $this->getProductSalableQty->execute($sku, $stockId);
+
             return $stockItemConfig->isManageStock()
-                && $this->qtyLeftChecker->execute($this->getProductSalableQty->execute($sku, $stockId), $stockItemConfig);
+                && $this->qtyLeftChecker->execute($salableQty, $stockItemConfig);
         }
 
         return false;

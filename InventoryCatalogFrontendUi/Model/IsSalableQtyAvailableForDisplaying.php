@@ -12,7 +12,8 @@ use Magento\InventoryConfigurationApi\Api\Data\StockItemConfigurationInterface;
 /**
  * Check if it is necessary to show qty left.
  *
- * @deprecated
+ * @deprecated Use IsSalableQtyThresholdReached instead.
+ * @see IsSalableQtyThresholdReached
  */
 class IsSalableQtyAvailableForDisplaying
 {
