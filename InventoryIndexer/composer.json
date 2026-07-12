@@ -5,6 +5,7 @@
         "php": "~8.3.0||~8.4.0||~8.5.0",
         "magento/framework": "*",
         "magento/framework-message-queue": "*",
+        "magento/module-indexer": "*",
         "magento/module-inventory-multi-dimensional-indexer-api": "*",
         "magento/module-inventory": "*",
         "magento/module-inventory-api": "*",
