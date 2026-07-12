@@ -16,6 +16,7 @@ use Magento\Framework\EntityManager\EntityMetadataInterface;
 use Magento\Framework\EntityManager\MetadataPool;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 use Magento\InventoryConfigurableProductIndexer\Indexer\SelectBuilder;
+use Magento\InventoryConfigurationApi\Model\InventoryConfigurationInterface;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexName;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexNameBuilder;
 use Magento\InventoryMultiDimensionalIndexerApi\Model\IndexNameResolverInterface;
@@ -67,13 +68,17 @@ class SelectBuilderTest extends TestCase
         $eavConfig = $this->createMock(Config::class);
         $eavConfig->method('getAttribute')->willReturn($statusAttribute);
 
+        $configuration = $this->createMock(InventoryConfigurationInterface::class);
+        $configuration->method('getManageStock')->willReturn(1);
+
         $this->selectBuilder = new SelectBuilder(
             $resourceConnection,
             $indexNameBuilder,
             $indexNameResolver,
             $metadataPool,
             $defaultStockProvider,
-            $eavConfig
+            $eavConfig,
+            $configuration
         );
     }
 

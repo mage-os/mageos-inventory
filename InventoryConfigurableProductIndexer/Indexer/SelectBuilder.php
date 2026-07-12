@@ -16,6 +16,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\EntityManager\MetadataPool;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
+use Magento\InventoryConfigurationApi\Model\InventoryConfigurationInterface;
 use Magento\InventoryIndexer\Indexer\IndexStructure;
 use Magento\InventoryIndexer\Indexer\InventoryIndexer;
 use Magento\InventoryIndexer\Indexer\SiblingSelectBuilderInterface;
@@ -37,6 +38,7 @@ class SelectBuilder implements SiblingSelectBuilderInterface
      * @param MetadataPool $metadataPool
      * @param DefaultStockProviderInterface $defaultStockProvider
      * @param Config $eavConfig
+     * @param InventoryConfigurationInterface $configuration
      */
     public function __construct(
         private readonly ResourceConnection $resourceConnection,
@@ -44,7 +46,8 @@ class SelectBuilder implements SiblingSelectBuilderInterface
         private readonly IndexNameResolverInterface $indexNameResolver,
         private readonly MetadataPool $metadataPool,
         private readonly DefaultStockProviderInterface $defaultStockProvider,
-        private readonly Config $eavConfig
+        private readonly Config $eavConfig,
+        private readonly InventoryConfigurationInterface $configuration
     ) {
     }
 
@@ -63,13 +66,20 @@ class SelectBuilder implements SiblingSelectBuilderInterface
         $linkField = $metadata->getLinkField();
         $statusAttributeId = $this->getAttribute(ProductInterface::STATUS)->getId();
 
+        $manageStock = '(inventory_stock_item.use_config_manage_stock = 0 AND inventory_stock_item.manage_stock = 1)';
+        if (((int)$this->configuration->getManageStock()) === 1) {
+            $manageStock .= ' OR inventory_stock_item.use_config_manage_stock = 1';
+            $manageStock = "($manageStock)";
+        }
+
         $select = $connection->select()
             ->from(
                 ['stock' => $indexTableName],
                 [
                     IndexStructure::SKU => 'parent_product_entity.sku',
                     IndexStructure::QUANTITY => 'SUM(stock.quantity)',
-                    IndexStructure::IS_SALABLE => 'IF(inventory_stock_item.is_in_stock = 0, 0, MAX(stock.is_salable))',
+                    IndexStructure::IS_SALABLE =>
+                        "IF(inventory_stock_item.is_in_stock = 0 AND $manageStock, 0, MAX(stock.is_salable))",
                 ]
             )->joinInner(
                 ['product_entity' => $this->resourceConnection->getTableName('catalog_product_entity')],
