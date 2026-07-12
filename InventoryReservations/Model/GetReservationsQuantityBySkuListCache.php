@@ -10,16 +10,19 @@ namespace Magento\InventoryReservations\Model;
 use Magento\InventoryReservations\Model\GetReservationsQuantity\CacheStorage;
 use Magento\InventoryReservations\Model\ResourceModel\GetReservationsQuantityBySkuList;
 use Magento\InventoryReservationsApi\Model\GetReservationsQuantityBySkuListCacheInterface;
+use Magento\InventoryReservationsApi\Model\SourceReservationsConfig;
 
 class GetReservationsQuantityBySkuListCache implements GetReservationsQuantityBySkuListCacheInterface
 {
     /**
      * @param GetReservationsQuantityBySkuList $getReservationsQuantityBySkuList
      * @param CacheStorage $reservationsQuantityCacheStorage
+     * @param SourceReservationsConfig $sourceReservationsConfig
      */
     public function __construct(
         private readonly GetReservationsQuantityBySkuList $getReservationsQuantityBySkuList,
-        private readonly CacheStorage $reservationsQuantityCacheStorage
+        private readonly CacheStorage $reservationsQuantityCacheStorage,
+        private readonly SourceReservationsConfig $sourceReservationsConfig
     ) {
     }
 
@@ -59,6 +62,9 @@ class GetReservationsQuantityBySkuListCache implements GetReservationsQuantityBy
      */
     public function clean(array $skus, ?int $stockId): void
     {
+        if ($this->sourceReservationsConfig->isEnabled()) {
+            $stockId = null;
+        }
         foreach ($skus as $sku) {
             $this->reservationsQuantityCacheStorage->delete((string)$sku, $stockId);
         }

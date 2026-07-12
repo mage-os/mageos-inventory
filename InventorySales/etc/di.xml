@@ -34,7 +34,7 @@
     <!-- Sales Event -->
     <preference for="Magento\InventorySalesApi\Api\Data\ItemToSellInterface" type="Magento\InventorySales\Model\ItemToSell"/>
     <preference for="Magento\InventorySalesApi\Api\Data\SalesEventInterface" type="Magento\InventorySales\Model\SalesEvent"/>
-    <preference for="Magento\InventorySalesApi\Api\PlaceReservationsForSalesEventInterface" type="Magento\InventorySales\Model\PlaceReservationsForSalesEvent"/>
+    <preference for="Magento\InventorySalesApi\Api\PlaceReservationsForSalesEventInterface" type="Magento\InventorySales\Model\SourceReservation\PlaceReservationsForSalesEventRouter"/>
     <!-- Query interfaces -->
     <preference for="Magento\InventorySalesApi\Api\GetProductSalableQtyInterface" type="Magento\InventorySales\Model\GetProductSalableQty"/>
     <!-- StockItem -->
