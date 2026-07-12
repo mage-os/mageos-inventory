@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\InventoryReservations\Model\ResourceModel;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\InventoryReservationsApi\Model\ReservationInterface;
 use Magento\InventoryReservationsApi\Model\CleanupReservationsInterface;
 
@@ -16,6 +17,8 @@ use Magento\InventoryReservationsApi\Model\CleanupReservationsInterface;
  */
 class CleanupReservations implements CleanupReservationsInterface
 {
+    private const DELETE_CHUNK_SIZE = 10000;
+
     /**
      * @var ResourceConnection
      */
@@ -43,21 +46,52 @@ class CleanupReservations implements CleanupReservationsInterface
      */
     public function execute(): void
     {
-        $connection = $this->resource->getConnection();
-        $reservationTable = $this->resource->getTableName('inventory_reservation');
-
-        $groupedReservationIds = implode(
-            ',',
-            array_unique(
-                array_merge(
-                    $this->getReservationIdsByField('object_id'),
-                    $this->getReservationIdsByField('object_increment_id')
-                )
+        $groupedReservationIds = array_unique(
+            array_merge(
+                $this->getReservationIdsByField('object_id'),
+                $this->getReservationIdsByField('object_increment_id')
             )
         );
 
-        $condition = [ReservationInterface::RESERVATION_ID . ' IN (?)' => explode(',', $groupedReservationIds)];
-        $connection->delete($reservationTable, $condition);
+        $connection = $this->resource->getConnection();
+        $seenIds = [];
+        $chunk = [];
+        foreach ($groupedReservationIds as $groupedIds) {
+            $groupIds = [];
+            foreach (explode(',', (string)$groupedIds) as $reservationId) {
+                $reservationId = (int)$reservationId;
+                if ($reservationId && !isset($seenIds[$reservationId])) {
+                    $seenIds[$reservationId] = true;
+                    $groupIds[] = $reservationId;
+                }
+            }
+            if (!$groupIds) {
+                continue;
+            }
+            if ($chunk && count($chunk) + count($groupIds) > self::DELETE_CHUNK_SIZE) {
+                $this->deleteReservations($connection, $chunk);
+                $chunk = [];
+            }
+            array_push($chunk, ...$groupIds);
+        }
+        if ($chunk) {
+            $this->deleteReservations($connection, $chunk);
+        }
+    }
+
+    /**
+     * Delete reservations by ids.
+     *
+     * @param AdapterInterface $connection
+     * @param int[] $reservationIds
+     * @return void
+     */
+    private function deleteReservations(AdapterInterface $connection, array $reservationIds): void
+    {
+        $connection->delete(
+            $this->resource->getTableName('inventory_reservation'),
+            [ReservationInterface::RESERVATION_ID . ' IN (?)' => $reservationIds]
+        );
     }
 
     /**
