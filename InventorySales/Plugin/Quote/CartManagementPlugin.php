@@ -11,7 +11,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
 use Magento\InventorySales\Model\ReservationExecutionInterface;
-use Magento\InventorySales\Model\ResourceModel\AcquireInventoryLock;
+use Magento\InventorySales\Model\ResourceModel\AcquireStockItemLocks;
 use Magento\InventorySalesApi\Model\StockByWebsiteIdResolverInterface;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -19,7 +19,7 @@ use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Acquire inventory locks during cart place order to prevent overselling race conditions
+ * Acquire per-source inventory locks during cart place order to prevent overselling.
  */
 class CartManagementPlugin
 {
@@ -34,9 +34,9 @@ class CartManagementPlugin
     private $getSkusByProductIds;
 
     /**
-     * @var AcquireInventoryLock
+     * @var AcquireStockItemLocks
      */
-    private $acquireInventoryLock;
+    private $acquireStockItemLocks;
 
     /**
      * @var StockByWebsiteIdResolverInterface
@@ -56,7 +56,7 @@ class CartManagementPlugin
     /**
      * @param CartRepositoryInterface $cartRepository
      * @param GetSkusByProductIdsInterface $getSkusByProductIds
-     * @param AcquireInventoryLock $acquireInventoryLock
+     * @param AcquireStockItemLocks $acquireStockItemLocks
      * @param StockByWebsiteIdResolverInterface $stockByWebsiteIdResolver
      * @param StoreManagerInterface $storeManager
      * @param ReservationExecutionInterface $reservationExecution
@@ -64,21 +64,21 @@ class CartManagementPlugin
     public function __construct(
         CartRepositoryInterface $cartRepository,
         GetSkusByProductIdsInterface $getSkusByProductIds,
-        AcquireInventoryLock $acquireInventoryLock,
+        AcquireStockItemLocks $acquireStockItemLocks,
         StockByWebsiteIdResolverInterface $stockByWebsiteIdResolver,
         StoreManagerInterface $storeManager,
         ReservationExecutionInterface $reservationExecution
     ) {
         $this->cartRepository = $cartRepository;
         $this->getSkusByProductIds = $getSkusByProductIds;
-        $this->acquireInventoryLock = $acquireInventoryLock;
+        $this->acquireStockItemLocks = $acquireStockItemLocks;
         $this->stockByWebsiteIdResolver = $stockByWebsiteIdResolver;
         $this->storeManager = $storeManager;
         $this->reservationExecution = $reservationExecution;
     }
 
     /**
-     * Acquire locks around place order for both guest and customer checkout
+     * Acquire source-level locks around place order for both guest and customer checkout.
      *
      * @param CartManagementInterface $subject
      * @param callable $proceed
@@ -112,29 +112,18 @@ class CartManagementPlugin
         foreach ($quote->getAllVisibleItems() as $item) {
             $productIds[] = $item->getProductId();
         }
-
-        if (empty($productIds)) {
+        if (!$productIds) {
             return $proceed($cartId, $paymentMethod);
         }
 
         $skus = $this->getSkusByProductIds->execute($productIds);
-        $locksAcquired = [];
 
         try {
-            foreach ($skus as $sku) {
-                if (!$this->acquireInventoryLock->execute((string) $sku, $stockId)) {
-                    throw new LocalizedException(
-                        __('Could not acquire inventory lock for SKU: %1. Please try again.', $sku)
-                    );
-                }
-                $locksAcquired[$sku] = true;
-            }
+            $this->acquireStockItemLocks->execute(array_map('strval', $skus), $stockId);
 
             return $proceed($cartId, $paymentMethod);
         } finally {
-            foreach (array_keys($locksAcquired) as $sku) {
-                $this->acquireInventoryLock->release((string) $sku, $stockId);
-            }
+            $this->acquireStockItemLocks->releaseAll();
         }
     }
 }

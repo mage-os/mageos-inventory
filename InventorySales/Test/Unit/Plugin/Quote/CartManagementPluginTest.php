@@ -11,7 +11,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryApi\Api\Data\StockInterface;
 use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
 use Magento\InventorySales\Model\ReservationExecutionInterface;
-use Magento\InventorySales\Model\ResourceModel\AcquireInventoryLock;
+use Magento\InventorySales\Model\ResourceModel\AcquireStockItemLocks;
 use Magento\InventorySales\Plugin\Quote\CartManagementPlugin;
 use Magento\InventorySalesApi\Model\StockByWebsiteIdResolverInterface;
 use Magento\Quote\Api\CartManagementInterface;
@@ -35,9 +35,9 @@ class CartManagementPluginTest extends TestCase
     private $getSkusByProductIds;
 
     /**
-     * @var AcquireInventoryLock|MockObject
+     * @var AcquireStockItemLocks|MockObject
      */
-    private $acquireInventoryLock;
+    private $acquireStockItemLocks;
 
     /**
      * @var StockByWebsiteIdResolverInterface|MockObject
@@ -63,7 +63,7 @@ class CartManagementPluginTest extends TestCase
     {
         $this->cartRepository = $this->createMock(CartRepositoryInterface::class);
         $this->getSkusByProductIds = $this->createMock(GetSkusByProductIdsInterface::class);
-        $this->acquireInventoryLock = $this->createMock(AcquireInventoryLock::class);
+        $this->acquireStockItemLocks = $this->createMock(AcquireStockItemLocks::class);
         $this->stockByWebsiteIdResolver = $this->createMock(StockByWebsiteIdResolverInterface::class);
         $this->storeManager = $this->createMock(StoreManagerInterface::class);
         $this->reservationExecution = $this->createMock(ReservationExecutionInterface::class);
@@ -71,20 +71,20 @@ class CartManagementPluginTest extends TestCase
         $this->plugin = new CartManagementPlugin(
             $this->cartRepository,
             $this->getSkusByProductIds,
-            $this->acquireInventoryLock,
+            $this->acquireStockItemLocks,
             $this->stockByWebsiteIdResolver,
             $this->storeManager,
             $this->reservationExecution
         );
     }
 
-    public function testAroundPlaceOrderFallsBackToGetForInactiveQuote(): void
+    public function testAroundPlaceOrderLocksStockItemsAndReleases(): void
     {
         $cartId = 36;
         $expectedOrderId = 1001;
 
         $subject = $this->createMock(CartManagementInterface::class);
-        
+
         $quote = $this->createMock(Quote::class);
         $quote->method('getStoreId')->willReturn(1);
         $item = new class {
@@ -110,8 +110,8 @@ class CartManagementPluginTest extends TestCase
         $this->storeManager->method('getStore')->with(1)->willReturn($store);
         $this->stockByWebsiteIdResolver->method('execute')->with(2)->willReturn($stock);
         $this->getSkusByProductIds->method('execute')->with([42])->willReturn(['simple-1']);
-        $this->acquireInventoryLock->method('execute')->with('simple-1', 3)->willReturn(true);
-        $this->acquireInventoryLock->expects($this->once())->method('release')->with('simple-1', 3);
+        $this->acquireStockItemLocks->expects($this->once())->method('execute')->with(['simple-1'], 3);
+        $this->acquireStockItemLocks->expects($this->once())->method('releaseAll');
 
         $proceed = function (int $receivedCartId) use ($cartId, $expectedOrderId): int {
             $this->assertSame($cartId, $receivedCartId);
