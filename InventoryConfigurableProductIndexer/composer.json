@@ -5,6 +5,7 @@
         "php": "~8.3.0||~8.4.0||~8.5.0",
         "magento/framework": "*",
         "magento/module-catalog": "*",
+        "magento/module-eav": "*",
         "magento/module-inventory-api": "*",
         "magento/module-inventory-catalog-api": "*",
         "magento/module-inventory-indexer": "*",
