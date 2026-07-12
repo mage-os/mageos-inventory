@@ -14,6 +14,8 @@
         <column xsi:type="decimal" name="quantity" scale="4" precision="10" unsigned="false" nullable="false"
                 default="0"/>
         <column xsi:type="varchar" name="metadata" nullable="true" length="255"/>
+        <column xsi:type="varchar" name="source_code" nullable="true" length="255"/>
+        <column xsi:type="varchar" name="object_increment_id" nullable="true" length="32"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="reservation_id"/>
         </constraint>
@@ -21,6 +23,14 @@
             <column name="stock_id"/>
             <column name="sku"/>
             <column name="quantity"/>
+        </index>
+        <index referenceId="INVENTORY_RESERVATION_SOURCE_CODE_SKU_QUANTITY" indexType="btree">
+            <column name="source_code"/>
+            <column name="sku"/>
+            <column name="quantity"/>
+        </index>
+        <index referenceId="INVENTORY_RESERVATION_OBJECT_INCREMENT_ID" indexType="btree">
+            <column name="object_increment_id"/>
         </index>
     </table>
 </schema>

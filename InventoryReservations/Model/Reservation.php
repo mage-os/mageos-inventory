@@ -42,24 +42,40 @@ class Reservation implements ReservationInterface
     private $metadata;
 
     /**
+     * @var string|null
+     */
+    private $sourceCode;
+
+    /**
+     * @var string|null
+     */
+    private $objectIncrementId;
+
+    /**
      * @param int|null $reservationId
      * @param int $stockId
      * @param string $sku
      * @param float $quantity
      * @param string|null $metadata
+     * @param string|null $sourceCode
+     * @param string|null $objectIncrementId
      */
     public function __construct(
         $reservationId,
         int $stockId,
         string $sku,
         float $quantity,
-        $metadata = null
+        $metadata = null,
+        ?string $sourceCode = null,
+        ?string $objectIncrementId = null
     ) {
         $this->reservationId = $reservationId;
         $this->stockId = $stockId;
         $this->sku = $sku;
         $this->quantity = $quantity;
         $this->metadata = $metadata;
+        $this->sourceCode = $sourceCode;
+        $this->objectIncrementId = $objectIncrementId;
     }
 
     /**
@@ -102,5 +118,21 @@ class Reservation implements ReservationInterface
     public function getMetadata(): ?string
     {
         return $this->metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSourceCode(): ?string
+    {
+        return $this->sourceCode;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getObjectIncrementId(): ?string
+    {
+        return $this->objectIncrementId;
     }
 }

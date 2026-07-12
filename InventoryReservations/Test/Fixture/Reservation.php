@@ -20,6 +20,8 @@ use Magento\TestFramework\Fixture\RevertibleDataFixtureInterface;
  *       'sku' => (string) SKU.
  *       'quantity' => (float) Quantity. Default: 1.
  *       'metadata' => (array) Metadata. Optional.
+ *       'source_code' => (string) Source Code. Optional.
+ *       'object_increment_id' => (string) Sales event object increment id. Optional.
  *     ]
  *  </pre>
  */
@@ -48,6 +50,12 @@ class Reservation implements RevertibleDataFixtureInterface
         if (isset($data['metadata'])) {
             $metadata = json_encode($data['metadata']);
             $this->reservationBuilder->setMetadata($metadata);
+        }
+        if (isset($data['source_code'])) {
+            $this->reservationBuilder->setSourceCode($data['source_code']);
+        }
+        if (isset($data['object_increment_id'])) {
+            $this->reservationBuilder->setObjectIncrementId($data['object_increment_id']);
         }
         $reservation = $this->reservationBuilder->build();
         $this->saveMultiple->execute([$reservation]);

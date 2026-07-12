@@ -51,6 +51,22 @@ interface ReservationBuilderInterface
     public function setMetadata(?string $metadata = null): self;
 
     /**
+     * Set source code
+     *
+     * @param string|null $sourceCode
+     * @return self
+     */
+    public function setSourceCode(?string $sourceCode = null): self;
+
+    /**
+     * Set sales event object increment id
+     *
+     * @param string|null $objectIncrementId
+     * @return self
+     */
+    public function setObjectIncrementId(?string $objectIncrementId = null): self;
+
+    /**
      * Method build for reservation
      *
      * @return ReservationInterface
