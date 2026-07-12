@@ -112,6 +112,34 @@ class CleanupReservationsTest extends TestCase
         self::assertSame([10000, 10001, 10002], end($deletedChunks));
     }
 
+    public function testGroupsCompensatedReservationsBySourceCode(): void
+    {
+        $connection = $this->createMock(AdapterInterface::class);
+
+        $groupCalls = [];
+        $select = $this->createMock(Select::class);
+        $select->method('from')->willReturnSelf();
+        $select->method('having')->willReturnSelf();
+        $select->method('group')
+            ->willReturnCallback(function (...$columns) use (&$groupCalls, $select) {
+                $groupCalls[] = $columns;
+                return $select;
+            });
+        $connection->method('select')->willReturn($select);
+        $connection->method('fetchCol')->willReturn([]);
+
+        $resourceConnection = $this->createMock(ResourceConnection::class);
+        $resourceConnection->method('getConnection')->willReturn($connection);
+        $resourceConnection->method('getTableName')->willReturnArgument(0);
+
+        (new CleanupReservations($resourceConnection, 1024))->execute();
+
+        self::assertCount(2, $groupCalls);
+        foreach ($groupCalls as $columns) {
+            self::assertContains('source_code', $columns);
+        }
+    }
+
     public function testKeepsGroupLargerThanChunkSizeInASingleDeleteStatement(): void
     {
         $this->connection->method('fetchCol')->willReturnOnConsecutiveCalls(

@@ -60,7 +60,7 @@ class GetReservationsQuantityBySkuListCache implements GetReservationsQuantityBy
     public function clean(array $skus, ?int $stockId): void
     {
         foreach ($skus as $sku) {
-            $this->reservationsQuantityCacheStorage->delete((string)$sku, (int)$stockId);
+            $this->reservationsQuantityCacheStorage->delete((string)$sku, $stockId);
         }
     }
 }
