@@ -22,4 +22,7 @@
     <event name="sales_quote_item_collection_products_after_load">
         <observer name="inventory_sales_preload_data" instance="Magento\InventorySales\Observer\PreloadData"/>
     </event>
+    <event name="sales_order_save_after">
+        <observer name="inventory_sales_reconcile_reservations_on_state_change" instance="Magento\InventorySales\Observer\CatalogInventory\ReconcileReservationsOnOrderStateChangeObserver"/>
+    </event>
 </config>

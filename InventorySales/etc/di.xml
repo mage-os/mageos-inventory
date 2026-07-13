@@ -30,6 +30,8 @@
     </type>
     <type name="Magento\InventoryReservationsApi\Model\AppendReservationsInterface">
         <plugin name="prevent_append_reservation_on_not_manage_items_in_stock" type="Magento\InventorySales\Plugin\InventoryReservationsApi\PreventAppendReservationOnNotManageItemsInStockPlugin"/>
+        <plugin name="clamp_compensation_reservations" type="Magento\InventorySales\Plugin\InventoryReservationsApi\ClampCompensationReservationsPlugin" sortOrder="20"/>
+        <plugin name="reject_overselling_reservations" type="Magento\InventorySales\Plugin\InventoryReservationsApi\RejectOversellingReservationsPlugin" sortOrder="30"/>
     </type>
     <!-- Sales Event -->
     <preference for="Magento\InventorySalesApi\Api\Data\ItemToSellInterface" type="Magento\InventorySales\Model\ItemToSell"/>
@@ -217,6 +219,13 @@
     <type name="Magento\InventorySales\Observer\PreloadData">
         <arguments>
             <argument name="cache" xsi:type="object">Magento\InventorySalesApi\Model\CachePool</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="inventorySalesReconcileReservations" xsi:type="object">Magento\InventorySales\Console\Command\ReconcileReservationsCommand</item>
+            </argument>
         </arguments>
     </type>
 </config>

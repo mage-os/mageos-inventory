@@ -1,0 +1,97 @@
+<?php
+/**
+ * Copyright 2026 Adobe
+ * All Rights Reserved.
+ */
+declare(strict_types=1);
+
+namespace Magento\InventorySales\Model\SourceReservation;
+
+use Magento\Framework\Serialize\SerializerInterface;
+use Magento\InventoryReservationsApi\Model\AppendReservationsInterface;
+use Magento\InventoryReservationsApi\Model\ReservationBuilderInterface;
+use Magento\InventorySales\Model\ResourceModel\SourceReservation\GetOrderReservationLedger;
+use Magento\Sales\Model\Order;
+
+/**
+ * Release the reservation demand a terminal order never compensated. For an
+ * order in a final state (complete/closed/canceled) the expected net reservation
+ * is zero; any remaining negative balance is a missing compensation that pins
+ * salable qty below the truth forever (the daily cleanup only deletes zero-sum
+ * groups). This appends the missing positive release per (stock, sku, source).
+ * It is bounded by the compensation clamp (so it can never over-release even if
+ * a late real event also fires) and idempotent (a second run finds no negative
+ * balance and does nothing).
+ */
+class ReconcileOrderReservations
+{
+    private const TERMINAL_STATES = [Order::STATE_COMPLETE, Order::STATE_CLOSED, Order::STATE_CANCELED];
+
+    /**
+     * @param GetOrderReservationLedger $getOrderReservationLedger
+     * @param AppendReservationsInterface $appendReservations
+     * @param ReservationBuilderInterface $reservationBuilder
+     * @param SerializerInterface $serializer
+     */
+    public function __construct(
+        private readonly GetOrderReservationLedger $getOrderReservationLedger,
+        private readonly AppendReservationsInterface $appendReservations,
+        private readonly ReservationBuilderInterface $reservationBuilder,
+        private readonly SerializerInterface $serializer
+    ) {
+    }
+
+    /**
+     * Reconcile a single order, returning the compensations made (or planned when dry-run).
+     *
+     * @param int $objectId
+     * @param string $objectIncrementId
+     * @param string $orderState
+     * @param bool $dryRun
+     * @return array<int, array{stock_id:int, sku:string, source_code:string|null, quantity:float}>
+     */
+    public function execute(int $objectId, string $objectIncrementId, string $orderState, bool $dryRun = false): array
+    {
+        if ($objectIncrementId === '' || !in_array($orderState, self::TERMINAL_STATES, true)) {
+            return [];
+        }
+
+        $ledger = $this->getOrderReservationLedger->execute($objectIncrementId);
+        if (empty($ledger)) {
+            return [];
+        }
+
+        $metadata = $this->serializer->serialize([
+            'event_type' => 'reconciliation',
+            'object_type' => 'order',
+            'object_id' => (string)$objectId,
+            'object_increment_id' => $objectIncrementId,
+        ]);
+
+        $compensations = [];
+        $reservations = [];
+        foreach ($ledger as $row) {
+            $quantity = -$row['balance'];
+            $compensations[] = [
+                'stock_id' => $row['stock_id'],
+                'sku' => $row['sku'],
+                'source_code' => $row['source_code'],
+                'quantity' => $quantity,
+            ];
+            $reservations[] = $this->reservationBuilder
+                ->setSku($row['sku'])
+                ->setQuantity($quantity)
+                ->setStockId($row['stock_id'])
+                ->setMetadata($metadata)
+                ->setSourceCode($row['source_code'])
+                ->setObjectIncrementId($objectIncrementId)
+                ->build();
+        }
+
+        if (!$dryRun && !empty($reservations)) {
+            $this->appendReservations->execute($reservations);
+        }
+
+        return $compensations;
+    }
+}

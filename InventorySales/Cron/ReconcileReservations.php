@@ -1,0 +1,61 @@
+<?php
+/**
+ * Copyright 2026 Adobe
+ * All Rights Reserved.
+ */
+declare(strict_types=1);
+
+namespace Magento\InventorySales\Cron;
+
+use Magento\InventorySales\Model\SourceReservation\ReconcileReservationsSweep;
+use Magento\InventorySales\Model\SourceReservation\ReconciliationConfig;
+use Psr\Log\LoggerInterface;
+
+/**
+ * Periodic out-of-band reconciliation sweep. Opt-in; the schedule is read from a
+ * configurable cron expression. Bounded per run to keep the job predictable; a
+ * hit limit is logged so a growing backlog is visible instead of silently
+ * truncated.
+ */
+class ReconcileReservations
+{
+    private const BATCH_LIMIT = 500;
+
+    /**
+     * @param ReconciliationConfig $reconciliationConfig
+     * @param ReconcileReservationsSweep $reconcileReservationsSweep
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        private readonly ReconciliationConfig $reconciliationConfig,
+        private readonly ReconcileReservationsSweep $reconcileReservationsSweep,
+        private readonly LoggerInterface $logger
+    ) {
+    }
+
+    /**
+     * Run the sweep when enabled.
+     *
+     * @return void
+     */
+    public function execute(): void
+    {
+        if (!$this->reconciliationConfig->isSweepEnabled()) {
+            return;
+        }
+
+        $result = $this->reconcileReservationsSweep->execute(self::BATCH_LIMIT);
+        if ($result['orders'] > 0) {
+            $this->logger->info(
+                'Source-level reservations: reconciliation sweep healed residual reservations.',
+                ['orders' => $result['orders'], 'compensations' => $result['compensations']]
+            );
+        }
+        if ($result['limit_reached']) {
+            $this->logger->warning(
+                'Source-level reservations: reconciliation sweep hit its batch limit; residues remain.',
+                ['limit' => self::BATCH_LIMIT]
+            );
+        }
+    }
+}

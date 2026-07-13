@@ -54,6 +54,28 @@
                     <comment>Split sales reservations per source so they affect every stock sharing that
                         source. Changing this value requires a full inventory reindex.</comment>
                 </field>
+                <field id="reconcile_cancel_refund" translate="label" type="select" sortOrder="20" showInDefault="1"
+                       showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Reconcile on cancel/refund</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When an order reaches a final state, append any release its cancel/credit-memo
+                        observer failed to write. Bounded so it can never over-release.</comment>
+                </field>
+                <field id="reconcile_sweep_enabled" translate="label" type="select" sortOrder="30" showInDefault="1"
+                       showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Enable reconciliation sweep</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Periodically reconcile terminal orders whose reservations were never released,
+                        including drift from direct database edits or third-party state changes.</comment>
+                </field>
+                <field id="reconcile_sweep_cron" translate="label" type="text" sortOrder="40" showInDefault="1"
+                       showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Reconciliation sweep schedule (cron expression)</label>
+                    <depends>
+                        <field id="reconcile_sweep_enabled">1</field>
+                    </depends>
+                    <comment>Cron expression controlling how often the reconciliation sweep runs.</comment>
+                </field>
             </group>
         </section>
     </system>
