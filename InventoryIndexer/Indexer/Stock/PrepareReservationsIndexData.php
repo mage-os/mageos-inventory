@@ -106,13 +106,7 @@ class PrepareReservationsIndexData
                 'stock_source_link.source_code = reservation.source_code',
                 []
             )
-            ->joinInner(
-                ['source' => $this->resourceConnection->getTableName('inventory_source')],
-                'source.source_code = stock_source_link.source_code',
-                []
-            )
-            ->where('stock_source_link.stock_id = ?', $stockId)
-            ->where('source.enabled = ?', 1);
+            ->where('stock_source_link.stock_id = ?', $stockId);
 
         $unionSelect = $connection->select()->union(
             [$stockScopedSelect, $sourceScopedSelect],
