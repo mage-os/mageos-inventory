@@ -13,21 +13,22 @@ use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
 use Magento\InventorySales\Model\ReservationExecutionInterface;
 use Magento\InventorySales\Model\ResourceModel\AcquireStockItemLocks;
 use Magento\InventorySalesApi\Model\StockByWebsiteIdResolverInterface;
-use Magento\Quote\Api\CartManagementInterface;
-use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Api\Data\PaymentInterface;
+use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\QuoteManagement;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Acquire per-source inventory locks during cart place order to prevent overselling.
+ * Acquire per-source inventory locks around order submission to prevent overselling.
+ *
+ * The lock wraps QuoteManagement::submit rather than placeOrder because submit is
+ * the single point every order-placement path funnels through: front-end and API
+ * checkout reach it via placeOrder -> placeOrderRun -> $this->submit (intercepted,
+ * since $this is the plugin interceptor), and admin order creation calls submit
+ * directly. Locking here therefore also covers the admin/API paths that bypass the
+ * placeOrder entry point.
  */
 class CartManagementPlugin
 {
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $cartRepository;
-
     /**
      * @var GetSkusByProductIdsInterface
      */
@@ -54,7 +55,6 @@ class CartManagementPlugin
     private $reservationExecution;
 
     /**
-     * @param CartRepositoryInterface $cartRepository
      * @param GetSkusByProductIdsInterface $getSkusByProductIds
      * @param AcquireStockItemLocks $acquireStockItemLocks
      * @param StockByWebsiteIdResolverInterface $stockByWebsiteIdResolver
@@ -62,14 +62,12 @@ class CartManagementPlugin
      * @param ReservationExecutionInterface $reservationExecution
      */
     public function __construct(
-        CartRepositoryInterface $cartRepository,
         GetSkusByProductIdsInterface $getSkusByProductIds,
         AcquireStockItemLocks $acquireStockItemLocks,
         StockByWebsiteIdResolverInterface $stockByWebsiteIdResolver,
         StoreManagerInterface $storeManager,
         ReservationExecutionInterface $reservationExecution
     ) {
-        $this->cartRepository = $cartRepository;
         $this->getSkusByProductIds = $getSkusByProductIds;
         $this->acquireStockItemLocks = $acquireStockItemLocks;
         $this->stockByWebsiteIdResolver = $stockByWebsiteIdResolver;
@@ -78,33 +76,27 @@ class CartManagementPlugin
     }
 
     /**
-     * Acquire source-level locks around place order for both guest and customer checkout.
+     * Acquire source-level locks around order submission for every checkout path.
      *
-     * @param CartManagementInterface $subject
+     * @param QuoteManagement $subject
      * @param callable $proceed
-     * @param int $cartId
-     * @param PaymentInterface|null $paymentMethod
-     * @return int Order ID
+     * @param Quote $quote
+     * @param array $orderData
+     * @return \Magento\Sales\Api\Data\OrderInterface
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function aroundPlaceOrder(
-        CartManagementInterface $subject,
+    public function aroundSubmit(
+        QuoteManagement $subject,
         callable $proceed,
-        $cartId,
-        ?PaymentInterface $paymentMethod = null
+        Quote $quote,
+        $orderData = []
     ) {
         if (!$this->reservationExecution->isDeferred()) {
-            return $proceed($cartId, $paymentMethod);
+            return $proceed($quote, $orderData);
         }
 
-        try {
-            $quote = $this->cartRepository->getActive($cartId);
-        } catch (NoSuchEntityException $exception) {
-            // Async order processing can work with an inactive quote after checkout message submission.
-            $quote = $this->cartRepository->get($cartId);
-        }
         $websiteId = (int)$this->storeManager->getStore($quote->getStoreId())->getWebsiteId();
         $stockId = (int)$this->stockByWebsiteIdResolver->execute($websiteId)->getStockId();
 
@@ -113,7 +105,7 @@ class CartManagementPlugin
             $productIds[] = $item->getProductId();
         }
         if (!$productIds) {
-            return $proceed($cartId, $paymentMethod);
+            return $proceed($quote, $orderData);
         }
 
         $skus = $this->getSkusByProductIds->execute($productIds);
@@ -121,7 +113,7 @@ class CartManagementPlugin
         try {
             $this->acquireStockItemLocks->execute(array_map('strval', $skus), $stockId);
 
-            return $proceed($cartId, $paymentMethod);
+            return $proceed($quote, $orderData);
         } finally {
             $this->acquireStockItemLocks->releaseAll();
         }
