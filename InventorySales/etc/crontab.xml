@@ -10,5 +10,8 @@
         <job name="inventory_reconcile_reservations" instance="Magento\InventorySales\Cron\ReconcileReservations" method="execute">
             <config_path>cataloginventory/source_reservations/reconcile_sweep_cron</config_path>
         </job>
+        <job name="inventory_detect_oversell" instance="Magento\InventorySales\Cron\DetectOversell" method="execute">
+            <config_path>cataloginventory/source_reservations/oversell_sweep_cron</config_path>
+        </job>
     </group>
 </config>

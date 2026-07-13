@@ -14,6 +14,9 @@
                 <reconcile_cancel_refund>0</reconcile_cancel_refund>
                 <reconcile_sweep_enabled>0</reconcile_sweep_enabled>
                 <reconcile_sweep_cron>0 * * * *</reconcile_sweep_cron>
+                <oversell_detection_enabled>0</oversell_detection_enabled>
+                <oversell_sweep_enabled>0</oversell_sweep_enabled>
+                <oversell_sweep_cron>0 * * * *</oversell_sweep_cron>
             </source_reservations>
         </cataloginventory>
     </default>

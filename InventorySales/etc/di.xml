@@ -33,6 +33,24 @@
         <plugin name="clamp_compensation_reservations" type="Magento\InventorySales\Plugin\InventoryReservationsApi\ClampCompensationReservationsPlugin" sortOrder="20"/>
         <plugin name="reject_overselling_reservations" type="Magento\InventorySales\Plugin\InventoryReservationsApi\RejectOversellingReservationsPlugin" sortOrder="30"/>
     </type>
+    <type name="Magento\InventoryApi\Api\SourceItemsSaveInterface">
+        <plugin name="detect_oversell_on_source_items_save" type="Magento\InventorySales\Plugin\InventoryApi\DetectOversellOnSourceItemsSavePlugin"/>
+    </type>
+    <type name="Magento\Inventory\Model\SourceItem\Command\DecrementSourceItemQty">
+        <plugin name="detect_oversell_on_decrement_source_item_qty" type="Magento\InventorySales\Plugin\Inventory\DetectOversellOnDecrementSourceItemQtyPlugin"/>
+    </type>
+    <type name="Magento\InventoryCatalog\Model\ResourceModel\BulkInventoryTransfer">
+        <plugin name="detect_oversell_on_bulk_inventory_transfer" type="Magento\InventorySales\Plugin\InventoryCatalog\DetectOversellOnBulkInventoryTransferPlugin"/>
+    </type>
+    <type name="Magento\InventoryCatalog\Model\ResourceModel\TransferInventoryPartially">
+        <plugin name="detect_oversell_on_transfer_inventory_partially" type="Magento\InventorySales\Plugin\InventoryCatalog\DetectOversellOnTransferInventoryPartiallyPlugin"/>
+    </type>
+    <type name="Magento\InventoryCatalog\Model\ResourceModel\BulkSourceAssign">
+        <plugin name="detect_oversell_on_bulk_source_assign" type="Magento\InventorySales\Plugin\InventoryCatalog\DetectOversellOnBulkSourceAssignPlugin"/>
+    </type>
+    <type name="Magento\InventoryCatalog\Model\ResourceModel\BulkSourceUnassign">
+        <plugin name="detect_oversell_on_bulk_source_unassign" type="Magento\InventorySales\Plugin\InventoryCatalog\DetectOversellOnBulkSourceUnassignPlugin"/>
+    </type>
     <!-- Sales Event -->
     <preference for="Magento\InventorySalesApi\Api\Data\ItemToSellInterface" type="Magento\InventorySales\Model\ItemToSell"/>
     <preference for="Magento\InventorySalesApi\Api\Data\SalesEventInterface" type="Magento\InventorySales\Model\SalesEvent"/>
@@ -225,6 +243,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="inventorySalesReconcileReservations" xsi:type="object">Magento\InventorySales\Console\Command\ReconcileReservationsCommand</item>
+                <item name="inventorySalesDetectOversell" xsi:type="object">Magento\InventorySales\Console\Command\DetectOversellCommand</item>
             </argument>
         </arguments>
     </type>

@@ -76,6 +76,29 @@
                     </depends>
                     <comment>Cron expression controlling how often the reconciliation sweep runs.</comment>
                 </field>
+                <field id="oversell_detection_enabled" translate="label" type="select" sortOrder="50" showInDefault="1"
+                       showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Detect oversold stock on stock writes</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Alert (never block) when a stock change leaves a source below the reservations
+                        already committed against it. Physical stock stays authoritative; the oversold
+                        position is logged and raised in the admin inbox for reconciliation.</comment>
+                </field>
+                <field id="oversell_sweep_enabled" translate="label" type="select" sortOrder="60" showInDefault="1"
+                       showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Enable oversold stock sweep</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Periodically scan every source for positions below their committed reservations,
+                        including drift from direct database edits that no stock write can observe.</comment>
+                </field>
+                <field id="oversell_sweep_cron" translate="label" type="text" sortOrder="70" showInDefault="1"
+                       showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Oversold stock sweep schedule (cron expression)</label>
+                    <depends>
+                        <field id="oversell_sweep_enabled">1</field>
+                    </depends>
+                    <comment>Cron expression controlling how often the oversold stock sweep runs.</comment>
+                </field>
             </group>
         </section>
     </system>
