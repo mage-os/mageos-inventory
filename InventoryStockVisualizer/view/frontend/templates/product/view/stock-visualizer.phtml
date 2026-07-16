@@ -26,10 +26,11 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
                     <span class="sv-word"><?= $escaper->escapeHtml($block->levelLabel($aggregateLevel)) ?></span>
                 </span>
             <?php else: ?>
-                <span class="sv-status" data-sv-status>
+                <?php $status = $block->getQuantityStatusLevel(); ?>
+                <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($status)) ?>" data-sv-status>
                     <span class="sv-dot" aria-hidden="true"></span>
-                    <span class="sv-word"><span class="sv-skel sv-skel-word" aria-hidden="true"></span></span>
-                    <span class="sv-count" data-sv-agg></span>
+                    <span class="sv-word"><?= $escaper->escapeHtml($block->levelLabel($status)) ?></span>
+                    <span class="sv-count" data-sv-agg><span class="sv-skel" aria-hidden="true"></span></span>
                 </span>
             <?php endif; ?>
         </div>

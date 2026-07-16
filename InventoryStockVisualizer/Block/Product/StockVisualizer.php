@@ -126,6 +126,20 @@ class StockVisualizer extends Template implements IdentityInterface
     }
 
     /**
+     * Server-rendered aggregate status for quantity mode: in stock or out of stock.
+     *
+     * The status is a coarse salability fact already cached with the product page, so it
+     * is baked into the HTML; only the exact number is fetched over AJAX. The widget
+     * reconciles it if a live quantity ever contradicts the cached status.
+     *
+     * @return string
+     */
+    public function getQuantityStatusLevel(): string
+    {
+        return $this->getView()->getSalableQty() > 0.0 ? Level::HIGH : Level::OUT;
+    }
+
+    /**
      * Per-source level rows (level mode), honouring hide-empty.
      *
      * @return array<int, array{name: string, level: string}>

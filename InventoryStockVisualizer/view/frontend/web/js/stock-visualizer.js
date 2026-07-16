@@ -80,27 +80,28 @@ define([
         },
 
         /**
-         * Project the fetched quantities onto the server-rendered scaffold: the
-         * aggregate status pill, the per-source values and the share-of-total meters.
+         * Fill the volatile numbers onto the server-rendered scaffold and reconcile the
+         * cached status pill with the live salable quantity. The in-stock/out-of-stock
+         * word is rendered by PHP and cached; on a failed fetch it is left untouched.
          *
          * @param {Object|null} data
          * @private
          */
         _fill: function (data) {
-            var self = this,
-                status = this.element.find('[data-sv-status]');
+            var status = this.element.find('[data-sv-status]');
 
             if (!data) {
-                status.removeClass('level-high level-out').find('.sv-word').text($t('n/a'));
-                status.find('[data-sv-agg]').text('');
-                this.element.find('[data-sv-value]').text($t('n/a'));
+                status.find('[data-sv-agg]').empty();
+                this.element.find('[data-sv-value]').empty();
 
                 return;
             }
 
+            var salable = data.qty > 0;
+
             status.removeClass('level-high level-out')
-                .addClass(data.qty > 0 ? 'level-high' : 'level-out');
-            status.find('.sv-word').text(data.qty > 0 ? $t('In stock') : $t('Out of stock'));
+                .addClass(salable ? 'level-high' : 'level-out');
+            status.find('.sv-word').text(salable ? $t('In stock') : $t('Out of stock'));
             status.find('[data-sv-agg]').text(this._formatQty(data.qty));
 
             if (this.options.scope === 'per_source') {
