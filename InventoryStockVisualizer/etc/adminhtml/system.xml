@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Adobe
+ * All Rights Reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="cataloginventory">
+            <group id="stock_visualizer" translate="label" type="text" sortOrder="800" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Storefront Stock Visualizer</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Enable stock visualizer</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Show an availability panel on the product page.</comment>
+                </field>
+                <field id="display_type" translate="label" type="select" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Display type</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\DisplayType</source_model>
+                    <comment>Level shows a semaphore and is rendered server-side (no quantity exposed, no AJAX);
+                        exact quantity shows the number and is fetched over a cacheable AJAX request.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="scope" translate="label" type="select" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Display scope</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\Scope</source_model>
+                    <comment>Aggregate shows a single availability; per source breaks it down by source.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="mode" translate="label" type="select" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Delivery mode (quantity only)</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\Mode</source_model>
+                    <comment>On demand fetches the quantity on a button click; instant fetches it on page load.
+                        Level display is always rendered on page load.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">quantity</field>
+                    </depends>
+                </field>
+                <field id="ttl" translate="label" type="text" sortOrder="50" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Cache TTL (seconds, quantity only)</label>
+                    <validate>validate-digits</validate>
+                    <comment>Public-cache lifetime for the quantity fragment. 0 relies on tag purge only.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">quantity</field>
+                    </depends>
+                </field>
+                <field id="level_basis" translate="label" type="select" sortOrder="60" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Level basis</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\LevelBasis</source_model>
+                    <comment>By quantity compares the salable quantity to the thresholds; by percentage compares
+                        the quantity to a reference (per-product full quantity, or total on-hand).</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">level</field>
+                    </depends>
+                </field>
+                <field id="level_high" translate="label" type="text" sortOrder="70" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>High level threshold</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                    <comment>Above this the level is high (green). In percentage basis this is a percent.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">level</field>
+                    </depends>
+                </field>
+                <field id="level_low" translate="label" type="text" sortOrder="80" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Low level threshold</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                    <comment>Above this (and at or below High) the level is medium (amber); at or below it is
+                        low (red). In percentage basis this is a percent.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">level</field>
+                    </depends>
+                </field>
+                <field id="show_source_labels" translate="label" type="select" sortOrder="90" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Show source labels</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Display the source name for each per-source row.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="scope">per_source</field>
+                    </depends>
+                </field>
+                <field id="hide_empty_sources" translate="label" type="select" sortOrder="100" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Hide empty sources</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Omit out-of-stock sources from the per-source breakdown.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="scope">per_source</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

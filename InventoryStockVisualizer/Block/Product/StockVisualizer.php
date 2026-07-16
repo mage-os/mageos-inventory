@@ -1,0 +1,302 @@
+<?php
+/**
+ * Copyright 2026 Adobe
+ * All Rights Reserved.
+ */
+declare(strict_types=1);
+
+namespace Magento\InventoryStockVisualizer\Block\Product;
+
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Framework\DataObject\IdentityInterface;
+use Magento\Framework\Registry;
+use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
+use Magento\InventoryStockVisualizer\Api\GetStockViewInterface;
+use Magento\InventoryStockVisualizer\Model\Cache\CacheTag;
+use Magento\InventoryStockVisualizer\Model\Config;
+use Magento\InventoryStockVisualizer\Model\DisplayConfig;
+use Magento\InventoryStockVisualizer\Model\GetEnabledSources;
+use Magento\InventoryStockVisualizer\Model\Level;
+use Magento\InventoryStockVisualizer\Model\LevelResolver;
+use Magento\InventoryStockVisualizer\Model\ResolveDisplayConfig;
+
+/**
+ * Product-page "Availability" panel.
+ */
+class StockVisualizer extends Template implements IdentityInterface
+{
+    /**
+     * @var DisplayConfig|null
+     */
+    private $displayConfig;
+
+    /**
+     * @var int|null
+     */
+    private $stockId;
+
+    /**
+     * @var bool
+     */
+    private $stockResolved = false;
+
+    /**
+     * @param Context $context
+     * @param Registry $registry
+     * @param Config $config
+     * @param Json $json
+     * @param ResolveDisplayConfig $resolveDisplayConfig
+     * @param GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
+     * @param GetStockViewInterface $getStockView
+     * @param GetEnabledSources $getEnabledSources
+     * @param LevelResolver $levelResolver
+     * @param array $data
+     */
+    public function __construct(
+        Context $context,
+        private readonly Registry $registry,
+        private readonly Config $config,
+        private readonly Json $json,
+        private readonly ResolveDisplayConfig $resolveDisplayConfig,
+        private readonly GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite,
+        private readonly GetStockViewInterface $getStockView,
+        private readonly GetEnabledSources $getEnabledSources,
+        private readonly LevelResolver $levelResolver,
+        array $data = []
+    ) {
+        parent::__construct($context, $data);
+    }
+
+    /**
+     * Whether the panel should render on the current product page.
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->config->isEnabled() && $this->getProduct() !== null && $this->getStockId() !== null;
+    }
+
+    /**
+     * Whether the panel shows a coarse level (semaphore) instead of the number.
+     *
+     * @return bool
+     */
+    public function isLevelMode(): bool
+    {
+        return $this->getDisplayConfig()->isLevel();
+    }
+
+    /**
+     * Whether the panel breaks availability down per source.
+     *
+     * @return bool
+     */
+    public function isPerSource(): bool
+    {
+        return $this->config->getScope() === Config::SCOPE_PER_SOURCE;
+    }
+
+    /**
+     * Panel heading.
+     *
+     * @return string
+     */
+    public function getPanelTitle(): string
+    {
+        return (string) __('Availability');
+    }
+
+    /**
+     * Aggregate level (level mode).
+     *
+     * @return string
+     */
+    public function getAggregateLevel(): string
+    {
+        return $this->levelResolver->resolve($this->getView()->getSalableQty(), $this->getDisplayConfig());
+    }
+
+    /**
+     * Per-source level rows (level mode), honouring hide-empty.
+     *
+     * @return array<int, array{name: string, level: string}>
+     */
+    public function getLevelSources(): array
+    {
+        $hideEmpty = $this->config->hideEmptySources();
+        $rows = [];
+        foreach ($this->getView()->getSources() as $source) {
+            $qty = $source->getQty();
+            if ($hideEmpty && $qty <= 0.0) {
+                continue;
+            }
+            $rows[] = [
+                'name' => (string) $source->getName(),
+                'level' => $this->levelResolver->resolve($qty, $this->getDisplayConfig()),
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Per-source scaffold rows (quantity mode) - labels only, numbers arrive over AJAX.
+     *
+     * @return array<int, array{code: string, name: string}>
+     */
+    public function getScaffoldSources(): array
+    {
+        return $this->getEnabledSources->execute((int) $this->getStockId());
+    }
+
+    /**
+     * Whether per-source labels are shown.
+     *
+     * @return bool
+     */
+    public function showSourceLabels(): bool
+    {
+        return $this->config->showSourceLabels();
+    }
+
+    /**
+     * JSON widget configuration for quantity mode.
+     *
+     * @return string
+     */
+    public function getWidgetConfig(): string
+    {
+        $product = $this->getProduct();
+
+        return $this->json->serialize([
+            'mode' => $this->config->getMode(),
+            'scope' => $this->config->getScope(),
+            'sku' => $product ? (string) $product->getSku() : '',
+            'productId' => $product ? (int) $product->getId() : 0,
+            'stock' => (int) $this->getStockId(),
+            'hideEmptySources' => $this->config->hideEmptySources(),
+            'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
+        ]);
+    }
+
+    /**
+     * CSS modifier class for a level.
+     *
+     * @param string $level
+     * @return string
+     */
+    public function levelClass(string $level): string
+    {
+        return 'level-' . $level;
+    }
+
+    /**
+     * Availability-bar fill percentage for a level (level mode).
+     *
+     * @param string $level
+     * @return int
+     */
+    public function levelFill(string $level): int
+    {
+        return $this->levelResolver->fillPercent($level);
+    }
+
+    /**
+     * Human-readable label for a level.
+     *
+     * @param string $level
+     * @return string
+     */
+    public function levelLabel(string $level): string
+    {
+        switch ($level) {
+            case Level::HIGH:
+                return (string) __('In stock');
+            case Level::MEDIUM:
+                return (string) __('Limited availability');
+            case Level::LOW:
+                return (string) __('Low stock');
+            default:
+                return (string) __('Out of stock');
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIdentities(): array
+    {
+        if (!$this->isEnabled() || !$this->isLevelMode()) {
+            return [];
+        }
+
+        return [CacheTag::CACHE_TAG . '_' . (int) $this->getProduct()->getId()];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function _toHtml()
+    {
+        return $this->isEnabled() ? parent::_toHtml() : '';
+    }
+
+    /**
+     * Current product from the registry, if any.
+     *
+     * @return ProductInterface|null
+     */
+    private function getProduct(): ?ProductInterface
+    {
+        $product = $this->registry->registry('current_product');
+
+        return $product instanceof ProductInterface ? $product : null;
+    }
+
+    /**
+     * Stock id for the current website, or null when it cannot be resolved.
+     *
+     * @return int|null
+     */
+    private function getStockId(): ?int
+    {
+        if (!$this->stockResolved) {
+            $this->stockResolved = true;
+            try {
+                $this->stockId = (int) $this->getStockIdForCurrentWebsite->execute();
+            } catch (\Throwable $e) {
+                $this->stockId = null;
+            }
+        }
+
+        return $this->stockId;
+    }
+
+    /**
+     * Effective display config (per-product override merged over store defaults).
+     *
+     * @return DisplayConfig
+     */
+    private function getDisplayConfig(): DisplayConfig
+    {
+        if ($this->displayConfig === null) {
+            $this->displayConfig = $this->resolveDisplayConfig->forProduct($this->getProduct());
+        }
+
+        return $this->displayConfig;
+    }
+
+    /**
+     * Availability quantities for the current product/stock (level mode).
+     *
+     * @return \Magento\InventoryStockVisualizer\Api\Data\StockViewInterface
+     */
+    private function getView()
+    {
+        return $this->getStockView->execute((string) $this->getProduct()->getSku(), (int) $this->getStockId());
+    }
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Adobe
+ * All Rights Reserved.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="product.info.main">
+            <block class="Magento\InventoryStockVisualizer\Block\Product\StockVisualizer"
+                   name="product.info.stock.visualizer"
+                   template="Magento_InventoryStockVisualizer::product/view/stock-visualizer.phtml"
+                   after="product.info.price"/>
+        </referenceContainer>
+        <referenceBlock name="product.info.simple" remove="true"/>
+        <referenceBlock name="product.info.virtual" remove="true"/>
+        <referenceBlock name="product.info.grouped.stock" remove="true"/>
+    </body>
+</page>

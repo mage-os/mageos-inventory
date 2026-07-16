@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Adobe
+ * All Rights Reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="Magento_InventoryStockVisualizer">
+        <sequence>
+            <module name="Magento_InventorySalesApi"/>
+            <module name="Magento_InventorySales"/>
+            <module name="Magento_InventoryReservationsApi"/>
+            <module name="Magento_InventoryConfigurationApi"/>
+            <module name="Magento_InventoryCatalog"/>
+            <module name="Magento_InventoryCatalogApi"/>
+            <module name="Magento_InventoryIndexer"/>
+            <module name="Magento_Catalog"/>
+        </sequence>
+    </module>
+</config>

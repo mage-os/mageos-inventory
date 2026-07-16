@@ -1,0 +1,76 @@
+<?php
+/**
+ * Copyright 2026 Adobe
+ * All Rights Reserved.
+ */
+
+/** @var \Magento\InventoryStockVisualizer\Block\Product\StockVisualizer $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+$pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"'
+    . ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+    . '<path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+?>
+<?php if ($block->isEnabled()): ?>
+    <?php $isLevel = $block->isLevelMode(); ?>
+    <div class="stock-visualizer sva <?= $isLevel ? 'sv-mode-level' : 'sv-mode-quantity' ?>"
+        <?php if (!$isLevel): ?>
+            data-mage-init='{"stockVisualizer": <?= /* @noEscape */ $block->getWidgetConfig() ?>}'
+        <?php endif; ?>>
+        <div class="sva-head">
+            <span class="sva-title"><?= $escaper->escapeHtml($block->getPanelTitle()) ?></span>
+            <?php if ($isLevel): ?>
+                <?php $aggregateLevel = $block->getAggregateLevel(); ?>
+                <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($aggregateLevel)) ?>">
+                    <span class="sv-dot" aria-hidden="true"></span>
+                    <span class="sv-word"><?= $escaper->escapeHtml($block->levelLabel($aggregateLevel)) ?></span>
+                </span>
+            <?php else: ?>
+                <span class="sv-status" data-sv-status>
+                    <span class="sv-dot" aria-hidden="true"></span>
+                    <span class="sv-word"><span class="sv-skel sv-skel-word" aria-hidden="true"></span></span>
+                    <span class="sv-count" data-sv-agg></span>
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($block->isPerSource()): ?>
+            <ul class="sva-body sv-sources">
+                <?php if ($isLevel): ?>
+                    <?php foreach ($block->getLevelSources() as $row): ?>
+                        <?php $level = $row['level']; ?>
+                        <li class="sv-src <?= $escaper->escapeHtmlAttr($block->levelClass($level)) ?>">
+                            <div class="sv-src-top">
+                                <?php if ($block->showSourceLabels()): ?>
+                                    <span class="sv-name">
+                                        <?= /* @noEscape */ $pin ?>
+                                        <?= $escaper->escapeHtml($row['name']) ?>
+                                    </span>
+                                <?php endif; ?>
+                                <span class="sv-lvl"><?= $escaper->escapeHtml($block->levelLabel($level)) ?></span>
+                            </div>
+                            <span class="sv-meter"><i style="width: <?= (int) $block->levelFill($level) ?>%"></i></span>
+                        </li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <?php foreach ($block->getScaffoldSources() as $row): ?>
+                        <li class="sv-src" data-sv-source="<?= $escaper->escapeHtmlAttr($row['code']) ?>">
+                            <div class="sv-src-top">
+                                <?php if ($block->showSourceLabels()): ?>
+                                    <span class="sv-name">
+                                        <?= /* @noEscape */ $pin ?>
+                                        <?= $escaper->escapeHtml($row['name']) ?>
+                                    </span>
+                                <?php endif; ?>
+                                <span class="sv-val" data-sv-value>
+                                    <span class="sv-skel" aria-hidden="true"></span>
+                                </span>
+                            </div>
+                            <span class="sv-meter"><i data-sv-meter style="width: 0"></i></span>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>
