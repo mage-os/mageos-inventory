@@ -13,6 +13,7 @@ use Magento\InventoryStockVisualizer\Api\GetStockViewInterface;
 use Magento\InventoryStockVisualizer\Model\Cache\FlushStockVisualizerCache;
 use Magento\InventoryStockVisualizer\Model\Cache\PurgeOnReservations;
 use Magento\InventoryStockVisualizer\Model\Config;
+use Magento\InventoryStockVisualizer\Model\Data\SourceView;
 use Magento\InventoryStockVisualizer\Model\Data\StockView;
 use Magento\InventoryStockVisualizer\Model\DisplayConfig;
 use Magento\InventoryStockVisualizer\Model\LevelResolver;
@@ -141,6 +142,23 @@ class PurgeOnReservationsTest extends TestCase
     }
 
     /**
+     * Level display purges when a per-source level crosses even if the aggregate stays put.
+     *
+     * @return void
+     */
+    public function testLevelModePurgesWhenPerSourceLevelChanges(): void
+    {
+        $this->config->method('isEnabled')->willReturn(true);
+        $this->resolveDisplayConfig->method('forSku')->willReturn($this->levelConfig());
+        $view = new StockView(self::SKU, self::STOCK_ID, 8.0, true, [new SourceView('slr_a', 3.0, 'A')]);
+        $this->getStockView->method('execute')->willReturn($view);
+        $this->getProductIdsBySkus->method('execute')->willReturn([self::SKU => self::PRODUCT_ID]);
+        $this->flush->expects($this->once())->method('execute')->with([self::PRODUCT_ID]);
+
+        $this->model->execute([$this->sourceReservation(-1.0, 'slr_a')]);
+    }
+
+    /**
      * @return DisplayConfig
      */
     private function levelConfig(): DisplayConfig
@@ -162,11 +180,31 @@ class PurgeOnReservationsTest extends TestCase
      */
     private function reservation(float $quantity)
     {
+        return $this->buildReservation($quantity, null);
+    }
+
+    /**
+     * @param float $quantity
+     * @param string $sourceCode
+     * @return ReservationInterface|MockObject
+     */
+    private function sourceReservation(float $quantity, string $sourceCode)
+    {
+        return $this->buildReservation($quantity, $sourceCode);
+    }
+
+    /**
+     * @param float $quantity
+     * @param string|null $sourceCode
+     * @return ReservationInterface|MockObject
+     */
+    private function buildReservation(float $quantity, ?string $sourceCode)
+    {
         $reservation = $this->createMock(ReservationInterface::class);
         $reservation->method('getQuantity')->willReturn($quantity);
         $reservation->method('getStockId')->willReturn(self::STOCK_ID);
         $reservation->method('getSku')->willReturn(self::SKU);
-        $reservation->method('getSourceCode')->willReturn(null);
+        $reservation->method('getSourceCode')->willReturn($sourceCode);
 
         return $reservation;
     }

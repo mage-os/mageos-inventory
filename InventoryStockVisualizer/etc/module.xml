@@ -11,11 +11,14 @@
             <module name="Magento_InventorySalesApi"/>
             <module name="Magento_InventorySales"/>
             <module name="Magento_InventoryReservationsApi"/>
-            <module name="Magento_InventoryConfigurationApi"/>
             <module name="Magento_InventoryCatalog"/>
             <module name="Magento_InventoryCatalogApi"/>
             <module name="Magento_InventoryIndexer"/>
             <module name="Magento_Catalog"/>
+            <module name="Magento_Eav"/>
+            <module name="Magento_Store"/>
+            <module name="Magento_Config"/>
+            <module name="Magento_PageCache"/>
         </sequence>
     </module>
 </config>

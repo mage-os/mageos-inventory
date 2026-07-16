@@ -15,7 +15,7 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
     <?php $isLevel = $block->isLevelMode(); ?>
     <div class="stock-visualizer sva <?= $isLevel ? 'sv-mode-level' : 'sv-mode-quantity' ?>"
         <?php if (!$isLevel): ?>
-            data-mage-init='{"stockVisualizer": <?= /* @noEscape */ $block->getWidgetConfig() ?>}'
+            data-mage-init='<?= $escaper->escapeHtmlAttr($block->getWidgetConfig()) ?>'
         <?php endif; ?>>
         <div class="sva-head">
             <span class="sva-title"><?= $escaper->escapeHtml($block->getPanelTitle()) ?></span>

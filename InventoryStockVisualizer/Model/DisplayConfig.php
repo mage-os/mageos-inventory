@@ -10,6 +10,8 @@ namespace Magento\InventoryStockVisualizer\Model;
 /**
  * Effective display configuration for a product, after merging the per-product
  * override over the store-scoped defaults.
+ *
+ * @api
  */
 class DisplayConfig
 {
@@ -30,6 +32,8 @@ class DisplayConfig
     }
 
     /**
+     * Display strategy, one of Config::DISPLAY_TYPE_*.
+     *
      * @return string
      */
     public function getDisplayType(): string
@@ -38,6 +42,8 @@ class DisplayConfig
     }
 
     /**
+     * Whether the coarse level (semaphore) strategy is in effect.
+     *
      * @return bool
      */
     public function isLevel(): bool
@@ -46,6 +52,8 @@ class DisplayConfig
     }
 
     /**
+     * Level threshold basis, one of Config::LEVEL_BASIS_*.
+     *
      * @return string
      */
     public function getLevelBasis(): string
@@ -54,6 +62,8 @@ class DisplayConfig
     }
 
     /**
+     * Threshold above which the level is high.
+     *
      * @return float
      */
     public function getLevelHigh(): float
@@ -62,6 +72,8 @@ class DisplayConfig
     }
 
     /**
+     * Threshold above which the level is medium.
+     *
      * @return float
      */
     public function getLevelLow(): float
@@ -70,6 +82,8 @@ class DisplayConfig
     }
 
     /**
+     * Percentage-basis reference (100% quantity), or null when not configured.
+     *
      * @return float|null
      */
     public function getFullQty(): ?float

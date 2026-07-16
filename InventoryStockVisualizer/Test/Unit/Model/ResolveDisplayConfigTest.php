@@ -7,8 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\InventoryStockVisualizer\Test\Unit\Model;
 
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
+use Magento\Framework\Api\AttributeInterface;
 use Magento\InventoryStockVisualizer\Model\Config;
 use Magento\InventoryStockVisualizer\Model\Product\StockVisualizerAttributes as Attr;
 use Magento\InventoryStockVisualizer\Model\ResolveDisplayConfig;
@@ -69,13 +70,13 @@ class ResolveDisplayConfigTest extends TestCase
      */
     public function testProductOverrideWins(): void
     {
-        $product = $this->createMock(Product::class);
-        $product->method('getData')->willReturnMap([
-            [Attr::DISPLAY_TYPE, Config::DISPLAY_TYPE_QUANTITY],
-            [Attr::LEVEL_BASIS, ''],
-            [Attr::LEVEL_HIGH, '5'],
+        $product = $this->createMock(ProductInterface::class);
+        $product->method('getCustomAttribute')->willReturnMap([
+            [Attr::DISPLAY_TYPE, $this->attribute(Config::DISPLAY_TYPE_QUANTITY)],
+            [Attr::LEVEL_BASIS, $this->attribute('')],
+            [Attr::LEVEL_HIGH, $this->attribute('5')],
             [Attr::LEVEL_LOW, null],
-            [Attr::FULL_QTY, '40'],
+            [Attr::FULL_QTY, $this->attribute('40')],
         ]);
 
         $displayConfig = $this->model->forProduct($product);
@@ -85,5 +86,19 @@ class ResolveDisplayConfigTest extends TestCase
         $this->assertSame(5.0, $displayConfig->getLevelHigh());
         $this->assertSame(3.0, $displayConfig->getLevelLow());
         $this->assertSame(40.0, $displayConfig->getFullQty());
+    }
+
+    /**
+     * Build a custom-attribute stub carrying a value.
+     *
+     * @param mixed $value
+     * @return AttributeInterface|MockObject
+     */
+    private function attribute($value)
+    {
+        $attribute = $this->createMock(AttributeInterface::class);
+        $attribute->method('getValue')->willReturn($value);
+
+        return $attribute;
     }
 }

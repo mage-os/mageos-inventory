@@ -17,6 +17,8 @@ class LevelBasis extends AbstractSource
 {
     /**
      * @inheritdoc
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getAllOptions(): array
     {

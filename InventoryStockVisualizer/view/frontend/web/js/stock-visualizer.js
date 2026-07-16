@@ -15,8 +15,6 @@ define([
             mode: 'on_demand',
             scope: 'aggregate',
             sku: '',
-            productId: 0,
-            stock: 0,
             hideEmptySources: true,
             ajaxUrl: ''
         },
@@ -59,6 +57,7 @@ define([
         /**
          * Fetch the minimal quantity payload. `cache:true` avoids the global
          * ajaxSetup({cache:false}) buster so the shared cache can serve repeats.
+         * Only the SKU is sent; the server resolves stock and product id from context.
          *
          * @private
          */
@@ -71,9 +70,7 @@ define([
                 dataType: 'json',
                 cache: true,
                 data: {
-                    sku: this.options.sku,
-                    product_id: this.options.productId,
-                    stock: this.options.stock
+                    sku: this.options.sku
                 }
             }).done(function (response) {
                 self._fill(response && response.data ? response.data : null);

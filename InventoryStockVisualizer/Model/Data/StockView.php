@@ -44,7 +44,7 @@ class StockView implements StockViewInterface
      * @param int $stockId
      * @param float $salableQty
      * @param bool $sourceReservationsEnabled
-     * @param array $sources
+     * @param \Magento\InventoryStockVisualizer\Api\Data\SourceViewInterface[] $sources
      */
     public function __construct(
         string $sku,

@@ -44,6 +44,9 @@ class SalabilityChangeProcessor implements CompositeProductProcessorInterface
 
     /**
      * @inheritdoc
+     *
+     * @param array<int, array<string, mixed>> $saleableStatusesBeforeSync
+     * @param array<int, array<string, mixed>> $saleableStatusesAfterSync
      */
     public function process(array $saleableStatusesBeforeSync, array $saleableStatusesAfterSync): void
     {

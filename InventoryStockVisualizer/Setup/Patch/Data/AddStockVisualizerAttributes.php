@@ -36,7 +36,7 @@ class AddStockVisualizerAttributes implements DataPatchInterface
     /**
      * @inheritdoc
      */
-    public function apply(): void
+    public function apply()
     {
         $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
@@ -88,6 +88,8 @@ class AddStockVisualizerAttributes implements DataPatchInterface
                 'sort_order' => $meta['sort'],
             ]);
         }
+
+        return $this;
     }
 
     /**

@@ -9,27 +9,31 @@ namespace Magento\InventoryStockVisualizer\Model;
 
 /**
  * Map a quantity to a coarse availability level using the effective display config.
+ *
+ * @api
  */
 class LevelResolver
 {
     /**
      * Resolve the availability level for a quantity.
      *
+     * Percentage basis uses the per-product full quantity as the 100% reference; when it
+     * is not configured the resolver degrades to raw-quantity thresholds.
+     *
      * @param float $qty
      * @param DisplayConfig $config
-     * @param float|null $reference on-hand fallback for the percentage basis
      * @return string one of the Level::* constants
      */
-    public function resolve(float $qty, DisplayConfig $config, ?float $reference = null): string
+    public function resolve(float $qty, DisplayConfig $config): string
     {
         if ($qty <= 0.0) {
             return Level::OUT;
         }
 
         if ($config->getLevelBasis() === Config::LEVEL_BASIS_PERCENTAGE) {
-            $ref = $config->getFullQty() ?: $reference;
-            if ($ref !== null && $ref > 0.0) {
-                return $this->byThresholds($qty / $ref * 100.0, $config->getLevelHigh(), $config->getLevelLow());
+            $reference = $config->getFullQty();
+            if ($reference !== null && $reference > 0.0) {
+                return $this->byThresholds($qty / $reference * 100.0, $config->getLevelHigh(), $config->getLevelLow());
             }
         }
 
@@ -57,6 +61,8 @@ class LevelResolver
     }
 
     /**
+     * Classify a value against the high/low thresholds into a level.
+     *
      * @param float $value
      * @param float $high
      * @param float $low

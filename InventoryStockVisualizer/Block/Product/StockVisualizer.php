@@ -44,6 +44,11 @@ class StockVisualizer extends Template implements IdentityInterface
     private $stockResolved = false;
 
     /**
+     * @var \Magento\InventoryStockVisualizer\Api\Data\StockViewInterface|null
+     */
+    private $view;
+
+    /**
      * @param Context $context
      * @param Registry $registry
      * @param Config $config
@@ -53,7 +58,7 @@ class StockVisualizer extends Template implements IdentityInterface
      * @param GetStockViewInterface $getStockView
      * @param GetEnabledSources $getEnabledSources
      * @param LevelResolver $levelResolver
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function __construct(
         Context $context,
@@ -164,7 +169,7 @@ class StockVisualizer extends Template implements IdentityInterface
     }
 
     /**
-     * JSON widget configuration for quantity mode.
+     * Full data-mage-init payload for quantity mode (keyed by the widget name).
      *
      * @return string
      */
@@ -173,13 +178,13 @@ class StockVisualizer extends Template implements IdentityInterface
         $product = $this->getProduct();
 
         return $this->json->serialize([
-            'mode' => $this->config->getMode(),
-            'scope' => $this->config->getScope(),
-            'sku' => $product ? (string) $product->getSku() : '',
-            'productId' => $product ? (int) $product->getId() : 0,
-            'stock' => (int) $this->getStockId(),
-            'hideEmptySources' => $this->config->hideEmptySources(),
-            'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
+            'stockVisualizer' => [
+                'mode' => $this->config->getMode(),
+                'scope' => $this->config->getScope(),
+                'sku' => $product ? (string) $product->getSku() : '',
+                'hideEmptySources' => $this->config->hideEmptySources(),
+                'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
+            ],
         ]);
     }
 
@@ -291,12 +296,19 @@ class StockVisualizer extends Template implements IdentityInterface
     }
 
     /**
-     * Availability quantities for the current product/stock (level mode).
+     * Availability quantities for the current product/stock (level mode), memoized per render.
      *
      * @return \Magento\InventoryStockVisualizer\Api\Data\StockViewInterface
      */
-    private function getView()
+    private function getView(): \Magento\InventoryStockVisualizer\Api\Data\StockViewInterface
     {
-        return $this->getStockView->execute((string) $this->getProduct()->getSku(), (int) $this->getStockId());
+        if ($this->view === null) {
+            $this->view = $this->getStockView->execute(
+                (string) $this->getProduct()->getSku(),
+                (int) $this->getStockId()
+            );
+        }
+
+        return $this->view;
     }
 }

@@ -35,7 +35,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: @indent__s;
+            flex-wrap: wrap;
+            gap: @indent__xs @indent__s;
             padding: @indent__xs @indent__s;
             background: @sv__head-bg;
             border-bottom: 1px solid @sv__border;
@@ -52,6 +53,7 @@
         .sv-status {
             display: inline-flex;
             align-items: center;
+            flex: 0 0 auto;
             gap: 7px;
             padding: 3px 10px;
             border-radius: 999px;
@@ -117,15 +119,23 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: @indent__s;
+            flex-wrap: wrap;
+            gap: 2px @indent__s;
             margin-bottom: 6px;
         }
 
         .sv-name {
             display: inline-flex;
             align-items: center;
+            flex: 1 1 auto;
             gap: 7px;
             min-width: 0;
+        }
+
+        .sv-val,
+        .sv-lvl {
+            flex: 0 0 auto;
+            white-space: nowrap;
         }
 
         .sv-pin {

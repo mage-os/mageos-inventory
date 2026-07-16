@@ -63,7 +63,7 @@
                     <label>Level basis</label>
                     <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\LevelBasis</source_model>
                     <comment>By quantity compares the salable quantity to the thresholds; by percentage compares
-                        the quantity to a reference (per-product full quantity, or total on-hand).</comment>
+                        it to the per-product full quantity (falls back to quantity thresholds when unset).</comment>
                     <depends>
                         <field id="enabled">1</field>
                         <field id="display_type">level</field>

@@ -17,6 +17,8 @@ use Magento\InventoryStockVisualizer\Api\Data\StockViewInterface;
 interface GetStockViewInterface
 {
     /**
+     * Build the availability view (salable quantity and per-source breakdown) for a SKU on a stock.
+     *
      * @param string $sku
      * @param int $stockId
      * @return \Magento\InventoryStockVisualizer\Api\Data\StockViewInterface

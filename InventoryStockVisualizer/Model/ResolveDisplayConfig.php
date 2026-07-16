@@ -60,6 +60,8 @@ class ResolveDisplayConfig
     }
 
     /**
+     * Merge the per-product override (when present) over the store-scoped defaults.
+     *
      * @param ProductInterface|null $product
      * @param int|string|null $store
      * @return DisplayConfig
@@ -73,26 +75,46 @@ class ResolveDisplayConfig
         $fullQty = null;
 
         if ($product !== null) {
-            $displayType = $this->override((string) $product->getData(Attr::DISPLAY_TYPE)) ?? $displayType;
-            $basis = $this->override((string) $product->getData(Attr::LEVEL_BASIS)) ?? $basis;
-            $high = $this->overrideFloat($product->getData(Attr::LEVEL_HIGH)) ?? $high;
-            $low = $this->overrideFloat($product->getData(Attr::LEVEL_LOW)) ?? $low;
-            $fullQty = $this->overrideFloat($product->getData(Attr::FULL_QTY));
+            $displayType = $this->overrideString($this->attributeValue($product, Attr::DISPLAY_TYPE)) ?? $displayType;
+            $basis = $this->overrideString($this->attributeValue($product, Attr::LEVEL_BASIS)) ?? $basis;
+            $high = $this->overrideFloat($this->attributeValue($product, Attr::LEVEL_HIGH)) ?? $high;
+            $low = $this->overrideFloat($this->attributeValue($product, Attr::LEVEL_LOW)) ?? $low;
+            $fullQty = $this->overrideFloat($this->attributeValue($product, Attr::FULL_QTY));
         }
 
         return new DisplayConfig($displayType, $basis, $high, $low, $fullQty);
     }
 
     /**
-     * @param string $value
+     * Read a custom (EAV) attribute value from a product, or null when it is not set.
+     *
+     * @param ProductInterface $product
+     * @param string $code
+     * @return mixed
+     */
+    private function attributeValue(ProductInterface $product, string $code)
+    {
+        $attribute = $product->getCustomAttribute($code);
+
+        return $attribute !== null ? $attribute->getValue() : null;
+    }
+
+    /**
+     * Normalise a raw override value to a non-empty string, or null to fall through.
+     *
+     * @param mixed $value
      * @return string|null
      */
-    private function override(string $value): ?string
+    private function overrideString($value): ?string
     {
+        $value = $value === null ? '' : (string) $value;
+
         return $value !== '' ? $value : null;
     }
 
     /**
+     * Normalise a raw override value to a float, or null to fall through.
+     *
      * @param mixed $value
      * @return float|null
      */

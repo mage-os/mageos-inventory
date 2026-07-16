@@ -17,6 +17,8 @@ class Mode implements OptionSourceInterface
 {
     /**
      * @inheritdoc
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function toOptionArray(): array
     {

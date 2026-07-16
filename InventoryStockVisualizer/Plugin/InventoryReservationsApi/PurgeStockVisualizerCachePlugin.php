@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\InventoryStockVisualizer\Plugin\InventoryReservationsApi;
 
 use Magento\InventoryReservationsApi\Model\AppendReservationsInterface;
+use Magento\InventoryReservationsApi\Model\ReservationInterface;
 use Magento\InventoryStockVisualizer\Model\Cache\PurgeOnReservations;
 use Psr\Log\LoggerInterface;
 
@@ -31,9 +32,11 @@ class PurgeStockVisualizerCachePlugin
     }
 
     /**
+     * Purge the visualizer fragment for every SKU touched by the appended reservations.
+     *
      * @param AppendReservationsInterface $subject
      * @param null $result
-     * @param array $reservations
+     * @param ReservationInterface[] $reservations
      * @return null
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */

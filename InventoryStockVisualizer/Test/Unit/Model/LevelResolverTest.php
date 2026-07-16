@@ -48,7 +48,7 @@ class LevelResolverTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array{0: float, 1: string}>
      */
     public static function quantityProvider(): array
     {
@@ -76,7 +76,7 @@ class LevelResolverTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array{0: float, 1: string}>
      */
     public static function percentageProvider(): array
     {
@@ -114,7 +114,7 @@ class LevelResolverTest extends TestCase
     }
 
     /**
-     * @return array
+     * @return array<string, array{0: string, 1: int}>
      */
     public static function fillProvider(): array
     {

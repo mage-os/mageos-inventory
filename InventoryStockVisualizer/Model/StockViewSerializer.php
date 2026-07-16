@@ -24,8 +24,10 @@ class StockViewSerializer
     }
 
     /**
+     * Project an availability view into the minimal AJAX payload.
+     *
      * @param StockViewInterface $view
-     * @return array
+     * @return array{qty: float, sources?: array<string, float>}
      */
     public function serialize(StockViewInterface $view): array
     {
