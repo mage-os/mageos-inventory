@@ -106,6 +106,20 @@ class StockVisualizer extends Template implements IdentityInterface
     }
 
     /**
+     * Whether the quantity is fetched on a call-to-action click rather than on page load.
+     *
+     * When on demand, the initial state (status word plus the call-to-action) is rendered
+     * server-side and the volatile numbers stay hidden until the fetch, so the widget never
+     * flashes a loading skeleton before it mounts.
+     *
+     * @return bool
+     */
+    public function isOnDemand(): bool
+    {
+        return $this->config->getMode() === Config::MODE_ON_DEMAND;
+    }
+
+    /**
      * Panel heading.
      *
      * @return string

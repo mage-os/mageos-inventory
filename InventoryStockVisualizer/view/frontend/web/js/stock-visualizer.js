@@ -21,8 +21,10 @@ define([
 
         /**
          * Boot the quantity widget. In instant mode the values load on page load, so a
-         * skeleton bridges the fetch. In on-demand mode only the call-to-action is shown;
-         * the values render already filled on click, so no skeleton is exposed.
+         * skeleton bridges the fetch. In on-demand mode the initial state (status word plus
+         * the call-to-action) is already rendered server-side with the volatile numbers
+         * hidden, so the widget only wires the button and never flashes a skeleton before
+         * it mounts.
          *
          * @private
          */
@@ -32,29 +34,27 @@ define([
             if (this.options.mode === 'instant') {
                 this._fetch();
             } else {
-                this._renderCta();
+                this._bindCta();
             }
         },
 
         /**
-         * Show only the call-to-action; the status word (in stock / out of stock) stays
-         * visible because salability is known and cached server-side. The volatile numbers
-         * stay hidden until the fetch returns, so no skeleton is shown before the click.
+         * Wire the server-rendered call-to-action. The button, the status word and the
+         * hidden volatile content all come from the cached HTML, so there is nothing to
+         * create or hide here; the fetch runs on click and the values are revealed already
+         * filled.
          *
          * @private
          */
-        _renderCta: function () {
+        _bindCta: function () {
             var self = this,
-                button = $('<button type="button" class="action stock-visualizer-cta"></button>')
-                    .text($t('Check availability'));
+                button = this.element.find('[data-sv-cta]');
 
-            this.$deferred.hide();
+            this.$cta = button;
             button.on('click', function () {
                 button.prop('disabled', true).addClass('sv-cta-loading').text($t('Checking availability…'));
-                self.$cta = button;
                 self._fetch();
             });
-            this.element.append(button);
         },
 
         /**
@@ -99,7 +99,6 @@ define([
             if (!data) {
                 if (this.$cta) {
                     this.$cta.prop('disabled', false).removeClass('sv-cta-loading').text($t('Check availability'));
-                    this.$cta = null;
                 } else {
                     status.find('[data-sv-agg]').empty();
                     this.element.find('[data-sv-value]').empty();

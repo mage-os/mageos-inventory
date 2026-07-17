@@ -13,6 +13,7 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
 ?>
 <?php if ($block->isEnabled()): ?>
     <?php $isLevel = $block->isLevelMode(); ?>
+    <?php $isOnDemand = !$isLevel && $block->isOnDemand(); ?>
     <div class="stock-visualizer sva <?= $isLevel ? 'sv-mode-level' : 'sv-mode-quantity' ?>"
         <?php if (!$isLevel): ?>
             data-mage-init='<?= $escaper->escapeHtmlAttr($block->getWidgetConfig()) ?>'
@@ -30,13 +31,15 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
                 <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($status)) ?>" data-sv-status>
                     <span class="sv-dot" aria-hidden="true"></span>
                     <span class="sv-word"><?= $escaper->escapeHtml($block->levelLabel($status)) ?></span>
-                    <span class="sv-count" data-sv-agg><span class="sv-skel" aria-hidden="true"></span></span>
+                    <span class="sv-count" data-sv-agg<?= $isOnDemand ? ' style="display: none"' : '' ?>>
+                        <?php if (!$isOnDemand): ?><span class="sv-skel" aria-hidden="true"></span><?php endif; ?>
+                    </span>
                 </span>
             <?php endif; ?>
         </div>
 
         <?php if ($block->isPerSource()): ?>
-            <ul class="sva-body sv-sources">
+            <ul class="sva-body sv-sources"<?= $isOnDemand ? ' style="display: none"' : '' ?>>
                 <?php if ($isLevel): ?>
                     <?php foreach ($block->getLevelSources() as $row): ?>
                         <?php $level = $row['level']; ?>
@@ -75,6 +78,12 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
                     </li>
                 <?php endif; ?>
             </ul>
+        <?php endif; ?>
+
+        <?php if ($isOnDemand): ?>
+            <button type="button" class="action stock-visualizer-cta" data-sv-cta>
+                <?= $escaper->escapeHtml(__('Check availability')) ?>
+            </button>
         <?php endif; ?>
     </div>
 <?php endif; ?>
