@@ -70,6 +70,9 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
                             <span class="sv-meter"><i data-sv-meter style="width: 0"></i></span>
                         </li>
                     <?php endforeach; ?>
+                    <li class="sv-src sv-empty-note sv-collapsed" data-sv-empty>
+                        <span class="sv-name"><?= $escaper->escapeHtml(__('No availability by source')) ?></span>
+                    </li>
                 <?php endif; ?>
             </ul>
         <?php endif; ?>

@@ -20,13 +20,14 @@ define([
         },
 
         /**
-         * Boot the quantity widget: fetch on load in instant mode, otherwise defer
-         * behind a call-to-action. The label/scaffold is already server-rendered.
+         * Boot the quantity widget. In instant mode the values load on page load, so a
+         * skeleton bridges the fetch. In on-demand mode only the call-to-action is shown;
+         * the values render already filled on click, so no skeleton is exposed.
          *
          * @private
          */
         _create: function () {
-            this.$body = this.element.find('.sv-status, .sva-body');
+            this.$deferred = this.element.find('[data-sv-agg], .sva-body');
 
             if (this.options.mode === 'instant') {
                 this._fetch();
@@ -36,7 +37,9 @@ define([
         },
 
         /**
-         * Hide the values behind a call-to-action until the shopper asks.
+         * Show only the call-to-action; the status word (in stock / out of stock) stays
+         * visible because salability is known and cached server-side. The volatile numbers
+         * stay hidden until the fetch returns, so no skeleton is shown before the click.
          *
          * @private
          */
@@ -45,10 +48,10 @@ define([
                 button = $('<button type="button" class="action stock-visualizer-cta"></button>')
                     .text($t('Check availability'));
 
-            this.$body.hide();
+            this.$deferred.hide();
             button.on('click', function () {
-                button.remove();
-                self.$body.show();
+                button.prop('disabled', true).addClass('sv-cta-loading').text($t('Checking availability…'));
+                self.$cta = button;
                 self._fetch();
             });
             this.element.append(button);
@@ -64,6 +67,7 @@ define([
         _fetch: function () {
             var self = this;
 
+            this.element.addClass('sv-loading');
             $.ajax({
                 url: this.options.ajaxUrl,
                 type: 'GET',
@@ -90,9 +94,16 @@ define([
         _fill: function (data) {
             var status = this.element.find('[data-sv-status]');
 
+            this.element.removeClass('sv-loading');
+
             if (!data) {
-                status.find('[data-sv-agg]').empty();
-                this.element.find('[data-sv-value]').empty();
+                if (this.$cta) {
+                    this.$cta.prop('disabled', false).removeClass('sv-cta-loading').text($t('Check availability'));
+                    this.$cta = null;
+                } else {
+                    status.find('[data-sv-agg]').empty();
+                    this.element.find('[data-sv-value]').empty();
+                }
 
                 return;
             }
@@ -107,17 +118,36 @@ define([
             if (this.options.scope === 'per_source') {
                 this._fillSources(data.sources || {});
             }
+
+            this._revealDeferred();
+        },
+
+        /**
+         * Reveal the now-filled numbers and drop the call-to-action (on-demand only).
+         * In instant mode there is no call-to-action and the values are already visible.
+         *
+         * @private
+         */
+        _revealDeferred: function () {
+            if (this.$cta) {
+                this.$deferred.show();
+                this.$cta.remove();
+                this.$cta = null;
+            }
         },
 
         /**
          * Fill per-source value cells and size each meter as a share of the total.
+         * Empty sources are collapsed; when the whole breakdown would be empty, a single
+         * note is shown so the panel is never an empty frame under the aggregate.
          *
          * @param {Object} sources
          * @private
          */
         _fillSources: function (sources) {
             var self = this,
-                total = 0;
+                total = 0,
+                visible = 0;
 
             $.each(sources, function (code, qty) {
                 total += qty > 0 ? qty : 0;
@@ -129,15 +159,18 @@ define([
                     qty = typeof sources[code] !== 'undefined' ? sources[code] : 0,
                     width = total > 0 && qty > 0 ? Math.round(qty / total * 100) : 0;
 
-                if (self.options.hideEmptySources && qty <= 0) {
-                    row.hide();
-
-                    return;
-                }
-                row.show();
                 row.find('[data-sv-value]').text(self._formatQty(qty));
                 row.find('[data-sv-meter]').css('width', width + '%');
+
+                if (self.options.hideEmptySources && qty <= 0) {
+                    row.addClass('sv-collapsed');
+                } else {
+                    row.removeClass('sv-collapsed');
+                    visible++;
+                }
             });
+
+            this.element.find('[data-sv-empty]').toggleClass('sv-collapsed', visible > 0);
         },
 
         /**
