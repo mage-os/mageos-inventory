@@ -8,6 +8,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="Magento_InventoryStockVisualizer">
         <sequence>
+            <module name="Magento_InventoryApi"/>
             <module name="Magento_InventorySalesApi"/>
             <module name="Magento_InventorySales"/>
             <module name="Magento_InventoryReservationsApi"/>

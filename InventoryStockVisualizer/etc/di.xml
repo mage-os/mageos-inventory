@@ -16,6 +16,14 @@
         <plugin name="stock_visualizer_purge_cache"
                 type="Magento\InventoryStockVisualizer\Plugin\InventoryReservationsApi\PurgeStockVisualizerCachePlugin"/>
     </type>
+    <type name="Magento\InventoryApi\Api\SourceItemsSaveInterface">
+        <plugin name="stock_visualizer_purge_on_source_items_save"
+                type="Magento\InventoryStockVisualizer\Plugin\InventoryApi\PurgeOnSourceItemsSave"/>
+    </type>
+    <type name="Magento\InventoryApi\Api\SourceItemsDeleteInterface">
+        <plugin name="stock_visualizer_purge_on_source_items_delete"
+                type="Magento\InventoryStockVisualizer\Plugin\InventoryApi\PurgeOnSourceItemsDelete"/>
+    </type>
     <type name="Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor">
         <arguments>
             <argument name="saleabilityChangesProcessorsPool" xsi:type="array">
