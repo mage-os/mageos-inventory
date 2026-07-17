@@ -20,6 +20,7 @@
                 <level_low>3</level_low>
                 <show_source_labels>1</show_source_labels>
                 <hide_empty_sources>1</hide_empty_sources>
+                <async_purge>auto</async_purge>
             </stock_visualizer>
         </cataloginventory>
     </default>

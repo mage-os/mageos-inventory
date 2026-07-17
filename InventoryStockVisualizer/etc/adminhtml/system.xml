@@ -110,6 +110,15 @@
                         <field id="scope">per_source</field>
                     </depends>
                 </field>
+                <field id="async_purge" translate="label comment" type="select" sortOrder="110" showInDefault="1"
+                       canRestore="1">
+                    <label>Cache purge strategy</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\AsyncPurge</source_model>
+                    <comment>How the fragment cache is purged after stock changes. Auto offloads to the queue only when inventory indexing runs on schedule; the queue path needs a running consumer (inventory.stockvisualizer.purge).</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
     </system>
