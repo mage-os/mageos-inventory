@@ -10,37 +10,127 @@
 $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"'
     . ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
     . '<path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+
 ?>
 <?php if ($block->isEnabled()): ?>
+    <?php $isAggregate = $block->isAggregateStatusOnly(); ?>
     <?php $isLevel = $block->isLevelMode(); ?>
-    <?php $isOnDemand = !$isLevel && $block->isOnDemand(); ?>
-    <div class="stock-visualizer sva <?= $isLevel ? 'sv-mode-level' : 'sv-mode-quantity' ?>"
-        <?php if (!$isLevel): ?>
-            data-mage-init='<?= $escaper->escapeHtmlAttr($block->getWidgetConfig()) ?>'
-        <?php endif; ?>>
-        <div class="sva-head">
+    <?php $isVariant = $block->isVariantMode(); ?>
+    <?php $isBundleMax = $block->isBundleMaxMode(); ?>
+    <?php $isInteractive = $isVariant || $isBundleMax; ?>
+    <?php $isStatusOnly = $isLevel || $isAggregate; ?>
+    <?php $kind = $block->getComponentKind(); ?>
+    <?php $hasComponent = $kind !== ''; ?>
+    <?php $isQuantity = $kind === 'quantity'; ?>
+    <?php $modeOnDemand = $block->isOnDemand(); ?>
+    <?php $isChildren = $kind === 'children'; ?>
+    <?php $perSourceQty = $isQuantity && $block->isPerSource(); ?>
+    <?php $loadingInit = ($isQuantity || $isBundleMax) && !$modeOnDemand; ?>
+    <?php $showCountInit = $loadingInit; ?>
+    <?php $showPromptInit = $isVariant; ?>
+    <?php $showCtaInit = $modeOnDemand && ($isQuantity || $isChildren || $isBundleMax); ?>
+    <?php $sourcesVisibleInit = $perSourceQty && !$modeOnDemand; ?>
+    <?php if ($isInteractive): ?>
+        <?php $flushInit = !$showPromptInit; ?>
+    <?php elseif ($isChildren): ?>
+        <?php $flushInit = $modeOnDemand; ?>
+    <?php else: ?>
+        <?php $flushInit = $perSourceQty ? !$sourcesVisibleInit : true; ?>
+    <?php endif; ?>
+    <?php if ($hasComponent): ?>
+        <script type="text/x-magento-init"><?= /* @noEscape */ $block->getInitJson() ?></script>
+    <?php endif; ?>
+    <div class="stock-visualizer sva <?= $isStatusOnly ? 'sv-mode-level' : 'sv-mode-quantity' ?>"
+        <?php if ($hasComponent): ?>data-bind="scope: 'stockVisualizer'"<?php endif; ?>>
+        <div class="sva-head<?php if ($hasComponent && $flushInit): ?> sv-flush<?php endif; ?>"
+            <?php if ($hasComponent): ?>data-bind="css: { 'sv-flush': flush }"<?php endif; ?>>
             <span class="sva-title"><?= $escaper->escapeHtml($block->getPanelTitle()) ?></span>
-            <?php if ($isLevel): ?>
-                <?php $aggregateLevel = $block->getAggregateLevel(); ?>
-                <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($aggregateLevel)) ?>">
+            <?php if ($isStatusOnly): ?>
+                <?php $level = $block->getAggregateLevel(); ?>
+                <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($level)) ?>"
+                    <?php if ($hasComponent): ?>data-bind="css: statusClass"<?php endif; ?>>
                     <span class="sv-dot" aria-hidden="true"></span>
-                    <span class="sv-word"><?= $escaper->escapeHtml($block->levelLabel($aggregateLevel)) ?></span>
+                    <span class="sv-word"
+                        <?php if ($hasComponent): ?>data-bind="text: statusWord"<?php endif; ?>><?=
+                        $escaper->escapeHtml($block->levelLabel($level)) ?></span>
+                    <?php if ($isInteractive): ?>
+                        <span class="sv-count"<?php if (!$showCountInit): ?> style="display: none"<?php endif; ?>
+                            data-bind="visible: showCount">
+                            <span class="sv-skel" aria-hidden="true" data-bind="visible: loading"
+                                <?php if (!$loadingInit): ?>style="display: none"<?php endif; ?>></span>
+                            <span<?php if ($loadingInit): ?> style="display: none"<?php endif; ?>
+                                data-bind="text: count, visible: !loading()"></span>
+                        </span>
+                    <?php endif; ?>
                 </span>
             <?php else: ?>
-                <?php $status = $block->getQuantityStatusLevel(); ?>
-                <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($status)) ?>" data-sv-status>
+                <?php $level = $block->getQuantityStatusLevel(); ?>
+                <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($level)) ?>"
+                    data-bind="css: statusClass">
                     <span class="sv-dot" aria-hidden="true"></span>
-                    <span class="sv-word"><?= $escaper->escapeHtml($block->levelLabel($status)) ?></span>
-                    <span class="sv-count" data-sv-agg<?= $isOnDemand ? ' style="display: none"' : '' ?>>
-                        <?php if (!$isOnDemand): ?><span class="sv-skel" aria-hidden="true"></span><?php endif; ?>
+                    <span class="sv-word" data-bind="text: statusWord"><?=
+                        $escaper->escapeHtml($block->levelLabel($level)) ?></span>
+                    <span class="sv-count"<?php if (!$loadingInit): ?> style="display: none"<?php endif; ?>
+                        data-bind="visible: showCount">
+                        <span class="sv-skel" aria-hidden="true" data-bind="visible: loading"
+                            <?php if (!$loadingInit): ?>style="display: none"<?php endif; ?>></span>
+                        <span<?php if ($loadingInit): ?> style="display: none"<?php endif; ?>
+                            data-bind="text: count, visible: !loading()"></span>
                     </span>
                 </span>
             <?php endif; ?>
         </div>
 
-        <?php if ($block->isPerSource()): ?>
-            <ul class="sva-body sv-sources"<?= $isOnDemand ? ' style="display: none"' : '' ?>>
-                <?php if ($isLevel): ?>
+        <?php if ($isInteractive): ?>
+            <p class="sva-body sv-hint"<?php if (!$showPromptInit): ?> style="display: none"<?php endif; ?>
+                data-bind="visible: showPrompt">
+                <?php if ($isVariant): ?>
+                    <?= $escaper->escapeHtml(__('Select options to see the exact availability.')) ?>
+                <?php else: ?>
+                    <?= $escaper->escapeHtml(__('Choose options to see how many you can order.')) ?>
+                <?php endif; ?>
+            </p>
+        <?php endif; ?>
+
+        <?php if ($isVariant): ?>
+            <ul class="sva-body sv-sources" style="display: none"
+                data-bind="visible: variantRows().length > 0, foreach: variantRows">
+                <li class="sv-src"<?php if ($isLevel): ?> data-bind="css: 'level-' + level"<?php endif; ?>>
+                    <div class="sv-src-top">
+                        <?php if ($block->showSourceLabels()): ?>
+                            <span class="sv-name"><?= /* @noEscape */ $pin ?><span data-bind="text: name"></span></span>
+                        <?php endif; ?>
+                        <span class="<?= $isLevel ? 'sv-lvl' : 'sv-val' ?>" data-bind="text: qtyText"></span>
+                    </div>
+                    <span class="sv-meter"><i data-bind="style: { width: fill + '%' }"></i></span>
+                </li>
+            </ul>
+        <?php endif; ?>
+
+        <?php if ($isChildren): ?>
+            <ul class="sva-body sv-sources sv-children"<?php if ($modeOnDemand): ?> style="display: none"<?php endif; ?>
+                data-bind="visible: childrenVisible() &amp;&amp; childRows().length > 0, foreach: childRows">
+                <li class="sv-src" data-bind="css: <?php if ($isLevel): ?>(loading() ? 'sv-loading ' : '') + 'level-' + level()<?php else: ?>{ 'level-high': salable(), 'level-out': !salable() }<?php endif; ?>">
+                    <div class="sv-src-top">
+                        <span class="sv-name" data-bind="text: label"></span>
+                        <span class="<?= $isLevel ? 'sv-lvl' : 'sv-val' ?>">
+                            <?php if (!$isLevel): ?>
+                                <span class="sv-skel" aria-hidden="true" data-bind="visible: loading"></span>
+                            <?php endif; ?>
+                            <span data-bind="text: value, visible: !loading()"></span>
+                        </span>
+                    </div>
+                    <?php if ($isLevel): ?>
+                        <span class="sv-meter"><i data-bind="style: { width: fill() + '%' }"></i></span>
+                    <?php endif; ?>
+                </li>
+            </ul>
+            <p class="sva-body sv-sets" style="display: none" data-bind="visible: setsText, text: setsText"></p>
+        <?php endif; ?>
+
+        <?php if (!$isAggregate && $block->isPerSource()): ?>
+            <?php if ($isLevel): ?>
+                <ul class="sva-body sv-sources">
                     <?php foreach ($block->getLevelSources() as $row): ?>
                         <?php $level = $row['level']; ?>
                         <li class="sv-src <?= $escaper->escapeHtmlAttr($block->levelClass($level)) ?>">
@@ -56,32 +146,36 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
                             <span class="sv-meter"><i style="width: <?= (int) $block->levelFill($level) ?>%"></i></span>
                         </li>
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <?php foreach ($block->getScaffoldSources() as $row): ?>
-                        <li class="sv-src" data-sv-source="<?= $escaper->escapeHtmlAttr($row['code']) ?>">
-                            <div class="sv-src-top">
-                                <?php if ($block->showSourceLabels()): ?>
-                                    <span class="sv-name">
-                                        <?= /* @noEscape */ $pin ?>
-                                        <?= $escaper->escapeHtml($row['name']) ?>
-                                    </span>
-                                <?php endif; ?>
-                                <span class="sv-val" data-sv-value>
-                                    <span class="sv-skel" aria-hidden="true"></span>
-                                </span>
-                            </div>
-                            <span class="sv-meter"><i data-sv-meter style="width: 0"></i></span>
-                        </li>
-                    <?php endforeach; ?>
-                    <li class="sv-src sv-empty-note sv-collapsed" data-sv-empty>
+                </ul>
+            <?php else: ?>
+                <ul class="sva-body sv-sources"<?php if (!$sourcesVisibleInit): ?> style="display: none"<?php endif; ?>
+                    data-bind="visible: sourcesVisible">
+                    <!-- ko foreach: sourceRows -->
+                    <li class="sv-src" data-bind="css: { 'sv-loading': loading, 'sv-collapsed': collapsed }">
+                        <div class="sv-src-top">
+                            <?php if ($block->showSourceLabels()): ?>
+                                <span class="sv-name"><?= /* @noEscape */ $pin ?><span
+                                    data-bind="text: name"></span></span>
+                            <?php endif; ?>
+                            <span class="sv-val">
+                                <span class="sv-skel" aria-hidden="true" data-bind="visible: loading"></span>
+                                <span data-bind="text: qty, visible: !loading()"></span>
+                            </span>
+                        </div>
+                        <span class="sv-meter"><i data-bind="style: { width: fill() + '%' }"></i></span>
+                    </li>
+                    <!-- /ko -->
+                    <li class="sv-src sv-empty-note sv-collapsed"
+                        data-bind="css: { 'sv-collapsed': !showEmptyNote() }">
                         <span class="sv-name"><?= $escaper->escapeHtml(__('No availability by source')) ?></span>
                     </li>
-                <?php endif; ?>
-            </ul>
+                </ul>
+            <?php endif; ?>
         <?php endif; ?>
 
-        <?php if ($isOnDemand): ?>
-            <button type="button" class="action stock-visualizer-cta" data-sv-cta>
+        <?php if ($hasComponent && $modeOnDemand): ?>
+            <button type="button" class="action stock-visualizer-cta"<?php if (!$showCtaInit): ?> style="display: none"<?php endif; ?>
+                data-bind="visible: showCta, click: activate">
                 <?= $escaper->escapeHtml(__('Check availability')) ?>
             </button>
         <?php endif; ?>

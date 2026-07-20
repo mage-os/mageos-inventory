@@ -16,5 +16,8 @@
         <referenceBlock name="product.info.simple" remove="true"/>
         <referenceBlock name="product.info.virtual" remove="true"/>
         <referenceBlock name="product.info.grouped.stock" remove="true"/>
+        <referenceBlock name="product.info.configurable" remove="true"/>
+        <referenceBlock name="product.info.bundle" remove="true"/>
+        <referenceBlock name="product.info.downloadable" remove="true"/>
     </body>
 </page>
