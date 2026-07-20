@@ -40,24 +40,48 @@ class StockView implements StockViewInterface
     private $sources;
 
     /**
+     * @var bool
+     */
+    private $salable;
+
+    /**
+     * @var bool
+     */
+    private $aggregateOnly;
+
+    /**
+     * @var \Magento\InventoryStockVisualizer\Api\Data\ChildViewInterface[]
+     */
+    private $children;
+
+    /**
      * @param string $sku
      * @param int $stockId
      * @param float $salableQty
      * @param bool $sourceReservationsEnabled
      * @param \Magento\InventoryStockVisualizer\Api\Data\SourceViewInterface[] $sources
+     * @param bool|null $salable
+     * @param bool $aggregateOnly
+     * @param \Magento\InventoryStockVisualizer\Api\Data\ChildViewInterface[] $children
      */
     public function __construct(
         string $sku,
         int $stockId,
         float $salableQty,
         bool $sourceReservationsEnabled,
-        array $sources = []
+        array $sources = [],
+        ?bool $salable = null,
+        bool $aggregateOnly = false,
+        array $children = []
     ) {
         $this->sku = $sku;
         $this->stockId = $stockId;
         $this->salableQty = $salableQty;
         $this->sourceReservationsEnabled = $sourceReservationsEnabled;
         $this->sources = $sources;
+        $this->salable = $salable ?? ($salableQty > 0.0);
+        $this->aggregateOnly = $aggregateOnly;
+        $this->children = $children;
     }
 
     /**
@@ -106,5 +130,29 @@ class StockView implements StockViewInterface
     public function isSourceReservationsEnabled(): bool
     {
         return $this->sourceReservationsEnabled;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isSalable(): bool
+    {
+        return $this->salable;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isAggregateOnly(): bool
+    {
+        return $this->aggregateOnly;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getChildren(): array
+    {
+        return $this->children;
     }
 }

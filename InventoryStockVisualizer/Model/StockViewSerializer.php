@@ -10,33 +10,108 @@ namespace Magento\InventoryStockVisualizer\Model;
 use Magento\InventoryStockVisualizer\Api\Data\StockViewInterface;
 
 /**
- * Project an availability view into the minimal quantity payload for the AJAX
- * fragment: the aggregate quantity plus, in per-source scope, a compact
- * source_code => qty map. Source names/labels are server-rendered, not sent here.
+ * Project an availability view into the minimal AJAX payload. In quantity display it carries the
+ * exact numbers; in level display it resolves them to coarse levels server-side, so exact
+ * quantities are never exposed to the client regardless of product type.
  */
 class StockViewSerializer
 {
     /**
      * @param Config $config
+     * @param LevelResolver $levelResolver
+     * @param ResolveDisplayConfig $resolveDisplayConfig
      */
-    public function __construct(private readonly Config $config)
-    {
+    public function __construct(
+        private readonly Config $config,
+        private readonly LevelResolver $levelResolver,
+        private readonly ResolveDisplayConfig $resolveDisplayConfig
+    ) {
     }
 
     /**
      * Project an availability view into the minimal AJAX payload.
      *
+     * Composite (aggregate-only) views carry no meaningful quantity or per-source breakdown, so
+     * only the salable status is sent. In level display the number is replaced by a coarse level.
+     *
      * @param StockViewInterface $view
-     * @return array{qty: float, sources?: array<string, float>}
+     * @return array<string, mixed>
      */
     public function serialize(StockViewInterface $view): array
     {
+        if ($view->isAggregateOnly()) {
+            return ['aggregateOnly' => true, 'salable' => $view->isSalable()];
+        }
+
+        if ($this->config->getDisplayType() === Config::DISPLAY_TYPE_LEVEL) {
+            return $this->serializeLevel($view);
+        }
+
         $data = ['qty' => $view->getSalableQty()];
 
         if ($this->config->getScope() === Config::SCOPE_PER_SOURCE) {
             $sources = [];
             foreach ($view->getSources() as $source) {
                 $sources[$source->getSourceCode()] = $source->getQty();
+            }
+            $data['sources'] = $sources;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Project the per-child breakdown of a composite view for the children fragment: the
+     * aggregate salable status plus one row per child. The volatile child quantities live only
+     * in this cacheable fragment; in level display each child carries a coarse level, not a number.
+     *
+     * @param StockViewInterface $view
+     * @return array{salable: bool, children: array<int, array<string, mixed>>}
+     */
+    public function serializeChildren(StockViewInterface $view): array
+    {
+        $level = $this->config->getDisplayType() === Config::DISPLAY_TYPE_LEVEL;
+        $children = [];
+        foreach ($view->getChildren() as $child) {
+            $row = [
+                'sku' => $child->getSku(),
+                'label' => $child->getLabel(),
+                'salable' => $child->isSalable(),
+            ];
+            if ($level) {
+                $row['level'] = $this->levelResolver->resolve(
+                    $child->getQty(),
+                    $this->resolveDisplayConfig->forSku($child->getSku())
+                );
+            } else {
+                $row['qty'] = $child->getQty();
+            }
+            $children[] = $row;
+        }
+
+        return ['salable' => $view->isSalable(), 'children' => $children];
+    }
+
+    /**
+     * Coarse-level projection of a quantity view: aggregate level plus an optional per-source map.
+     *
+     * The per-source scope adds a source_code => level map. No exact quantity leaves the server.
+     *
+     * @param StockViewInterface $view
+     * @return array<string, mixed>
+     */
+    private function serializeLevel(StockViewInterface $view): array
+    {
+        $displayConfig = $this->resolveDisplayConfig->forSku($view->getSku());
+        $data = [
+            'level' => $this->levelResolver->resolve($view->getSalableQty(), $displayConfig),
+            'salable' => $view->getSalableQty() > 0.0,
+        ];
+
+        if ($this->config->getScope() === Config::SCOPE_PER_SOURCE) {
+            $sources = [];
+            foreach ($view->getSources() as $source) {
+                $sources[$source->getSourceCode()] = $this->levelResolver->resolve($source->getQty(), $displayConfig);
             }
             $data['sources'] = $sources;
         }

@@ -12,6 +12,8 @@
                 type="Magento\InventoryStockVisualizer\Model\Data\StockView"/>
     <preference for="Magento\InventoryStockVisualizer\Api\Data\SourceViewInterface"
                 type="Magento\InventoryStockVisualizer\Model\Data\SourceView"/>
+    <preference for="Magento\InventoryStockVisualizer\Api\Data\ChildViewInterface"
+                type="Magento\InventoryStockVisualizer\Model\Data\ChildView"/>
     <type name="Magento\InventoryReservationsApi\Model\AppendReservationsInterface">
         <plugin name="stock_visualizer_purge_cache"
                 type="Magento\InventoryStockVisualizer\Plugin\InventoryReservationsApi\PurgeStockVisualizerCachePlugin"/>

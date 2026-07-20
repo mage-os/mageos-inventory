@@ -9,6 +9,7 @@ namespace Magento\InventoryStockVisualizer\Test\Unit\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\InventoryStockVisualizer\Model\Config;
+use Magento\Store\Model\ScopeInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -46,6 +47,19 @@ class ConfigTest extends TestCase
     {
         $this->scopeConfig->method('isSetFlag')->willReturn(true);
         $this->assertTrue($this->config->isEnabled());
+    }
+
+    /**
+     * The grouped sets calculator reads the config flag on the store scope.
+     *
+     * @return void
+     */
+    public function testGroupedSetsCalculatorReadsFlag(): void
+    {
+        $this->scopeConfig->method('isSetFlag')
+            ->with(Config::XML_PATH_GROUPED_SETS_CALCULATOR, ScopeInterface::SCOPE_STORE, null)
+            ->willReturn(true);
+        $this->assertTrue($this->config->isGroupedSetsCalculatorEnabled());
     }
 
     /**

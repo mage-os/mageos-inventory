@@ -58,7 +58,7 @@ class StockVisualizer extends Template implements IdentityInterface
      * @param GetStockViewInterface $getStockView
      * @param GetEnabledSources $getEnabledSources
      * @param LevelResolver $levelResolver
-     * @param array<string, mixed> $data
+     * @param array<string,mixed> $data
      */
     public function __construct(
         Context $context,
@@ -136,7 +136,45 @@ class StockVisualizer extends Template implements IdentityInterface
      */
     public function getAggregateLevel(): string
     {
-        return $this->levelResolver->resolve($this->getView()->getSalableQty(), $this->getDisplayConfig());
+        $view = $this->getView();
+        if ($view->isAggregateOnly()) {
+            return $view->isSalable() ? Level::HIGH : Level::OUT;
+        }
+
+        return $this->levelResolver->resolve($view->getSalableQty(), $this->getDisplayConfig());
+    }
+
+    /**
+     * Whether the panel shows only an aggregate salable/not-salable status.
+     *
+     * True for composite types (configurable/grouped/bundle): no quantity number, no
+     * per-source breakdown and no AJAX fetch — just the in-stock/out-of-stock word.
+     *
+     * @return bool
+     */
+    public function isAggregateStatusOnly(): bool
+    {
+        return $this->getView()->isAggregateOnly();
+    }
+
+    /**
+     * Child structure scaffold (sku and label) for the composite children fragment.
+     *
+     * Only the stable structure is server-rendered; the volatile per-child stock arrives over AJAX.
+     *
+     * @return array<int, array{sku: string, label: string}>
+     */
+    public function getChildScaffold(): array
+    {
+        $rows = [];
+        foreach ($this->getView()->getChildren() as $child) {
+            $rows[] = [
+                'sku' => $child->getSku(),
+                'label' => $child->getLabel(),
+            ];
+        }
+
+        return $rows;
     }
 
     /**
@@ -150,7 +188,7 @@ class StockVisualizer extends Template implements IdentityInterface
      */
     public function getQuantityStatusLevel(): string
     {
-        return $this->getView()->getSalableQty() > 0.0 ? Level::HIGH : Level::OUT;
+        return $this->getView()->isSalable() ? Level::HIGH : Level::OUT;
     }
 
     /**
@@ -197,23 +235,174 @@ class StockVisualizer extends Template implements IdentityInterface
     }
 
     /**
-     * Full data-mage-init payload for quantity mode (keyed by the widget name).
+     * The interactive strategy for the current product.
+     *
+     * Returns '' when the panel is fully server-rendered (level / aggregate-status / children /
+     * grouped-sets) and needs no client component.
      *
      * @return string
      */
-    public function getWidgetConfig(): string
+    public function getComponentKind(): string
     {
-        $product = $this->getProduct();
+        if ($this->isVariantMode()) {
+            return 'variant';
+        }
+        if ($this->isBundleMaxMode()) {
+            return 'bundleMax';
+        }
+        if ($this->getCompositeMode() === Config::COMPOSITE_MODE_CHILDREN) {
+            return 'children';
+        }
+        if ($this->isAggregateStatusOnly()) {
+            return '';
+        }
+        if ($this->isLevelMode()) {
+            return '';
+        }
+
+        return 'quantity';
+    }
+
+    /**
+     * Mount payload for the Knockout availability component.
+     *
+     * The x-magento-init config seeds the component observables with the server-rendered
+     * state, so hydration produces no visible change.
+     *
+     * @return string
+     */
+    public function getInitJson(): string
+    {
+        $kind = $this->getComponentKind();
+        if ($kind === '') {
+            return '';
+        }
 
         return $this->json->serialize([
-            'stockVisualizer' => [
-                'mode' => $this->config->getMode(),
-                'scope' => $this->config->getScope(),
-                'sku' => $product ? (string) $product->getSku() : '',
-                'hideEmptySources' => $this->config->hideEmptySources(),
-                'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
+            '*' => [
+                'Magento_Ui/js/core/app' => [
+                    'components' => [
+                        'stockVisualizer' => $this->componentConfig($kind),
+                    ],
+                ],
             ],
         ]);
+    }
+
+    /**
+     * Component config plus initial observable seeds for the given strategy.
+     *
+     * @param string $kind
+     * @return array<string, mixed>
+     */
+    private function componentConfig(string $kind): array
+    {
+        $product = $this->getProduct();
+        $sku = $product ? (string) $product->getSku() : '';
+        $onDemand = $this->isOnDemand();
+        $perSource = $this->isPerSource();
+        $config = [
+            'component' => 'Magento_InventoryStockVisualizer/js/view/availability',
+            'kind' => $kind,
+            'mode' => $this->config->getMode(),
+            'sku' => $sku,
+            'levelDisplay' => $this->isLevelMode(),
+            'configVersion' => $this->config->getVersion(),
+        ];
+
+        if ($kind === 'quantity') {
+            $level = $this->getQuantityStatusLevel();
+            $config += [
+                'scope' => $this->config->getScope(),
+                'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
+                'perSource' => $perSource,
+                'hideEmptySources' => $this->config->hideEmptySources(),
+                'showSourceLabels' => $this->showSourceLabels(),
+                'sourceScaffold' => $perSource ? array_values($this->getScaffoldSources()) : [],
+                'sourcesVisible' => $perSource && !$onDemand,
+                'loading' => !$onDemand,
+                'showPrompt' => false,
+                'showCta' => $onDemand,
+            ];
+        } elseif ($kind === 'variant') {
+            $level = $this->getAggregateLevel();
+            $config += [
+                'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
+                'perSource' => $perSource,
+                'hideEmptySources' => $this->config->hideEmptySources(),
+                'showSourceLabels' => $this->showSourceLabels(),
+                'sourceScaffold' => $perSource ? array_values($this->getScaffoldSources()) : [],
+                'loading' => false,
+                'showPrompt' => true,
+                'showCta' => false,
+            ];
+        } elseif ($kind === 'children') {
+            $level = $this->getAggregateLevel();
+            $config += [
+                'ajaxUrl' => $this->getUrl('inventory_stockviz/product/children'),
+                'childScaffold' => $this->getChildScaffold(),
+                'childrenVisible' => !$onDemand,
+                'loading' => false,
+                'showPrompt' => false,
+                'showCta' => $onDemand,
+            ];
+        } else {
+            $level = $this->getAggregateLevel();
+            $config += [
+                'ajaxUrl' => $this->getUrl('inventory_stockviz/product/bundleMax'),
+                'loading' => !$onDemand,
+                'showPrompt' => false,
+                'showCta' => $onDemand,
+            ];
+        }
+
+        $config['statusLevel'] = $level;
+        $config['statusWord'] = $this->levelLabel($level);
+
+        return $config;
+    }
+
+    /**
+     * Configured composite display mode for the current product type, or '' for stockable types.
+     *
+     * @return string
+     */
+    public function getCompositeMode(): string
+    {
+        $product = $this->getProduct();
+        if ($product === null) {
+            return '';
+        }
+        switch ($product->getTypeId()) {
+            case 'configurable':
+                return $this->config->getConfigurableMode();
+            case 'bundle':
+                return $this->config->getBundleMode();
+            case 'grouped':
+                return $this->config->getGroupedMode();
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * Whether the configurable variant-driven mode is active.
+     *
+     * @return bool
+     */
+    public function isVariantMode(): bool
+    {
+        return $this->getCompositeMode() === Config::COMPOSITE_MODE_VARIANT;
+    }
+
+    /**
+     * Whether the bundle sellable-count mode is active.
+     *
+     * @return bool
+     */
+    public function isBundleMaxMode(): bool
+    {
+        return $this->getCompositeMode() === Config::COMPOSITE_MODE_MAX;
     }
 
     /**
@@ -331,9 +520,11 @@ class StockVisualizer extends Template implements IdentityInterface
     private function getView(): \Magento\InventoryStockVisualizer\Api\Data\StockViewInterface
     {
         if ($this->view === null) {
+            $product = $this->getProduct();
             $this->view = $this->getStockView->execute(
-                (string) $this->getProduct()->getSku(),
-                (int) $this->getStockId()
+                (string) $product->getSku(),
+                (int) $this->getStockId(),
+                $product ? $product->getTypeId() : null
             );
         }
 

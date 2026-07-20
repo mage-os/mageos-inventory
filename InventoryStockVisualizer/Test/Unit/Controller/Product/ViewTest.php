@@ -13,6 +13,7 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
 use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
+use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
 use Magento\InventoryStockVisualizer\Api\Data\StockViewInterface;
 use Magento\InventoryStockVisualizer\Api\GetStockViewInterface;
 use Magento\InventoryStockVisualizer\Controller\Product\View;
@@ -63,6 +64,11 @@ class ViewTest extends TestCase
     private $getProductIdsBySkus;
 
     /**
+     * @var GetSkusByProductIdsInterface|MockObject
+     */
+    private $getSkusByProductIds;
+
+    /**
      * @var ResolveDisplayConfig|MockObject
      */
     private $resolveDisplayConfig;
@@ -106,6 +112,7 @@ class ViewTest extends TestCase
         $this->getProductIdsBySkus = $this->createMock(GetProductIdsBySkusInterface::class);
         $this->resolveDisplayConfig = $this->createMock(ResolveDisplayConfig::class);
         $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $this->getSkusByProductIds = $this->createMock(GetSkusByProductIdsInterface::class);
 
         $this->result = $this->createMock(Json::class);
         $this->result->method('setHeader')->willReturnCallback(
@@ -134,8 +141,8 @@ class ViewTest extends TestCase
             $this->serializer,
             $this->getStockId,
             $this->getProductIdsBySkus,
-            $this->resolveDisplayConfig,
-            $this->scopeConfig
+            $this->scopeConfig,
+            $this->getSkusByProductIds
         );
     }
 
@@ -170,25 +177,6 @@ class ViewTest extends TestCase
         $this->controller->execute();
 
         $this->assertSame(['data' => null], $this->data);
-        $this->assertArrayNotHasKey('X-Magento-Tags', $this->headers);
-    }
-
-    /**
-     * Level mode never computes or leaks the quantity through this endpoint.
-     *
-     * @return void
-     */
-    public function testLevelModeNeverLeaksQuantity(): void
-    {
-        $this->request->method('getParam')->willReturn(self::SKU);
-        $this->config->method('isEnabled')->willReturn(true);
-        $this->resolveDisplayConfig->method('forSku')->willReturn($this->displayConfig(Config::DISPLAY_TYPE_LEVEL));
-        $this->getStockView->expects($this->never())->method('execute');
-
-        $this->controller->execute();
-
-        $this->assertSame(['data' => null], $this->data);
-        $this->assertStringContainsString('no-store', $this->headers['Cache-Control']);
         $this->assertArrayNotHasKey('X-Magento-Tags', $this->headers);
     }
 

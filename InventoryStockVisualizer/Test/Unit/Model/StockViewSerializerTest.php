@@ -8,8 +8,12 @@ declare(strict_types=1);
 namespace Magento\InventoryStockVisualizer\Test\Unit\Model;
 
 use Magento\InventoryStockVisualizer\Model\Config;
+use Magento\InventoryStockVisualizer\Model\Data\ChildView;
+use Magento\InventoryStockVisualizer\Model\DisplayConfig;
 use Magento\InventoryStockVisualizer\Model\Data\SourceView;
 use Magento\InventoryStockVisualizer\Model\Data\StockView;
+use Magento\InventoryStockVisualizer\Model\LevelResolver;
+use Magento\InventoryStockVisualizer\Model\ResolveDisplayConfig;
 use Magento\InventoryStockVisualizer\Model\StockViewSerializer;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -25,12 +29,33 @@ class StockViewSerializerTest extends TestCase
     private $config;
 
     /**
+     * @var LevelResolver|MockObject
+     */
+    private $levelResolver;
+
+    /**
+     * @var ResolveDisplayConfig|MockObject
+     */
+    private $resolveDisplayConfig;
+
+    /**
      * @inheritdoc
      */
     protected function setUp(): void
     {
         parent::setUp();
         $this->config = $this->createMock(Config::class);
+        $this->levelResolver = $this->createMock(LevelResolver::class);
+        $this->resolveDisplayConfig = $this->createMock(ResolveDisplayConfig::class);
+        $this->config->method('getDisplayType')->willReturn(Config::DISPLAY_TYPE_QUANTITY);
+    }
+
+    /**
+     * @return StockViewSerializer
+     */
+    private function serializer(): StockViewSerializer
+    {
+        return new StockViewSerializer($this->config, $this->levelResolver, $this->resolveDisplayConfig);
     }
 
     /**
@@ -43,7 +68,7 @@ class StockViewSerializerTest extends TestCase
         $this->config->method('getScope')->willReturn(Config::SCOPE_AGGREGATE);
         $view = new StockView('SKU-1', 2, 15.0, true, []);
 
-        $this->assertSame(['qty' => 15.0], (new StockViewSerializer($this->config))->serialize($view));
+        $this->assertSame(['qty' => 15.0], $this->serializer()->serialize($view));
     }
 
     /**
@@ -61,7 +86,63 @@ class StockViewSerializerTest extends TestCase
 
         $this->assertSame(
             ['qty' => 15.0, 'sources' => ['slr_a' => 5.0, 'slr_b' => 10.0]],
-            (new StockViewSerializer($this->config))->serialize($view)
+            $this->serializer()->serialize($view)
         );
+    }
+
+    /**
+     * The children fragment carries the aggregate status plus one row per child.
+     *
+     * @return void
+     */
+    public function testChildrenPayload(): void
+    {
+        $view = new StockView('GRP-1', 2, 0.0, true, [], true, true, [
+            new ChildView('CH-A', 'Item A', 30.0, true),
+            new ChildView('CH-B', 'Item B', 0.0, false),
+        ]);
+
+        $this->assertSame(
+            [
+                'salable' => true,
+                'children' => [
+                    ['sku' => 'CH-A', 'label' => 'Item A', 'salable' => true, 'qty' => 30.0],
+                    ['sku' => 'CH-B', 'label' => 'Item B', 'salable' => false, 'qty' => 0.0],
+                ],
+            ],
+            $this->serializer()->serializeChildren($view)
+        );
+    }
+
+    /**
+     * Level display resolves the quantity to a coarse level server-side and never emits a number.
+     *
+     * @return void
+     */
+    public function testLevelPayloadExposesNoQuantity(): void
+    {
+        $config = $this->createMock(Config::class);
+        $config->method('getDisplayType')->willReturn(Config::DISPLAY_TYPE_LEVEL);
+        $config->method('getScope')->willReturn(Config::SCOPE_PER_SOURCE);
+        $displayConfig = $this->createMock(DisplayConfig::class);
+        $this->resolveDisplayConfig->method('forSku')->willReturn($displayConfig);
+        $this->levelResolver->method('resolve')->willReturnMap([
+            [15.0, $displayConfig, 'high'],
+            [5.0, $displayConfig, 'high'],
+            [0.0, $displayConfig, 'out'],
+        ]);
+        $view = new StockView('SKU-1', 2, 15.0, true, [
+            new SourceView('slr_a', 5.0, 'Source A'),
+            new SourceView('slr_b', 0.0, 'Source B'),
+        ]);
+
+        $payload = (new StockViewSerializer($config, $this->levelResolver, $this->resolveDisplayConfig))
+            ->serialize($view);
+
+        $this->assertSame(
+            ['level' => 'high', 'salable' => true, 'sources' => ['slr_a' => 'high', 'slr_b' => 'out']],
+            $payload
+        );
+        $this->assertArrayNotHasKey('qty', $payload);
     }
 }

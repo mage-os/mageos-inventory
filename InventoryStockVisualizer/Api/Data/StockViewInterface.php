@@ -57,4 +57,35 @@ interface StockViewInterface
      * @return bool
      */
     public function isSourceReservationsEnabled(): bool;
+
+    /**
+     * Authoritative salability of the SKU on the stock.
+     *
+     * For stockable (is_qty) types this mirrors salableQty > 0; for composite types
+     * (configurable/grouped/bundle) it is the aggregated index salability, since their
+     * salable quantity is undefined at the parent level.
+     *
+     * @return bool
+     */
+    public function isSalable(): bool;
+
+    /**
+     * Whether the view carries only an aggregate salable/not-salable status.
+     *
+     * True for composite parents, whose salable quantity and per-source breakdown are
+     * not meaningful: the presentation must render the status word only, never a number
+     * and never per-source rows.
+     *
+     * @return bool
+     */
+    public function isAggregateOnly(): bool;
+
+    /**
+     * Per-child availability rows for a composite parent (children display mode).
+     *
+     * Empty unless the composite type is configured to show a per-component breakdown.
+     *
+     * @return \Magento\InventoryStockVisualizer\Api\Data\ChildViewInterface[]
+     */
+    public function getChildren(): array;
 }

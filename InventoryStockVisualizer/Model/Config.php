@@ -28,6 +28,16 @@ class Config
     public const XML_PATH_SHOW_SOURCE_LABELS = 'cataloginventory/stock_visualizer/show_source_labels';
     public const XML_PATH_HIDE_EMPTY_SOURCES = 'cataloginventory/stock_visualizer/hide_empty_sources';
     public const XML_PATH_ASYNC_PURGE = 'cataloginventory/stock_visualizer/async_purge';
+    public const XML_PATH_CONFIGURABLE_MODE = 'cataloginventory/stock_visualizer/composite_configurable_mode';
+    public const XML_PATH_BUNDLE_MODE = 'cataloginventory/stock_visualizer/composite_bundle_mode';
+    public const XML_PATH_GROUPED_MODE = 'cataloginventory/stock_visualizer/composite_grouped_mode';
+    public const XML_PATH_GROUPED_SETS_CALCULATOR =
+        'cataloginventory/stock_visualizer/composite_grouped_sets_calculator';
+
+    public const COMPOSITE_MODE_STATUS = 'status';
+    public const COMPOSITE_MODE_CHILDREN = 'children';
+    public const COMPOSITE_MODE_VARIANT = 'variant';
+    public const COMPOSITE_MODE_MAX = 'max';
 
     public const MODE_INSTANT = 'instant';
     public const MODE_ON_DEMAND = 'on_demand';
@@ -186,5 +196,82 @@ class Config
         return in_array($value, [self::ASYNC_PURGE_ON, self::ASYNC_PURGE_OFF], true)
             ? $value
             : self::ASYNC_PURGE_AUTO;
+    }
+
+    /**
+     * Availability display mode for configurable products.
+     *
+     * @param int|string|null $store
+     * @return string
+     */
+    public function getConfigurableMode($store = null): string
+    {
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_CONFIGURABLE_MODE, ScopeInterface::SCOPE_STORE, $store)
+            ?: self::COMPOSITE_MODE_VARIANT;
+    }
+
+    /**
+     * Availability display mode for bundle products.
+     *
+     * @param int|string|null $store
+     * @return string
+     */
+    public function getBundleMode($store = null): string
+    {
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_BUNDLE_MODE, ScopeInterface::SCOPE_STORE, $store)
+            ?: self::COMPOSITE_MODE_MAX;
+    }
+
+    /**
+     * Availability display mode for grouped products.
+     *
+     * @param int|string|null $store
+     * @return string
+     */
+    public function getGroupedMode($store = null): string
+    {
+        return (string) $this->scopeConfig->getValue(self::XML_PATH_GROUPED_MODE, ScopeInterface::SCOPE_STORE, $store)
+            ?: self::COMPOSITE_MODE_CHILDREN;
+    }
+
+    /**
+     * Whether the grouped "complete sets" calculator is shown alongside the per-component list.
+     *
+     * @param int|string|null $store
+     * @return bool
+     */
+    public function isGroupedSetsCalculatorEnabled($store = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_GROUPED_SETS_CALCULATOR,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        );
+    }
+
+    /**
+     * Short fingerprint of the display configuration that shapes the AJAX fragments.
+     *
+     * The storefront appends it to the fragment request, so changing any of these settings mints a
+     * fresh cache key and the new output is served immediately instead of waiting for a tag purge.
+     *
+     * @param int|string|null $store
+     * @return string
+     */
+    public function getVersion($store = null): string
+    {
+        return substr(hash('sha256', implode('|', [
+            $this->getDisplayType($store),
+            $this->getScope($store),
+            $this->getLevelBasis($store),
+            (string) $this->getLevelHigh($store),
+            (string) $this->getLevelLow($store),
+            $this->showSourceLabels($store) ? '1' : '0',
+            $this->hideEmptySources($store) ? '1' : '0',
+            $this->getConfigurableMode($store),
+            $this->getBundleMode($store),
+            $this->getGroupedMode($store),
+            $this->isGroupedSetsCalculatorEnabled($store) ? '1' : '0',
+        ])), 0, 12);
     }
 }

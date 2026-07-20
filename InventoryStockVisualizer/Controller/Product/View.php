@@ -14,10 +14,10 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
 use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
+use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
 use Magento\InventoryStockVisualizer\Api\GetStockViewInterface;
 use Magento\InventoryStockVisualizer\Model\Cache\CacheTag;
 use Magento\InventoryStockVisualizer\Model\Config;
-use Magento\InventoryStockVisualizer\Model\ResolveDisplayConfig;
 use Magento\InventoryStockVisualizer\Model\StockViewSerializer;
 use Magento\PageCache\Model\Config as PageCacheConfig;
 
@@ -39,8 +39,8 @@ class View implements HttpGetActionInterface
      * @param StockViewSerializer $stockViewSerializer
      * @param GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
      * @param GetProductIdsBySkusInterface $getProductIdsBySkus
-     * @param ResolveDisplayConfig $resolveDisplayConfig
      * @param ScopeConfigInterface $scopeConfig
+     * @param GetSkusByProductIdsInterface $getSkusByProductIds
      */
     public function __construct(
         private readonly RequestInterface $request,
@@ -50,8 +50,8 @@ class View implements HttpGetActionInterface
         private readonly StockViewSerializer $stockViewSerializer,
         private readonly GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite,
         private readonly GetProductIdsBySkusInterface $getProductIdsBySkus,
-        private readonly ResolveDisplayConfig $resolveDisplayConfig,
-        private readonly ScopeConfigInterface $scopeConfig
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly GetSkusByProductIdsInterface $getSkusByProductIds
     ) {
     }
 
@@ -68,12 +68,11 @@ class View implements HttpGetActionInterface
     {
         $result = $this->jsonFactory->create();
         $sku = (string) $this->request->getParam('sku');
-
-        if (!$this->config->isEnabled() || $sku === '') {
-            return $this->uncacheable($result)->setData(['data' => null]);
+        if ($sku === '') {
+            $sku = $this->resolveSkuFromProductId((int) $this->request->getParam('product_id'));
         }
 
-        if ($this->resolveDisplayConfig->forSku($sku)->isLevel()) {
+        if (!$this->config->isEnabled() || $sku === '') {
             return $this->uncacheable($result)->setData(['data' => null]);
         }
 
@@ -104,6 +103,27 @@ class View implements HttpGetActionInterface
         $ids = $this->getProductIdsBySkus->execute([$sku]);
 
         return (int) ($ids[$sku] ?? 0);
+    }
+
+    /**
+     * Resolve a SKU from a product id (variant mode sends the selected child id), or '' if unknown.
+     *
+     * @param int $productId
+     * @return string
+     */
+    private function resolveSkuFromProductId(int $productId): string
+    {
+        if ($productId <= 0) {
+            return '';
+        }
+
+        try {
+            $skus = $this->getSkusByProductIds->execute([$productId]);
+        } catch (\Throwable $e) {
+            return '';
+        }
+
+        return (string) ($skus[$productId] ?? '');
     }
 
     /**
