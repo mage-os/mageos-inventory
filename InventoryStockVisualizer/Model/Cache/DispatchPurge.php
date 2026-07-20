@@ -11,10 +11,9 @@ use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Indexer\IndexerRegistry;
 use Magento\Framework\MessageQueue\PublisherInterface;
 use Magento\InventoryIndexer\Indexer\InventoryIndexer;
-use Magento\InventoryStockVisualizer\Model\Config;
 
 /**
- * Route a purge to the synchronous flush or the coalescing queue, following the configured strategy.
+ * Route a purge to the synchronous flush or the coalescing queue, following the inventory indexer.
  *
  * Under on-save indexing the fragment must refresh immediately, so the flush runs inline. Under
  * scheduled indexing the site already runs background workers, so the purge is offloaded to a queue
@@ -35,14 +34,12 @@ class DispatchPurge
     private const GUARD_TTL = 60;
 
     /**
-     * @param Config $config
      * @param IndexerRegistry $indexerRegistry
      * @param PublisherInterface $publisher
      * @param CacheInterface $cache
      * @param PurgeBySkus $purgeBySkus
      */
     public function __construct(
-        private readonly Config $config,
         private readonly IndexerRegistry $indexerRegistry,
         private readonly PublisherInterface $publisher,
         private readonly CacheInterface $cache,
@@ -51,6 +48,8 @@ class DispatchPurge
     }
 
     /**
+     * Flush the stock visualizer cache for the given SKUs, synchronously or via the async queue.
+     *
      * @param string[] $skus
      * @return void
      */
@@ -73,20 +72,14 @@ class DispatchPurge
     }
 
     /**
-     * Whether purges should be offloaded to the queue rather than flushed inline.
+     * Whether purges should be offloaded to the queue rather than flushed inline. This follows the
+     * inventory indexer: scheduled indexing already runs background workers, so purges are queued;
+     * on-save indexing needs the fragment fresh immediately, so they flush inline.
      *
      * @return bool
      */
     private function isAsync(): bool
     {
-        $mode = $this->config->getAsyncPurge();
-        if ($mode === Config::ASYNC_PURGE_ON) {
-            return true;
-        }
-        if ($mode === Config::ASYNC_PURGE_OFF) {
-            return false;
-        }
-
         try {
             return $this->indexerRegistry->get(InventoryIndexer::INDEXER_ID)->isScheduled();
         } catch (\Throwable $e) {

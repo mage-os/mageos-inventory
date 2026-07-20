@@ -27,7 +27,6 @@ class Config
     public const XML_PATH_TTL = 'cataloginventory/stock_visualizer/ttl';
     public const XML_PATH_SHOW_SOURCE_LABELS = 'cataloginventory/stock_visualizer/show_source_labels';
     public const XML_PATH_HIDE_EMPTY_SOURCES = 'cataloginventory/stock_visualizer/hide_empty_sources';
-    public const XML_PATH_ASYNC_PURGE = 'cataloginventory/stock_visualizer/async_purge';
     public const XML_PATH_CONFIGURABLE_MODE = 'cataloginventory/stock_visualizer/composite_configurable_mode';
     public const XML_PATH_BUNDLE_MODE = 'cataloginventory/stock_visualizer/composite_bundle_mode';
     public const XML_PATH_GROUPED_MODE = 'cataloginventory/stock_visualizer/composite_grouped_mode';
@@ -41,10 +40,6 @@ class Config
 
     public const MODE_INSTANT = 'instant';
     public const MODE_ON_DEMAND = 'on_demand';
-
-    public const ASYNC_PURGE_AUTO = 'auto';
-    public const ASYNC_PURGE_ON = 'on';
-    public const ASYNC_PURGE_OFF = 'off';
 
     public const DISPLAY_TYPE_QUANTITY = 'quantity';
     public const DISPLAY_TYPE_LEVEL = 'level';
@@ -183,22 +178,6 @@ class Config
     }
 
     /**
-     * Cache-purge delivery strategy: auto (async only under scheduled indexing), on, or off.
-     *
-     * The store is irrelevant for the write-path decision, so this is read on the default scope.
-     *
-     * @return string
-     */
-    public function getAsyncPurge(): string
-    {
-        $value = (string) $this->scopeConfig->getValue(self::XML_PATH_ASYNC_PURGE);
-
-        return in_array($value, [self::ASYNC_PURGE_ON, self::ASYNC_PURGE_OFF], true)
-            ? $value
-            : self::ASYNC_PURGE_AUTO;
-    }
-
-    /**
      * Availability display mode for configurable products.
      *
      * @param int|string|null $store
@@ -206,8 +185,11 @@ class Config
      */
     public function getConfigurableMode($store = null): string
     {
-        return (string) $this->scopeConfig->getValue(self::XML_PATH_CONFIGURABLE_MODE, ScopeInterface::SCOPE_STORE, $store)
-            ?: self::COMPOSITE_MODE_VARIANT;
+        return (string) $this->scopeConfig->getValue(
+            self::XML_PATH_CONFIGURABLE_MODE,
+            ScopeInterface::SCOPE_STORE,
+            $store
+        ) ?: self::COMPOSITE_MODE_VARIANT;
     }
 
     /**

@@ -13,7 +13,6 @@ use Magento\Framework\Indexer\IndexerRegistry;
 use Magento\Framework\MessageQueue\PublisherInterface;
 use Magento\InventoryStockVisualizer\Model\Cache\DispatchPurge;
 use Magento\InventoryStockVisualizer\Model\Cache\PurgeBySkus;
-use Magento\InventoryStockVisualizer\Model\Config;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -22,11 +21,6 @@ use PHPUnit\Framework\TestCase;
  */
 class DispatchPurgeTest extends TestCase
 {
-    /**
-     * @var Config|MockObject
-     */
-    private $config;
-
     /**
      * @var IndexerRegistry|MockObject
      */
@@ -58,14 +52,12 @@ class DispatchPurgeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->config = $this->createMock(Config::class);
         $this->indexerRegistry = $this->createMock(IndexerRegistry::class);
         $this->publisher = $this->createMock(PublisherInterface::class);
         $this->cache = $this->createMock(CacheInterface::class);
         $this->purgeBySkus = $this->createMock(PurgeBySkus::class);
 
         $this->model = new DispatchPurge(
-            $this->config,
             $this->indexerRegistry,
             $this->publisher,
             $this->cache,
@@ -87,14 +79,13 @@ class DispatchPurgeTest extends TestCase
     }
 
     /**
-     * async_purge=off flushes inline regardless of the indexer mode.
+     * On-save indexing flushes the fragment inline and de-duplicates the SKUs.
      *
      * @return void
      */
-    public function testForcedSyncFlushesInline(): void
+    public function testOnSaveIndexingFlushesInline(): void
     {
-        $this->config->method('getAsyncPurge')->willReturn(Config::ASYNC_PURGE_OFF);
-        $this->indexerRegistry->expects($this->never())->method('get');
+        $this->indexerRegistry->method('get')->willReturn($this->indexer(false));
         $this->purgeBySkus->expects($this->once())->method('execute')->with(['SKU-1']);
         $this->publisher->expects($this->never())->method('publish');
 
@@ -102,28 +93,12 @@ class DispatchPurgeTest extends TestCase
     }
 
     /**
-     * auto strategy with on-save indexing flushes inline.
+     * Scheduled indexing publishes and sets the coalescing guard.
      *
      * @return void
      */
-    public function testAutoOnSaveFlushesInline(): void
+    public function testScheduledIndexingPublishesAndGuards(): void
     {
-        $this->config->method('getAsyncPurge')->willReturn(Config::ASYNC_PURGE_AUTO);
-        $this->indexerRegistry->method('get')->willReturn($this->indexer(false));
-        $this->purgeBySkus->expects($this->once())->method('execute')->with(['SKU-1']);
-        $this->publisher->expects($this->never())->method('publish');
-
-        $this->model->execute(['SKU-1']);
-    }
-
-    /**
-     * auto strategy with scheduled indexing publishes and sets the coalescing guard.
-     *
-     * @return void
-     */
-    public function testAutoScheduledPublishesAndGuards(): void
-    {
-        $this->config->method('getAsyncPurge')->willReturn(Config::ASYNC_PURGE_AUTO);
         $this->indexerRegistry->method('get')->willReturn($this->indexer(true));
         $this->cache->method('load')->willReturn(false);
         $this->purgeBySkus->expects($this->never())->method('execute');
@@ -142,10 +117,24 @@ class DispatchPurgeTest extends TestCase
      */
     public function testPendingGuardCoalesces(): void
     {
-        $this->config->method('getAsyncPurge')->willReturn(Config::ASYNC_PURGE_ON);
+        $this->indexerRegistry->method('get')->willReturn($this->indexer(true));
         $this->cache->method('load')->willReturn('1');
         $this->publisher->expects($this->never())->method('publish');
         $this->cache->expects($this->never())->method('save');
+
+        $this->model->execute(['SKU-1']);
+    }
+
+    /**
+     * An indexer lookup failure degrades to an inline flush rather than dropping the purge.
+     *
+     * @return void
+     */
+    public function testIndexerFailureFlushesInline(): void
+    {
+        $this->indexerRegistry->method('get')->willThrowException(new \RuntimeException('boom'));
+        $this->purgeBySkus->expects($this->once())->method('execute')->with(['SKU-1']);
+        $this->publisher->expects($this->never())->method('publish');
 
         $this->model->execute(['SKU-1']);
     }
