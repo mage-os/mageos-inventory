@@ -8,17 +8,14 @@ declare(strict_types=1);
 namespace Magento\InventoryStockVisualizer\Controller\Product;
 
 use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
-use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
+use Magento\InventoryStockVisualizer\Controller\FragmentResponder;
 use Magento\InventoryStockVisualizer\Model\Availability\GetBundleMaxSellable;
-use Magento\InventoryStockVisualizer\Model\Cache\CacheTag;
 use Magento\InventoryStockVisualizer\Model\Config;
 use Magento\InventoryStockVisualizer\Model\LevelResolver;
 use Magento\InventoryStockVisualizer\Model\ResolveDisplayConfig;
-use Magento\PageCache\Model\Config as PageCacheConfig;
 
 /**
  * Return how many bundles can be sold for the customer's current selection.
@@ -30,29 +27,22 @@ use Magento\PageCache\Model\Config as PageCacheConfig;
 class BundleMax implements HttpGetActionInterface
 {
     /**
-     * Default public lifetime when neither the feature nor the FPC define one.
-     */
-    private const DEFAULT_TTL = 86400;
-
-    /**
      * @param RequestInterface $request
-     * @param JsonFactory $jsonFactory
      * @param Config $config
      * @param GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
      * @param GetBundleMaxSellable $getBundleMaxSellable
-     * @param ScopeConfigInterface $scopeConfig
      * @param LevelResolver $levelResolver
      * @param ResolveDisplayConfig $resolveDisplayConfig
+     * @param FragmentResponder $responder
      */
     public function __construct(
         private readonly RequestInterface $request,
-        private readonly JsonFactory $jsonFactory,
         private readonly Config $config,
         private readonly GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite,
         private readonly GetBundleMaxSellable $getBundleMaxSellable,
-        private readonly ScopeConfigInterface $scopeConfig,
         private readonly LevelResolver $levelResolver,
-        private readonly ResolveDisplayConfig $resolveDisplayConfig
+        private readonly ResolveDisplayConfig $resolveDisplayConfig,
+        private readonly FragmentResponder $responder
     ) {
     }
 
@@ -63,19 +53,19 @@ class BundleMax implements HttpGetActionInterface
      */
     public function execute(): Json
     {
-        $result = $this->jsonFactory->create();
+        $result = $this->responder->create();
         $sku = (string) $this->request->getParam('sku');
         $selections = $this->parseSelections($this->request->getParam('selections'));
 
         if (!$this->config->isEnabled() || $sku === '') {
-            return $this->uncacheable($result)->setData(['data' => null]);
+            return $this->responder->uncacheable($result, null);
         }
 
         try {
             $stockId = $this->getStockIdForCurrentWebsite->execute();
             $bundleMax = $this->getBundleMaxSellable->execute($sku, $selections, $stockId);
         } catch (\Throwable $e) {
-            return $this->uncacheable($result)->setData(['data' => null]);
+            return $this->responder->uncacheable($result, null);
         }
 
         $max = $bundleMax->getMax();
@@ -83,10 +73,10 @@ class BundleMax implements HttpGetActionInterface
         $payload = $this->payload($sku, $max);
 
         if ($max === null || $productIds === []) {
-            return $this->uncacheable($result)->setData(['data' => $payload]);
+            return $this->responder->uncacheable($result, $payload);
         }
 
-        return $this->cacheable($result, $productIds)->setData(['data' => $payload]);
+        return $this->responder->cacheable($result, $productIds, $payload);
     }
 
     /**
@@ -127,43 +117,5 @@ class BundleMax implements HttpGetActionInterface
         }
 
         return is_array($raw) ? $raw : [];
-    }
-
-    /**
-     * Apply public cache headers and one purge tag per chosen child product.
-     *
-     * @param Json $result
-     * @param int[] $productIds
-     * @return Json
-     */
-    private function cacheable(Json $result, array $productIds): Json
-    {
-        $ttl = $this->config->getTtl() ?: (int) $this->scopeConfig->getValue(PageCacheConfig::XML_PAGECACHE_TTL);
-        $ttl = $ttl > 0 ? $ttl : self::DEFAULT_TTL;
-
-        $tags = [];
-        foreach ($productIds as $productId) {
-            $tags[] = CacheTag::CACHE_TAG . '_' . (int) $productId;
-        }
-
-        $result->setHeader('X-Magento-Tags', implode(',', $tags), true);
-        $result->setHeader('Cache-Control', 'public, max-age=' . $ttl . ', s-maxage=' . $ttl, true);
-        $result->setHeader('Pragma', 'cache', true);
-
-        return $result;
-    }
-
-    /**
-     * Mark the response as non-cacheable.
-     *
-     * @param Json $result
-     * @return Json
-     */
-    private function uncacheable(Json $result): Json
-    {
-        $result->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0', true);
-        $result->setHeader('Pragma', 'no-cache', true);
-
-        return $result;
     }
 }

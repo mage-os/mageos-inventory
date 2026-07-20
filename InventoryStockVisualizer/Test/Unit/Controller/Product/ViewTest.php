@@ -16,6 +16,7 @@ use Magento\InventoryCatalogApi\Model\GetProductIdsBySkusInterface;
 use Magento\InventoryCatalogApi\Model\GetSkusByProductIdsInterface;
 use Magento\InventoryStockVisualizer\Api\Data\StockViewInterface;
 use Magento\InventoryStockVisualizer\Api\GetStockViewInterface;
+use Magento\InventoryStockVisualizer\Controller\FragmentResponder;
 use Magento\InventoryStockVisualizer\Controller\Product\View;
 use Magento\InventoryStockVisualizer\Model\Config;
 use Magento\InventoryStockVisualizer\Model\DisplayConfig;
@@ -133,16 +134,21 @@ class ViewTest extends TestCase
         $jsonFactory = $this->createMock(JsonFactory::class);
         $jsonFactory->method('create')->willReturn($this->result);
 
+        $responder = new FragmentResponder(
+            $jsonFactory,
+            $this->scopeConfig,
+            $this->config,
+            $this->getProductIdsBySkus,
+            $this->getSkusByProductIds
+        );
+
         $this->controller = new View(
             $this->request,
-            $jsonFactory,
             $this->config,
             $this->getStockView,
             $this->serializer,
             $this->getStockId,
-            $this->getProductIdsBySkus,
-            $this->scopeConfig,
-            $this->getSkusByProductIds
+            $responder
         );
     }
 

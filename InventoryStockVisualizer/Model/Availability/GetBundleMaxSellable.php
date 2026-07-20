@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\InventoryStockVisualizer\Model\Availability;
 
 use Magento\Bundle\Model\Product\Type as BundleType;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
@@ -44,66 +45,135 @@ class GetBundleMaxSellable
      */
     public function execute(string $sku, array $selectedQtyBySelectionId, int $stockId): BundleMaxResult
     {
-        try {
-            $product = $this->productRepository->get($sku);
-        } catch (LocalizedException $e) {
+        $product = $this->loadBundleProduct($sku);
+        if ($product === null) {
             return new BundleMaxResult(null, []);
         }
 
         $type = $product->getTypeInstance();
-        if (!$type instanceof BundleType) {
-            return new BundleMaxResult(null, []);
-        }
-
         $optionIds = $type->getOptionsIds($product);
         if (!$optionIds) {
             return new BundleMaxResult(null, []);
         }
 
-        $requiredOptionIds = [];
-        foreach ($type->getOptionsCollection($product) as $option) {
-            if ($option->getRequired()) {
-                $requiredOptionIds[(int) $option->getOptionId()] = true;
-            }
+        $evaluation = $this->evaluateSelections($type, $product, $optionIds, $selectedQtyBySelectionId, $stockId);
+        if (!$this->hasAllRequiredOptions($type, $product, $evaluation['chosenOptionIds'])) {
+            return new BundleMaxResult(null, []);
         }
 
+        return new BundleMaxResult($evaluation['max'], $evaluation['productIds']);
+    }
+
+    /**
+     * Load the SKU and return it only when it is a bundle product, otherwise null.
+     *
+     * @param string $sku
+     * @return ProductInterface|null
+     */
+    private function loadBundleProduct(string $sku): ?ProductInterface
+    {
+        try {
+            $product = $this->productRepository->get($sku);
+        } catch (LocalizedException $e) {
+            return null;
+        }
+
+        return $product->getTypeInstance() instanceof BundleType ? $product : null;
+    }
+
+    /**
+     * Fold the chosen selections into the sellable cap, the touched option ids and product ids.
+     *
+     * @param BundleType $type
+     * @param ProductInterface $product
+     * @param int[] $optionIds
+     * @param array<int|string,float|int|string> $selectedQtyBySelectionId
+     * @param int $stockId
+     * @return array{max: int|null, chosenOptionIds: array<int,true>, productIds: int[]}
+     */
+    private function evaluateSelections(
+        BundleType $type,
+        ProductInterface $product,
+        array $optionIds,
+        array $selectedQtyBySelectionId,
+        int $stockId
+    ): array {
         $chosenOptionIds = [];
         $productIds = [];
         $max = null;
         foreach ($type->getSelectionsCollection($optionIds, $product) as $selection) {
-            $selectionId = (int) $selection->getSelectionId();
-            if (!array_key_exists($selectionId, $selectedQtyBySelectionId)) {
+            $evaluated = $this->evaluateSelection($selection, $selectedQtyBySelectionId, $stockId);
+            if ($evaluated === null) {
                 continue;
             }
-            $chosenOptionIds[(int) $selection->getOptionId()] = true;
-
-            $perBundleQty = $selection->getSelectionCanChangeQty()
-                ? max(1.0, (float) $selectedQtyBySelectionId[$selectionId])
-                : (float) $selection->getSelectionQty();
-            if ($perBundleQty <= 0.0) {
+            $chosenOptionIds[$evaluated['optionId']] = true;
+            if ($evaluated['cap'] === null) {
                 continue;
             }
-
-            try {
-                $childSalable = (float) $this->getProductSalableQty->execute((string) $selection->getSku(), $stockId);
-            } catch (LocalizedException $e) {
-                $childSalable = 0.0;
+            if ($evaluated['productId'] > 0) {
+                $productIds[$evaluated['productId']] = true;
             }
-
-            $productId = (int) $selection->getProductId();
-            if ($productId > 0) {
-                $productIds[$productId] = true;
-            }
-            $cap = (int) floor($childSalable / $perBundleQty);
-            $max = $max === null ? $cap : min($max, $cap);
+            $max = $max === null ? $evaluated['cap'] : min($max, $evaluated['cap']);
         }
 
-        foreach (array_keys($requiredOptionIds) as $optionId) {
-            if (!isset($chosenOptionIds[$optionId])) {
-                return new BundleMaxResult(null, []);
+        return ['max' => $max, 'chosenOptionIds' => $chosenOptionIds, 'productIds' => array_keys($productIds)];
+    }
+
+    /**
+     * Evaluate one selection: null when not chosen, else its option id, sellable cap and product id.
+     *
+     * The cap is null when the selection is chosen but its per-bundle quantity is not positive, so
+     * the option still counts as chosen without bounding the sellable count.
+     *
+     * @param \Magento\Bundle\Model\Selection $selection
+     * @param array<int|string,float|int|string> $selectedQtyBySelectionId
+     * @param int $stockId
+     * @return array{optionId: int, cap: int|null, productId: int}|null
+     */
+    private function evaluateSelection($selection, array $selectedQtyBySelectionId, int $stockId): ?array
+    {
+        $selectionId = (int) $selection->getSelectionId();
+        if (!array_key_exists($selectionId, $selectedQtyBySelectionId)) {
+            return null;
+        }
+
+        $optionId = (int) $selection->getOptionId();
+        $perBundleQty = $selection->getSelectionCanChangeQty()
+            ? max(1.0, (float) $selectedQtyBySelectionId[$selectionId])
+            : (float) $selection->getSelectionQty();
+        if ($perBundleQty <= 0.0) {
+            return ['optionId' => $optionId, 'cap' => null, 'productId' => 0];
+        }
+
+        try {
+            $childSalable = (float) $this->getProductSalableQty->execute((string) $selection->getSku(), $stockId);
+        } catch (LocalizedException $e) {
+            $childSalable = 0.0;
+        }
+
+        return [
+            'optionId' => $optionId,
+            'cap' => (int) floor($childSalable / $perBundleQty),
+            'productId' => (int) $selection->getProductId(),
+        ];
+    }
+
+    /**
+     * Whether every required bundle option has a chosen selection.
+     *
+     * @param BundleType $type
+     * @param ProductInterface $product
+     * @param array<int,true> $chosenOptionIds
+     * @return bool
+     */
+    private function hasAllRequiredOptions(BundleType $type, ProductInterface $product, array $chosenOptionIds): bool
+    {
+        foreach ($type->getOptionsCollection($product) as $option) {
+            if ($option->getRequired() && !isset($chosenOptionIds[(int) $option->getOptionId()])) {
+                return false;
             }
         }
 
-        return new BundleMaxResult($max, array_keys($productIds));
+        return true;
     }
 }

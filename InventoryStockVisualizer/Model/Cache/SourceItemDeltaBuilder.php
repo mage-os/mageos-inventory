@@ -27,12 +27,34 @@ class SourceItemDeltaBuilder
     }
 
     /**
+     * Build the grouped deltas the decider expects from the saved or deleted source items.
+     *
      * @param SourceItemInterface[] $sourceItems items being written (or removed)
-     * @param array<string, float> $snapshot old quantity keyed by "sku|source"
+     * @param array<string,float> $snapshot old quantity keyed by "sku|source"
      * @param bool $removed whether the items are being deleted (new quantity is zero)
      * @return array<int, array<string, array{total: float, bySource: array<string, float>}>>
      */
     public function build(array $sourceItems, array $snapshot, bool $removed = false): array
+    {
+        $collected = $this->collectDeltas($sourceItems, $snapshot, $removed);
+        if (!$collected['bySkuSource']) {
+            return [];
+        }
+
+        $stockIdsBySource = $this->resolveStockIdsBySourceCodes->execute(array_keys($collected['sources']));
+
+        return $this->expandToStocks($collected['bySkuSource'], $stockIdsBySource);
+    }
+
+    /**
+     * Net each written item's quantity against the snapshot into a sku => source => delta map.
+     *
+     * @param SourceItemInterface[] $sourceItems
+     * @param array<string,float> $snapshot
+     * @param bool $removed
+     * @return array{bySkuSource: array<string, array<string, float>>, sources: array<string, true>}
+     */
+    private function collectDeltas(array $sourceItems, array $snapshot, bool $removed): array
     {
         $bySkuSource = [];
         $sources = [];
@@ -43,20 +65,26 @@ class SourceItemDeltaBuilder
                 continue;
             }
             $new = $removed ? 0.0 : (float) $item->getQuantity();
-            $old = $snapshot[$sku . '|' . $source] ?? 0.0;
-            $delta = $new - $old;
+            $delta = $new - ($snapshot[$sku . '|' . $source] ?? 0.0);
             if ($delta === 0.0) {
                 continue;
             }
             $bySkuSource[$sku][$source] = $delta;
             $sources[$source] = true;
         }
-        if (!$bySkuSource) {
-            return [];
-        }
 
-        $stockIdsBySource = $this->resolveStockIdsBySourceCodes->execute(array_keys($sources));
+        return ['bySkuSource' => $bySkuSource, 'sources' => $sources];
+    }
 
+    /**
+     * Expand each source delta to every stock the source is linked to.
+     *
+     * @param array<string,array<string,float>> $bySkuSource
+     * @param array<string,int[]> $stockIdsBySource
+     * @return array<int, array<string, array{total: float, bySource: array<string, float>}>>
+     */
+    private function expandToStocks(array $bySkuSource, array $stockIdsBySource): array
+    {
         $deltas = [];
         foreach ($bySkuSource as $sku => $sourceDeltas) {
             foreach ($sourceDeltas as $source => $delta) {

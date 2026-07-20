@@ -20,7 +20,9 @@ use Magento\InventorySalesApi\Model\GetStockItemDataInterface;
 use Magento\InventoryStockVisualizer\Api\Data\ChildViewInterfaceFactory;
 use Magento\InventoryStockVisualizer\Api\Data\SourceViewInterfaceFactory;
 use Magento\InventoryStockVisualizer\Api\Data\StockViewInterfaceFactory;
+use Magento\InventoryStockVisualizer\Model\Availability\CompositeViewBuilder;
 use Magento\InventoryStockVisualizer\Model\Availability\GetCompositeChildren;
+use Magento\InventoryStockVisualizer\Model\Availability\SourceViewBuilder;
 use Magento\InventoryStockVisualizer\Model\Config;
 use Magento\InventoryStockVisualizer\Model\Data\ChildView;
 use Magento\InventoryStockVisualizer\Model\Data\SourceView;
@@ -150,21 +152,33 @@ class GetStockViewTest extends TestCase
             )
         );
 
-        $this->model = new GetStockView(
-            $this->getProductSalableQty,
+        $eventManager = $this->createMock(EventManagerInterface::class);
+        $sourceViewBuilder = new SourceViewBuilder(
             $this->getSourcesAssignedToStock,
             $this->getSourceItemQuantity,
             $this->getSourceReservations,
+            $sourceViewFactory
+        );
+        $compositeViewBuilder = new CompositeViewBuilder(
+            $this->getCompositeChildren,
+            $this->getProductSalableQty,
+            $this->getStockItemData,
+            $stockViewFactory,
+            $childViewFactory,
+            $eventManager,
+            $this->config
+        );
+
+        $this->model = new GetStockView(
+            $this->getProductSalableQty,
             $this->sourceReservationsConfig,
             $this->config,
             $stockViewFactory,
-            $sourceViewFactory,
-            $this->createMock(EventManagerInterface::class),
+            $eventManager,
             $this->isSourceItemManagementAllowed,
-            $this->getStockItemData,
             $this->productRepository,
-            $this->getCompositeChildren,
-            $childViewFactory
+            $sourceViewBuilder,
+            $compositeViewBuilder
         );
     }
 

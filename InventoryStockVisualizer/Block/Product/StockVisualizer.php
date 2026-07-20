@@ -13,15 +13,10 @@ use Magento\Framework\Registry;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
-use Magento\InventoryCatalog\Model\GetStockIdForCurrentWebsite;
-use Magento\InventoryStockVisualizer\Api\GetStockViewInterface;
 use Magento\InventoryStockVisualizer\Model\Cache\CacheTag;
 use Magento\InventoryStockVisualizer\Model\Config;
 use Magento\InventoryStockVisualizer\Model\DisplayConfig;
-use Magento\InventoryStockVisualizer\Model\GetEnabledSources;
 use Magento\InventoryStockVisualizer\Model\Level;
-use Magento\InventoryStockVisualizer\Model\LevelResolver;
-use Magento\InventoryStockVisualizer\Model\ResolveDisplayConfig;
 
 /**
  * Product-page "Availability" panel.
@@ -53,11 +48,7 @@ class StockVisualizer extends Template implements IdentityInterface
      * @param Registry $registry
      * @param Config $config
      * @param Json $json
-     * @param ResolveDisplayConfig $resolveDisplayConfig
-     * @param GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite
-     * @param GetStockViewInterface $getStockView
-     * @param GetEnabledSources $getEnabledSources
-     * @param LevelResolver $levelResolver
+     * @param AvailabilityData $availabilityData
      * @param array<string,mixed> $data
      */
     public function __construct(
@@ -65,11 +56,7 @@ class StockVisualizer extends Template implements IdentityInterface
         private readonly Registry $registry,
         private readonly Config $config,
         private readonly Json $json,
-        private readonly ResolveDisplayConfig $resolveDisplayConfig,
-        private readonly GetStockIdForCurrentWebsite $getStockIdForCurrentWebsite,
-        private readonly GetStockViewInterface $getStockView,
-        private readonly GetEnabledSources $getEnabledSources,
-        private readonly LevelResolver $levelResolver,
+        private readonly AvailabilityData $availabilityData,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -141,7 +128,7 @@ class StockVisualizer extends Template implements IdentityInterface
             return $view->isSalable() ? Level::HIGH : Level::OUT;
         }
 
-        return $this->levelResolver->resolve($view->getSalableQty(), $this->getDisplayConfig());
+        return $this->availabilityData->resolveLevel($view->getSalableQty(), $this->getDisplayConfig());
     }
 
     /**
@@ -207,7 +194,7 @@ class StockVisualizer extends Template implements IdentityInterface
             }
             $rows[] = [
                 'name' => (string) $source->getName(),
-                'level' => $this->levelResolver->resolve($qty, $this->getDisplayConfig()),
+                'level' => $this->availabilityData->resolveLevel($qty, $this->getDisplayConfig()),
             ];
         }
 
@@ -221,7 +208,7 @@ class StockVisualizer extends Template implements IdentityInterface
      */
     public function getScaffoldSources(): array
     {
-        return $this->getEnabledSources->execute((int) $this->getStockId());
+        return $this->availabilityData->enabledSources((int) $this->getStockId());
     }
 
     /**
@@ -424,7 +411,7 @@ class StockVisualizer extends Template implements IdentityInterface
      */
     public function levelFill(string $level): int
     {
-        return $this->levelResolver->fillPercent($level);
+        return $this->availabilityData->fillPercent($level);
     }
 
     /**
@@ -488,11 +475,7 @@ class StockVisualizer extends Template implements IdentityInterface
     {
         if (!$this->stockResolved) {
             $this->stockResolved = true;
-            try {
-                $this->stockId = (int) $this->getStockIdForCurrentWebsite->execute();
-            } catch (\Throwable $e) {
-                $this->stockId = null;
-            }
+            $this->stockId = $this->availabilityData->resolveStockId();
         }
 
         return $this->stockId;
@@ -506,7 +489,7 @@ class StockVisualizer extends Template implements IdentityInterface
     private function getDisplayConfig(): DisplayConfig
     {
         if ($this->displayConfig === null) {
-            $this->displayConfig = $this->resolveDisplayConfig->forProduct($this->getProduct());
+            $this->displayConfig = $this->availabilityData->displayConfig($this->getProduct());
         }
 
         return $this->displayConfig;
@@ -521,7 +504,7 @@ class StockVisualizer extends Template implements IdentityInterface
     {
         if ($this->view === null) {
             $product = $this->getProduct();
-            $this->view = $this->getStockView->execute(
+            $this->view = $this->availabilityData->view(
                 (string) $product->getSku(),
                 (int) $this->getStockId(),
                 $product ? $product->getTypeId() : null
