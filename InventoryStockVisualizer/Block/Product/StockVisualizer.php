@@ -23,6 +23,16 @@ use Magento\InventoryStockVisualizer\Model\Level;
  */
 class StockVisualizer extends Template implements IdentityInterface
 {
+    public const KIND_NONE = '';
+
+    public const KIND_QUANTITY = 'quantity';
+
+    public const KIND_VARIANT = 'variant';
+
+    public const KIND_CHILDREN = 'children';
+
+    public const KIND_BUNDLE_MAX = 'bundleMax';
+
     /**
      * @var DisplayConfig|null
      */
@@ -224,30 +234,68 @@ class StockVisualizer extends Template implements IdentityInterface
     /**
      * The interactive strategy for the current product.
      *
-     * Returns '' when the panel is fully server-rendered (level / aggregate-status / children /
-     * grouped-sets) and needs no client component.
+     * Returns KIND_NONE when the panel is fully server-rendered (level / aggregate-status /
+     * children / grouped-sets) and needs no client component.
      *
      * @return string
      */
     public function getComponentKind(): string
     {
+        return $this->isOutOfStock() ? self::KIND_NONE : $this->resolveBaseKind();
+    }
+
+    /**
+     * Whether the panel already knows the product is unavailable.
+     *
+     * Suppressing the component on a known zero is what keeps an out-of-stock page from
+     * offering a call-to-action — or firing an instant fetch — whose only possible answer
+     * is the quantity the server already resolved. Aggregate salability is authoritative
+     * for composites too: an out-of-stock parent has no salable child to report.
+     *
+     * @return bool
+     */
+    public function isOutOfStock(): bool
+    {
+        $kind = $this->resolveBaseKind();
+
+        return $kind !== self::KIND_NONE && $this->resolveStatusLevel($kind) === Level::OUT;
+    }
+
+    /**
+     * The interactive strategy the product maps to, before the availability guard.
+     *
+     * @return string
+     */
+    private function resolveBaseKind(): string
+    {
         if ($this->isVariantMode()) {
-            return 'variant';
+            return self::KIND_VARIANT;
         }
         if ($this->isBundleMaxMode()) {
-            return 'bundleMax';
+            return self::KIND_BUNDLE_MAX;
         }
         if ($this->getCompositeMode() === Config::COMPOSITE_MODE_CHILDREN) {
-            return 'children';
+            return self::KIND_CHILDREN;
         }
         if ($this->isAggregateStatusOnly()) {
-            return '';
+            return self::KIND_NONE;
         }
         if ($this->isLevelMode()) {
-            return '';
+            return self::KIND_NONE;
         }
 
-        return 'quantity';
+        return self::KIND_QUANTITY;
+    }
+
+    /**
+     * Server-resolved status level backing the given strategy.
+     *
+     * @param string $kind
+     * @return string
+     */
+    private function resolveStatusLevel(string $kind): string
+    {
+        return $kind === self::KIND_QUANTITY ? $this->getQuantityStatusLevel() : $this->getAggregateLevel();
     }
 
     /**
@@ -261,7 +309,7 @@ class StockVisualizer extends Template implements IdentityInterface
     public function getInitJson(): string
     {
         $kind = $this->getComponentKind();
-        if ($kind === '') {
+        if ($kind === self::KIND_NONE) {
             return '';
         }
 
@@ -297,8 +345,7 @@ class StockVisualizer extends Template implements IdentityInterface
             'configVersion' => $this->config->getVersion(),
         ];
 
-        if ($kind === 'quantity') {
-            $level = $this->getQuantityStatusLevel();
+        if ($kind === self::KIND_QUANTITY) {
             $config += [
                 'scope' => $this->config->getScope(),
                 'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
@@ -311,8 +358,7 @@ class StockVisualizer extends Template implements IdentityInterface
                 'showPrompt' => false,
                 'showCta' => $onDemand,
             ];
-        } elseif ($kind === 'variant') {
-            $level = $this->getAggregateLevel();
+        } elseif ($kind === self::KIND_VARIANT) {
             $config += [
                 'ajaxUrl' => $this->getUrl('inventory_stockviz/product/view'),
                 'perSource' => $perSource,
@@ -323,8 +369,7 @@ class StockVisualizer extends Template implements IdentityInterface
                 'showPrompt' => true,
                 'showCta' => false,
             ];
-        } elseif ($kind === 'children') {
-            $level = $this->getAggregateLevel();
+        } elseif ($kind === self::KIND_CHILDREN) {
             $config += [
                 'ajaxUrl' => $this->getUrl('inventory_stockviz/product/children'),
                 'childScaffold' => $this->getChildScaffold(),
@@ -334,7 +379,6 @@ class StockVisualizer extends Template implements IdentityInterface
                 'showCta' => $onDemand,
             ];
         } else {
-            $level = $this->getAggregateLevel();
             $config += [
                 'ajaxUrl' => $this->getUrl('inventory_stockviz/product/bundleMax'),
                 'loading' => !$onDemand,
@@ -343,6 +387,7 @@ class StockVisualizer extends Template implements IdentityInterface
             ];
         }
 
+        $level = $this->resolveStatusLevel($kind);
         $config['statusLevel'] = $level;
         $config['statusWord'] = $this->levelLabel($level);
 

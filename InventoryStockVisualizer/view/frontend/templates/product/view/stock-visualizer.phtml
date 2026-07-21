@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
  */
 
-/** @var \Magento\InventoryStockVisualizer\Block\Product\StockVisualizer $block */
+use Magento\InventoryStockVisualizer\Block\Product\StockVisualizer;
+
+/** @var StockVisualizer $block */
 /** @var \Magento\Framework\Escaper $escaper */
 
 $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"'
@@ -15,15 +17,15 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
 <?php if ($block->isEnabled()): ?>
     <?php $isAggregate = $block->isAggregateStatusOnly(); ?>
     <?php $isLevel = $block->isLevelMode(); ?>
-    <?php $isVariant = $block->isVariantMode(); ?>
-    <?php $isBundleMax = $block->isBundleMaxMode(); ?>
+    <?php $kind = $block->getComponentKind(); ?>
+    <?php $hasComponent = $kind !== StockVisualizer::KIND_NONE; ?>
+    <?php $isVariant = $kind === StockVisualizer::KIND_VARIANT; ?>
+    <?php $isBundleMax = $kind === StockVisualizer::KIND_BUNDLE_MAX; ?>
     <?php $isInteractive = $isVariant || $isBundleMax; ?>
     <?php $isStatusOnly = $isLevel || $isAggregate; ?>
-    <?php $kind = $block->getComponentKind(); ?>
-    <?php $hasComponent = $kind !== ''; ?>
-    <?php $isQuantity = $kind === 'quantity'; ?>
+    <?php $isQuantity = $kind === StockVisualizer::KIND_QUANTITY; ?>
     <?php $modeOnDemand = $block->isOnDemand(); ?>
-    <?php $isChildren = $kind === 'children'; ?>
+    <?php $isChildren = $kind === StockVisualizer::KIND_CHILDREN; ?>
     <?php $perSourceQty = $isQuantity && $block->isPerSource(); ?>
     <?php $loadingInit = ($isQuantity || $isBundleMax) && !$modeOnDemand; ?>
     <?php $showCountInit = $loadingInit; ?>
@@ -66,17 +68,20 @@ $pin = '<svg class="sv-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor
             <?php else: ?>
                 <?php $level = $block->getQuantityStatusLevel(); ?>
                 <span class="sv-status <?= $escaper->escapeHtmlAttr($block->levelClass($level)) ?>"
-                    data-bind="css: statusClass">
+                    <?php if ($hasComponent): ?>data-bind="css: statusClass"<?php endif; ?>>
                     <span class="sv-dot" aria-hidden="true"></span>
-                    <span class="sv-word" data-bind="text: statusWord"><?=
+                    <span class="sv-word"
+                        <?php if ($hasComponent): ?>data-bind="text: statusWord"<?php endif; ?>><?=
                         $escaper->escapeHtml($block->levelLabel($level)) ?></span>
-                    <span class="sv-count"<?php if (!$loadingInit): ?> style="display: none"<?php endif; ?>
-                        data-bind="visible: showCount">
-                        <span class="sv-skel" aria-hidden="true" data-bind="visible: loading"
-                            <?php if (!$loadingInit): ?>style="display: none"<?php endif; ?>></span>
-                        <span<?php if ($loadingInit): ?> style="display: none"<?php endif; ?>
-                            data-bind="text: count, visible: !loading()"></span>
-                    </span>
+                    <?php if ($hasComponent): ?>
+                        <span class="sv-count"<?php if (!$loadingInit): ?> style="display: none"<?php endif; ?>
+                            data-bind="visible: showCount">
+                            <span class="sv-skel" aria-hidden="true" data-bind="visible: loading"
+                                <?php if (!$loadingInit): ?>style="display: none"<?php endif; ?>></span>
+                            <span<?php if ($loadingInit): ?> style="display: none"<?php endif; ?>
+                                data-bind="text: count, visible: !loading()"></span>
+                        </span>
+                    <?php endif; ?>
                 </span>
             <?php endif; ?>
         </div>
