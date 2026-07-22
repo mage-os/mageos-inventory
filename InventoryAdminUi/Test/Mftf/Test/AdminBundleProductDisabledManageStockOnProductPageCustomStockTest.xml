@@ -89,7 +89,7 @@
         <!--Verify product is not visible storefront.-->
         <amOnPage url="{{StorefrontCategoryPage.url($$category.custom_attributes[url_key]$$)}}" stepKey="navigateToCategoryPage"/>
         <waitForPageLoad stepKey="waitForCategoryPageLoad"/>
-        <waitForText userInput="$bundleProduct.name$" stepKey="assertProductIsPresent1"/>
+        <dontSee userInput="$$bundleProduct.name$$" stepKey="assertProductIsNotPresent"/>
         <!--Disable "Manage Stock" On Product Page.-->
         <amOnPage url="{{AdminProductEditPage.url($$bundleProduct.id$$)}}" stepKey="openProductEditPageToSetStockStatus"/>
         <click selector="{{AdminProductFormSection.advancedInventoryLink}}" stepKey="clickOnAdvancedInventoryLink"/>
@@ -101,7 +101,7 @@
         <!--Verify product is visible storefront.-->
         <amOnPage url="{{StorefrontCategoryPage.url($$category.custom_attributes[url_key]$$)}}" stepKey="navigateToCategoryPageToVerifyBundleProduct"/>
         <waitForPageLoad stepKey="waitForCategoryPageLoadToVerifyBundleProduct"/>
-        <dontSee userInput="$bundleProduct.name$" stepKey="assertProductIsPresent"/>
+        <see userInput="$$bundleProduct.name$$" stepKey="assertProductIsPresent"/>
         <see userInput="$$simpleProduct.price$$" stepKey="assertProductPriceIsPresent"/>
     </test>
 </tests>

@@ -121,8 +121,8 @@
         <waitForText  selector="{{AdminProductGridSection.productGridCell('1', 'Websites')}}" userInput="Main Website" stepKey="seeSimpleProductWebsiteInFirstRow"/>
         <waitForElementClickable selector="{{AdminGridColumnsControls.cancel}}" stepKey="waitForCancelToHideColumnsBlock"/>
         <click selector="{{AdminGridColumnsControls.cancel}}" stepKey="clickOnCancelToHideColumnsBlock"/>
-        <waitForElementClickable selector="{{AdminGridRow.editByValue(SimpleMsiProduct.sku)}}" stepKey="waitForEditSimpleMsiProduct"/>
-        <click selector="{{AdminGridRow.editByValue(SimpleMsiProduct.sku)}}" stepKey="clickOnEditSimpleMsiProduct"/>
+        <waitForElementClickable selector="{{AdminProductGridSection.productGridNameProduct(SimpleMsiProduct.name)}}" stepKey="waitForEditSimpleMsiProduct"/>
+        <click selector="{{AdminProductGridSection.productGridNameProduct(SimpleMsiProduct.name)}}" stepKey="clickOnEditSimpleMsiProduct"/>
         <waitForPageLoad stepKey="waitForSimpleProductPageLoad"/>
 
 
