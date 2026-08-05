@@ -1,27 +1,31 @@
 {
-    "name": "magento/module-inventory-reservation-cli",
-    "description": "N/A",
-    "require": {
-        "php": "~8.3.0||~8.4.0||~8.5.0",
-        "magento/framework": "*",
-        "magento/module-sales": "*",
-        "magento/module-inventory-api": "*",
-        "magento/module-inventory-reservations-api": "*",
-        "magento/module-inventory-sales-api": "*",
-        "magento/module-inventory-configuration-api": "*",
-        "magento/module-catalog": "*"
-    },
-    "type": "magento2-module",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
+  "name": "mage-os/module-inventory-reservation-cli",
+  "description": "N/A",
+  "require": {
+    "php": "~8.3.0||~8.4.0||~8.5.0",
+    "mage-os/framework": "3.3.0",
+    "mage-os/module-sales": "3.3.0",
+    "mage-os/module-inventory-api": "3.3.0",
+    "mage-os/module-inventory-reservations-api": "3.3.0",
+    "mage-os/module-inventory-sales-api": "3.3.0",
+    "mage-os/module-inventory-configuration-api": "3.3.0",
+    "mage-os/module-catalog": "3.3.0"
+  },
+  "type": "magento2-module",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Magento\\InventoryReservationCli\\": ""
-        }
+    "psr-4": {
+      "Magento\\InventoryReservationCli\\": ""
     }
+  },
+  "version": "3.3.0",
+  "replace": {
+    "magento/module-inventory-reservation-cli": "1.2.6"
+  }
 }
