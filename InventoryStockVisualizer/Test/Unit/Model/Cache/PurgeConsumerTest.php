@@ -69,7 +69,7 @@ class PurgeConsumerTest extends TestCase
      */
     public function testClearsGuardAndPurges(): void
     {
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->cache->expects($this->once())->method('remove')->with(DispatchPurge::GUARD_PREFIX . self::SKU);
         $this->purgeBySkus->expects($this->once())->method('execute')->with([self::SKU]);
 
@@ -83,7 +83,7 @@ class PurgeConsumerTest extends TestCase
      */
     public function testDisabledClearsGuardWithoutPurging(): void
     {
-        $this->config->method('isEnabled')->willReturn(false);
+        $this->config->method('isEnabledInAnyStore')->willReturn(false);
         $this->cache->expects($this->once())->method('remove')->with(DispatchPurge::GUARD_PREFIX . self::SKU);
         $this->purgeBySkus->expects($this->never())->method('execute');
 
@@ -97,7 +97,7 @@ class PurgeConsumerTest extends TestCase
      */
     public function testSwallowsAndLogsFailure(): void
     {
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->purgeBySkus->method('execute')->willThrowException(new \RuntimeException('boom'));
         $this->logger->expects($this->once())->method('error');
 

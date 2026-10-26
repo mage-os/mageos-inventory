@@ -9,6 +9,7 @@ namespace Magento\InventoryStockVisualizer\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Reader for the storefront stock visualizer store-scoped configuration.
@@ -56,11 +57,18 @@ class Config
     private $scopeConfig;
 
     /**
-     * @param ScopeConfigInterface $scopeConfig
+     * @var StoreManagerInterface
      */
-    public function __construct(ScopeConfigInterface $scopeConfig)
+    private $storeManager;
+
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     * @param StoreManagerInterface $storeManager
+     */
+    public function __construct(ScopeConfigInterface $scopeConfig, StoreManagerInterface $storeManager)
     {
         $this->scopeConfig = $scopeConfig;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -72,6 +80,25 @@ class Config
     public function isEnabled($store = null): bool
     {
         return $this->scopeConfig->isSetFlag(self::XML_PATH_ENABLED, ScopeInterface::SCOPE_STORE, $store);
+    }
+
+    /**
+     * Whether the visualizer is enabled for at least one store view.
+     *
+     * For store-independent callers (admin saves, cron, queue consumers) that must purge
+     * whenever any storefront renders the panel.
+     *
+     * @return bool
+     */
+    public function isEnabledInAnyStore(): bool
+    {
+        foreach ($this->storeManager->getStores() as $store) {
+            if ($this->isEnabled($store->getId())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

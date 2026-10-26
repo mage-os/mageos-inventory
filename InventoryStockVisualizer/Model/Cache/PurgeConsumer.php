@@ -43,7 +43,7 @@ class PurgeConsumer
     {
         try {
             $this->cache->remove(DispatchPurge::GUARD_PREFIX . $sku);
-            if ($sku === '' || !$this->config->isEnabled()) {
+            if ($sku === '' || !$this->config->isEnabledInAnyStore()) {
                 return;
             }
             $this->purgeBySkus->execute([$sku]);

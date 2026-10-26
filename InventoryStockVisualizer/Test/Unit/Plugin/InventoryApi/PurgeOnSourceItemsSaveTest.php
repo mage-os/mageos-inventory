@@ -93,7 +93,7 @@ class PurgeOnSourceItemsSaveTest extends TestCase
         $snapshot = ['SKU-1|slr_a' => 5.0];
         $deltas = [10 => ['SKU-1' => ['total' => -2.0, 'bySource' => ['slr_a' => -2.0]]]];
 
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->snapshot->expects($this->once())->method('execute')->with($items)->willReturn($snapshot);
         $this->deltaBuilder->expects($this->once())->method('build')->with($items, $snapshot)->willReturn($deltas);
         $this->resolveSkusToPurge->expects($this->once())->method('execute')->with($deltas)->willReturn(['SKU-1']);
@@ -111,7 +111,7 @@ class PurgeOnSourceItemsSaveTest extends TestCase
     public function testDisabledDoesNothing(): void
     {
         $items = [$this->createMock(SourceItemInterface::class)];
-        $this->config->method('isEnabled')->willReturn(false);
+        $this->config->method('isEnabledInAnyStore')->willReturn(false);
         $this->snapshot->expects($this->never())->method('execute');
         $this->deltaBuilder->expects($this->never())->method('build');
         $this->dispatchPurge->expects($this->never())->method('execute');
@@ -128,7 +128,7 @@ class PurgeOnSourceItemsSaveTest extends TestCase
     public function testNoDeltasDoesNotDispatch(): void
     {
         $items = [$this->createMock(SourceItemInterface::class)];
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->snapshot->method('execute')->willReturn([]);
         $this->deltaBuilder->method('build')->willReturn([]);
         $this->resolveSkusToPurge->expects($this->never())->method('execute');

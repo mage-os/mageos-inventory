@@ -9,7 +9,9 @@ namespace Magento\InventoryStockVisualizer\Test\Unit\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\InventoryStockVisualizer\Model\Config;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -24,6 +26,11 @@ class ConfigTest extends TestCase
     private $scopeConfig;
 
     /**
+     * @var StoreManagerInterface|MockObject
+     */
+    private $storeManager;
+
+    /**
      * @var Config
      */
     private $config;
@@ -35,7 +42,44 @@ class ConfigTest extends TestCase
     {
         parent::setUp();
         $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
-        $this->config = new Config($this->scopeConfig);
+        $this->storeManager = $this->createMock(StoreManagerInterface::class);
+        $this->config = new Config($this->scopeConfig, $this->storeManager);
+    }
+
+    /**
+     * Store-independent callers see the panel as enabled when any store view enables it.
+     *
+     * @return void
+     */
+    public function testIsEnabledInAnyStoreChecksEveryStoreView(): void
+    {
+        $this->storeManager->method('getStores')->willReturn([
+            $this->createConfiguredStub(StoreInterface::class, ['getId' => 1]),
+            $this->createConfiguredStub(StoreInterface::class, ['getId' => 2]),
+        ]);
+        $this->scopeConfig->method('isSetFlag')->willReturnCallback(
+            fn(string $path, string $scope, $store) => $path === Config::XML_PATH_ENABLED
+                && $scope === ScopeInterface::SCOPE_STORE
+                && (int)$store === 2
+        );
+
+        $this->assertFalse($this->config->isEnabled());
+        $this->assertTrue($this->config->isEnabledInAnyStore());
+    }
+
+    /**
+     * Disabled in every store view means nothing to purge.
+     *
+     * @return void
+     */
+    public function testIsEnabledInAnyStoreIsFalseWhenNoStoreEnablesIt(): void
+    {
+        $this->storeManager->method('getStores')->willReturn([
+            $this->createConfiguredStub(StoreInterface::class, ['getId' => 1]),
+        ]);
+        $this->scopeConfig->method('isSetFlag')->willReturn(false);
+
+        $this->assertFalse($this->config->isEnabledInAnyStore());
     }
 
     /**

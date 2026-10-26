@@ -61,7 +61,7 @@ class PurgeOnSourceItemsSave
     {
         $snapshot = [];
         try {
-            if ($this->config->isEnabled()) {
+            if ($this->config->isEnabledInAnyStore()) {
                 $snapshot = $this->snapshotSourceItemQty->execute($sourceItems);
             }
         } catch (\Throwable $e) {
@@ -86,7 +86,7 @@ class PurgeOnSourceItemsSave
     {
         $snapshot = array_pop($this->snapshots) ?? [];
         try {
-            if ($this->config->isEnabled()) {
+            if ($this->config->isEnabledInAnyStore()) {
                 $deltas = $this->sourceItemDeltaBuilder->build($sourceItems, $snapshot);
                 if ($deltas) {
                     $this->dispatchPurge->execute($this->resolveSkusToPurge->execute($deltas));

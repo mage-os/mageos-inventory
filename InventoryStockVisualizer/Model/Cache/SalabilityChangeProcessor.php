@@ -50,7 +50,7 @@ class SalabilityChangeProcessor implements CompositeProductProcessorInterface
      */
     public function process(array $saleableStatusesBeforeSync, array $saleableStatusesAfterSync): void
     {
-        if (!$this->config->isEnabled()) {
+        if (!$this->config->isEnabledInAnyStore()) {
             return;
         }
         try {

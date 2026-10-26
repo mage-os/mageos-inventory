@@ -71,7 +71,7 @@ class ResolveSkusToPurgeTest extends TestCase
      */
     public function testDisabledResolvesNothing(): void
     {
-        $this->config->method('isEnabled')->willReturn(false);
+        $this->config->method('isEnabledInAnyStore')->willReturn(false);
         $this->resolveDisplayConfig->expects($this->never())->method('forSku');
 
         $this->assertSame([], $this->model->execute($this->deltas(-2.0)));
@@ -84,7 +84,7 @@ class ResolveSkusToPurgeTest extends TestCase
      */
     public function testQuantityModeResolvesTouchedSku(): void
     {
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->resolveDisplayConfig->method('forSku')->willReturn($this->quantityConfig());
 
         $this->assertSame([self::SKU], $this->model->execute($this->deltas(-2.0)));
@@ -97,7 +97,7 @@ class ResolveSkusToPurgeTest extends TestCase
      */
     public function testLevelModeSkipsWhenLevelUnchanged(): void
     {
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->resolveDisplayConfig->method('forSku')->willReturn($this->levelConfig());
         $this->getStockView->method('execute')->willReturn(new StockView(self::SKU, self::STOCK_ID, 8.0, true, []));
 
@@ -111,7 +111,7 @@ class ResolveSkusToPurgeTest extends TestCase
      */
     public function testLevelModeResolvesWhenAggregateLevelChanges(): void
     {
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->resolveDisplayConfig->method('forSku')->willReturn($this->levelConfig());
         $this->getStockView->method('execute')->willReturn(new StockView(self::SKU, self::STOCK_ID, 2.0, true, []));
 
@@ -125,7 +125,7 @@ class ResolveSkusToPurgeTest extends TestCase
      */
     public function testLevelModeResolvesWhenPerSourceLevelChanges(): void
     {
-        $this->config->method('isEnabled')->willReturn(true);
+        $this->config->method('isEnabledInAnyStore')->willReturn(true);
         $this->resolveDisplayConfig->method('forSku')->willReturn($this->levelConfig());
         $view = new StockView(self::SKU, self::STOCK_ID, 8.0, true, [new SourceView('slr_a', 3.0, 'A')]);
         $this->getStockView->method('execute')->willReturn($view);

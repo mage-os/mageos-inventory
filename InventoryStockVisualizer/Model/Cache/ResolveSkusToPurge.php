@@ -46,7 +46,7 @@ class ResolveSkusToPurge
      */
     public function execute(array $deltas): array
     {
-        if (!$this->config->isEnabled()) {
+        if (!$this->config->isEnabledInAnyStore()) {
             return [];
         }
 
