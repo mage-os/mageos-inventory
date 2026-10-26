@@ -76,6 +76,7 @@ class AcquireStockItemLocks implements ResetAfterRequestInterface
      */
     public function _resetState(): void
     {
+        $this->releaseAll();
         $this->connection = null;
         $this->acquiredLocks = [];
     }
@@ -262,8 +263,9 @@ class AcquireStockItemLocks implements ResetAfterRequestInterface
      */
     private function sourceLockName(string $sku, string $sourceCode): string
     {
+        // One hash keeps the name within MySQL's 64-character GET_LOCK limit; the separator avoids collisions.
         // phpcs:ignore Magento2.Security.InsecureFunction
-        return sprintf('inv_src_%s_%s', md5($sourceCode), md5($sku));
+        return 'inv_src_' . md5($sourceCode . "\0" . $sku);
     }
 
     /**

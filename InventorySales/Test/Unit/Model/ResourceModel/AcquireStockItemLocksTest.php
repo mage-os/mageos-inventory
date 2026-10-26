@@ -127,6 +127,29 @@ class AcquireStockItemLocksTest extends TestCase
         $this->assertCount(1, $shared, 'the shared source must yield a common lock name');
     }
 
+    /**
+     * MySQL rejects GET_LOCK names longer than 64 characters (MariaDB does not).
+     */
+    public function testLockNamesFitTheMysqlLengthLimit(): void
+    {
+        $longSku = str_repeat('s', 64);
+        $this->getSourcesMock->method('execute')->willReturnCallback(
+            fn(int $stockId) => $stockId === 5
+                ? [$this->source(str_repeat('c', 255), true)]
+                : [$this->source('src_a', false)]
+        );
+
+        $names = array_merge(
+            $this->model->buildOrderedLockNames([$longSku], 5),
+            $this->model->buildOrderedLockNames([$longSku], PHP_INT_MAX)
+        );
+
+        $this->assertCount(2, $names);
+        foreach ($names as $name) {
+            $this->assertLessThanOrEqual(64, strlen($name), $name);
+        }
+    }
+
     public function testExecuteReturnsTheLockNamesItTook(): void
     {
         $this->getSourcesMock->method('execute')->willReturn([$this->source('slr_a', true)]);
