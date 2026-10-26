@@ -94,7 +94,7 @@ class StockVisualizerTest extends TestCase
      * @param string $compositeMode
      * @return void
      */
-    #[DataProvider('componentKindProvider')]
+    #[DataProvider('componentTypeProvider')]
     public function testComponentSuppressedWhenOutOfStock(string $typeId, string $compositeMode): void
     {
         $this->givenProduct($typeId, $compositeMode, false);
@@ -121,6 +121,16 @@ class StockVisualizerTest extends TestCase
 
         $this->assertFalse($this->block->isOutOfStock());
         $this->assertSame($expectedKind, $this->block->getComponentKind());
+    }
+
+    /**
+     * Product type and configured composite mode, without the resolved strategy.
+     *
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function componentTypeProvider(): array
+    {
+        return array_map(static fn(array $case): array => array_slice($case, 0, 2), self::componentKindProvider());
     }
 
     /**
