@@ -157,7 +157,7 @@
         <plugin name="inventory_reservations_placement" type="Magento\InventorySales\Plugin\Sales\OrderManagement\AppendReservationsAfterOrderPlacementPlugin"/>
     </type>
     <type name="Magento\Quote\Model\QuoteManagement">
-        <plugin name="inventory_lock_during_place_order" type="Magento\InventorySales\Plugin\Quote\CartManagementPlugin"/>
+        <plugin name="inventory_lock_during_place_order" type="Magento\InventorySales\Plugin\Quote\CartManagementPlugin" disabled="true"/>
     </type>
     <!-- Return Processor -->
     <preference for="Magento\InventorySalesApi\Model\ReturnProcessor\Request\ItemsToRefundInterface" type="Magento\InventorySales\Model\ReturnProcessor\Request\ItemsToRefund" />
@@ -213,6 +213,7 @@
         <arguments>
             <argument name="cache" xsi:type="object">Magento\InventoryReservationsApi\Model\GetReservationsQuantityBySkuListCacheInterface</argument>
         </arguments>
+        <plugin name="lock_reserved_skus" type="Magento\InventorySales\Plugin\InventorySales\LockReservedSkusPlugin"/>
     </type>
     <type name="Magento\InventorySales\Observer\PreloadData">
         <arguments>
