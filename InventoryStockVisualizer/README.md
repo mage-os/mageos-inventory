@@ -90,6 +90,9 @@ Per-product overrides (attribute group *Stock Visualizer*) cover the display typ
 and the level thresholds: `stockviz_display_type`, `stockviz_level_basis`,
 `stockviz_level_high`, `stockviz_level_low`, `stockviz_full_qty` (the percentage
 reference). Scope, delivery mode and the composite modes are store-scoped only.
+Every AJAX fragment follows the effective display type of the product it
+describes. A selected configurable variant shows a level when either the
+configurable or the variant is set to level.
 
 ## Cache invalidation
 
@@ -142,6 +145,14 @@ fragment, every fragment request carries a short **config fingerprint** (`_cv`)
 derived from the display settings (`Config::getVersion()`). Changing any display
 setting mints a fresh cache key, so the new output is served on the next load
 without a manual cache flush.
+
+### Product changes purge their fragments
+
+Each fragment also carries the `cat_p_<productId>` tag of every product it
+describes, the composite included. Saving a product, for example to change its
+*Stock Visualizer* override, purges its fragments together with its page. With
+the full page cache disabled the fragments are sent as non-cacheable, like the
+rest of the storefront.
 
 ## Operational requirements
 

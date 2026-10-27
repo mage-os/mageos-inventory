@@ -22,6 +22,7 @@ use Magento\InventoryStockVisualizer\Model\Config;
 use Magento\InventoryStockVisualizer\Model\DisplayConfig;
 use Magento\InventoryStockVisualizer\Model\ResolveDisplayConfig;
 use Magento\InventoryStockVisualizer\Model\StockViewSerializer;
+use Magento\PageCache\Model\Config as PageCacheConfig;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -133,13 +134,16 @@ class ViewTest extends TestCase
 
         $jsonFactory = $this->createMock(JsonFactory::class);
         $jsonFactory->method('create')->willReturn($this->result);
+        $pageCacheConfig = $this->createStub(PageCacheConfig::class);
+        $pageCacheConfig->method('isEnabled')->willReturn(true);
 
         $responder = new FragmentResponder(
             $jsonFactory,
             $this->scopeConfig,
             $this->config,
             $this->getProductIdsBySkus,
-            $this->getSkusByProductIds
+            $this->getSkusByProductIds,
+            $pageCacheConfig
         );
 
         $this->controller = new View(
@@ -206,7 +210,10 @@ class ViewTest extends TestCase
         $this->controller->execute();
 
         $this->assertSame(['data' => ['qty' => 15.0]], $this->data);
-        $this->assertSame('inv_stockviz_' . self::PRODUCT_ID, $this->headers['X-Magento-Tags']);
+        $this->assertSame(
+            'inv_stockviz_' . self::PRODUCT_ID . ',cat_p_' . self::PRODUCT_ID,
+            $this->headers['X-Magento-Tags']
+        );
         $this->assertStringContainsString('public', $this->headers['Cache-Control']);
         $this->assertStringContainsString('max-age=120', $this->headers['Cache-Control']);
     }
@@ -249,6 +256,43 @@ class ViewTest extends TestCase
 
         $this->assertSame(['data' => null], $this->data);
         $this->assertArrayNotHasKey('X-Magento-Tags', $this->headers);
+    }
+
+    public function testAVariantShownAsALevelAsksTheSerializerForALevel(): void
+    {
+        $params = ['sku' => '', 'product_id' => '7', 'level' => '1'];
+        $this->request->method('getParam')->willReturnCallback(fn (string $key) => $params[$key] ?? null);
+        $this->config->method('isEnabled')->willReturn(true);
+        $this->getSkusByProductIds->method('execute')->with([7])->willReturn([7 => 'CH-1']);
+        $this->getStockId->method('execute')->willReturn(self::STOCK_ID);
+        $view = $this->createStub(StockViewInterface::class);
+        $this->getStockView->method('execute')->with('CH-1', self::STOCK_ID)->willReturn($view);
+        $this->getProductIdsBySkus->method('execute')->willReturn(['CH-1' => 7]);
+
+        $this->serializer->expects($this->once())->method('serialize')
+            ->with($view, true)
+            ->willReturn(['level' => 'high']);
+
+        $this->controller->execute();
+
+        $this->assertSame(['data' => ['level' => 'high']], $this->data);
+    }
+
+    public function testAProductPageAsksForItsOwnDisplay(): void
+    {
+        $params = ['sku' => self::SKU];
+        $this->request->method('getParam')->willReturnCallback(fn (string $key) => $params[$key] ?? null);
+        $this->config->method('isEnabled')->willReturn(true);
+        $this->getStockId->method('execute')->willReturn(self::STOCK_ID);
+        $view = $this->createStub(StockViewInterface::class);
+        $this->getStockView->method('execute')->willReturn($view);
+        $this->getProductIdsBySkus->method('execute')->willReturn([self::SKU => self::PRODUCT_ID]);
+
+        $this->serializer->expects($this->once())->method('serialize')
+            ->with($view, false)
+            ->willReturn(['qty' => 1.0]);
+
+        $this->controller->execute();
     }
 
     /**

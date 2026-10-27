@@ -127,6 +127,47 @@ class AcquireStockItemLocksTest extends TestCase
         $this->assertCount(1, $shared, 'the shared source must yield a common lock name');
     }
 
+    public function testSourceLockNamesMatchTheCheckoutLockNamesForTheSameSource(): void
+    {
+        $this->getSourcesMock->method('execute')->willReturn([$this->source('slr_a', true)]);
+
+        $checkout = $this->model->buildOrderedLockNames(['sku1'], 5);
+        $transfer = $this->model->buildOrderedSourceLockNames(['sku1', 'sku1'], ['slr_b', 'slr_a', 'slr_a']);
+
+        $this->assertCount(2, $transfer);
+        $this->assertContains($checkout[0], $transfer);
+        $sorted = $transfer;
+        sort($sorted, SORT_STRING);
+        $this->assertSame($sorted, $transfer);
+    }
+
+    public function testAcquiresEverySourceLockAndReleasesThem(): void
+    {
+        $connection = $this->createMock(AdapterInterface::class);
+        $resourceConnection = $this->createMock(ResourceConnection::class);
+        $resourceConnection->method('getConnection')->willReturn($connection);
+        $model = new AcquireStockItemLocks($resourceConnection, $this->getSourcesMock);
+        $queries = [];
+        $connection->method('fetchOne')->willReturnCallback(function (string $sql, array $bind) use (&$queries) {
+            $queries[] = [strtok($sql, '('), $bind[0]];
+            return 1;
+        });
+
+        $names = $model->buildOrderedSourceLockNames(['sku1'], ['slr_a', 'slr_b']);
+        $model->executeForSources(['sku1'], ['slr_a', 'slr_b']);
+        $model->releaseAll();
+
+        $this->assertSame(
+            [
+                ['SELECT GET_LOCK', $names[0]],
+                ['SELECT GET_LOCK', $names[1]],
+                ['SELECT RELEASE_LOCK', $names[0]],
+                ['SELECT RELEASE_LOCK', $names[1]],
+            ],
+            $queries
+        );
+    }
+
     /**
      * MySQL rejects GET_LOCK names longer than 64 characters (MariaDB does not).
      */

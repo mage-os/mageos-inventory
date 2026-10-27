@@ -76,7 +76,11 @@ class BundleMax implements HttpGetActionInterface
             return $this->responder->uncacheable($result, $payload);
         }
 
-        return $this->responder->cacheable($result, $productIds, $payload);
+        return $this->responder->cacheable(
+            $result,
+            [...$this->responder->resolveProductIds([$sku]), ...$productIds],
+            $payload
+        );
     }
 
     /**
@@ -93,9 +97,10 @@ class BundleMax implements HttpGetActionInterface
         if ($max === null) {
             return null;
         }
-        if ($this->config->getDisplayType() === Config::DISPLAY_TYPE_LEVEL) {
+        $displayConfig = $this->resolveDisplayConfig->forSku($sku);
+        if ($displayConfig->isLevel()) {
             return [
-                'level' => $this->levelResolver->resolve((float) $max, $this->resolveDisplayConfig->forSku($sku)),
+                'level' => $this->levelResolver->resolve((float) $max, $displayConfig),
                 'salable' => $max > 0,
             ];
         }

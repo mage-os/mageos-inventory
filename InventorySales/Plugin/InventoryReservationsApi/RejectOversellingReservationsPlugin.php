@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\InventorySales\Plugin\InventoryReservationsApi;
 
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\InventoryReservationsApi\Model\AppendReservationsInterface;
 use Magento\InventoryReservationsApi\Model\ReservationInterface;
 use Magento\InventorySalesApi\Api\AreProductsSalableForRequestedQtyInterface;
@@ -22,13 +23,19 @@ use Magento\InventorySalesApi\Api\Data\IsProductSalableForRequestedQtyRequestInt
  */
 class RejectOversellingReservationsPlugin
 {
+    private const EPSILON = 0.000001;
+
+    private const MANUAL_COMPENSATION = 'manual_compensation';
+
     /**
      * @param AreProductsSalableForRequestedQtyInterface $areProductsSalableForRequestedQty
      * @param IsProductSalableForRequestedQtyRequestInterfaceFactory $requestFactory
+     * @param SerializerInterface $serializer
      */
     public function __construct(
         private readonly AreProductsSalableForRequestedQtyInterface $areProductsSalableForRequestedQty,
-        private readonly IsProductSalableForRequestedQtyRequestInterfaceFactory $requestFactory
+        private readonly IsProductSalableForRequestedQtyRequestInterfaceFactory $requestFactory,
+        private readonly SerializerInterface $serializer
     ) {
     }
 
@@ -43,22 +50,50 @@ class RejectOversellingReservationsPlugin
      */
     public function aroundExecute(AppendReservationsInterface $subject, callable $proceed, array $reservations)
     {
-        $demandByStock = [];
+        $netByStock = [];
         foreach ($reservations as $reservation) {
-            $quantity = $reservation->getQuantity();
-            if ($quantity >= 0) {
+            if ($this->isManualCompensation($reservation)) {
                 continue;
             }
             $stockId = $reservation->getStockId();
             $sku = $reservation->getSku();
-            $demandByStock[$stockId][$sku] = ($demandByStock[$stockId][$sku] ?? 0.0) - $quantity;
+            $netByStock[$stockId][$sku] = ($netByStock[$stockId][$sku] ?? 0.0) + $reservation->getQuantity();
         }
 
-        foreach ($demandByStock as $stockId => $demandBySku) {
-            $this->assertSalable((int)$stockId, $demandBySku);
+        foreach ($netByStock as $stockId => $netBySku) {
+            $demandBySku = [];
+            foreach ($netBySku as $sku => $net) {
+                if ($net < -self::EPSILON) {
+                    $demandBySku[$sku] = -$net;
+                }
+            }
+            if ($demandBySku) {
+                $this->assertSalable((int)$stockId, $demandBySku);
+            }
         }
 
         return $proceed($reservations);
+    }
+
+    /**
+     * Whether the reservation records a compensation written by inventory:reservation:create-compensations.
+     *
+     * @param ReservationInterface $reservation
+     * @return bool
+     */
+    private function isManualCompensation(ReservationInterface $reservation): bool
+    {
+        $metadata = $reservation->getMetadata();
+        if ($metadata === null || $metadata === '') {
+            return false;
+        }
+        try {
+            $data = $this->serializer->unserialize($metadata);
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return is_array($data) && ($data['event_type'] ?? null) === self::MANUAL_COMPENSATION;
     }
 
     /**
