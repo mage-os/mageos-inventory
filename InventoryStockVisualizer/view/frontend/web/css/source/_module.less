@@ -1,0 +1,332 @@
+// /**
+//  * Copyright 2026 Jeanmarcos Juarez
+//  * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+//  */
+
+@sv__level-high: @color-dark-green1;
+@sv__level-medium: @color-orange-red1;
+@sv__level-low: @color-red11;
+@sv__level-out: @color-gray62;
+@sv__border: @border-color__base;
+@sv__panel-bg: @color-white;
+@sv__head-bg: darken(@color-white, 3%);
+@sv__track: darken(@color-white, 9%);
+@sv__muted: @text__color__muted;
+@sv__skeleton-bg: fade(@primary__color, 12%);
+@sv__skeleton-hi: fade(@primary__color, 24%);
+@sv__tint: 12%;
+
+.sv-status-colors(@color) {
+    color: @color;
+
+    .sv-dot {
+        background: @color;
+    }
+}
+
+& when (@media-common = true) {
+    .product-info-main .stock-visualizer.sva {
+        margin: @indent__s 0;
+        border: 1px solid @sv__border;
+        border-radius: 4px;
+        background: @sv__panel-bg;
+        overflow: hidden;
+
+        .sva-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: @indent__xs @indent__s;
+            padding: @indent__xs @indent__s;
+            background: @sv__head-bg;
+        }
+
+        .sva-head:not(:last-child) {
+            border-bottom: 1px solid @sv__border;
+        }
+
+        .sva-title {
+            font-size: 1.1rem;
+            font-weight: @font-weight__bold;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: @sv__muted;
+        }
+
+        .sv-status {
+            display: inline-flex;
+            align-items: center;
+            flex: 0 0 auto;
+            gap: 7px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: @font-weight__bold;
+            white-space: nowrap;
+            color: @sv__level-out;
+
+            &.level-high {
+                .sv-status-colors(@sv__level-high);
+                background: fade(@sv__level-high, @sv__tint);
+            }
+
+            &.level-medium {
+                .sv-status-colors(@sv__level-medium);
+                background: fade(@sv__level-medium, @sv__tint);
+            }
+
+            &.level-low {
+                .sv-status-colors(@sv__level-low);
+                background: fade(@sv__level-low, @sv__tint);
+            }
+
+            &.level-out {
+                .sv-status-colors(@sv__level-out);
+                background: fade(@sv__level-out, @sv__tint);
+            }
+        }
+
+        .sv-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+            background: @sv__level-out;
+        }
+
+        .sv-count {
+            color: @primary__color;
+            font-variant-numeric: tabular-nums;
+
+            &:not(:empty)::before {
+                content: '\00B7\00A0';
+                color: @sv__muted;
+            }
+
+            &:empty {
+                display: none;
+            }
+        }
+
+        .sva-body {
+            list-style: none;
+            margin: 0;
+            padding: @indent__xs @indent__s @indent__s;
+        }
+
+        .sva-head.sv-flush {
+            border-bottom: 0;
+        }
+
+        .sv-hint {
+            padding: @indent__s;
+            color: @sv__muted;
+        }
+
+        .sv-children {
+            padding-bottom: 0;
+
+            .sv-src {
+                padding: @indent__s 0;
+                border-top-color: @sv__border;
+            }
+        }
+
+        &.sv-mode-quantity .sv-children .sv-src-top {
+            margin-bottom: 0;
+        }
+
+        .sv-sets {
+            margin: 0 @indent__s;
+            padding: @indent__s 0;
+            border-top: 1px solid @sv__border;
+            color: @sv__muted;
+        }
+
+        .sv-src {
+            margin: 0;
+            padding: @indent__xs 0;
+            border-top: 1px solid @sv__head-bg;
+            max-height: 12em;
+            overflow: hidden;
+            transition: max-height .3s ease, opacity .3s ease, padding .3s ease, margin .3s ease, border-width .3s ease;
+
+            &:first-child {
+                border-top: 0;
+            }
+
+            &.sv-collapsed {
+                max-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                margin: 0;
+                border-top-width: 0;
+                opacity: 0;
+            }
+        }
+
+        .sv-empty-note {
+            border-top: 0;
+            color: @sv__muted;
+            font-style: italic;
+        }
+
+        .sv-src-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2px @indent__s;
+            margin-bottom: 6px;
+        }
+
+        .sv-name {
+            display: inline-flex;
+            align-items: center;
+            flex: 1 1 auto;
+            gap: 7px;
+            min-width: 0;
+        }
+
+        .sv-val,
+        .sv-lvl {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .sv-pin {
+            width: 14px;
+            height: 14px;
+            flex: 0 0 auto;
+            color: @sv__muted;
+        }
+
+        .sv-val {
+            font-weight: @font-weight__bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sv-lvl {
+            font-weight: @font-weight__bold;
+        }
+
+        .sv-meter {
+            display: block;
+            height: 6px;
+            border-radius: 999px;
+            background: @sv__track;
+            overflow: hidden;
+        }
+
+        .sv-meter > i {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: @sv__level-high;
+            transition: width .4s ease;
+        }
+
+        .sv-loading .sv-meter {
+            background-image: linear-gradient(
+                90deg,
+                @sv__skeleton-bg 25%,
+                @sv__skeleton-hi 37%,
+                @sv__skeleton-bg 63%
+            );
+            background-size: 400% 100%;
+            animation: sv-shimmer 1.2s ease infinite;
+        }
+
+        .sv-loading .sv-meter > i {
+            opacity: 0;
+        }
+
+        .level-high .sv-lvl {
+            color: @sv__level-high;
+        }
+
+        .level-high .sv-meter > i {
+            background: @sv__level-high;
+        }
+
+        .level-medium .sv-lvl {
+            color: @sv__level-medium;
+        }
+
+        .level-medium .sv-meter > i {
+            background: @sv__level-medium;
+        }
+
+        .level-low .sv-lvl {
+            color: @sv__level-low;
+        }
+
+        .level-low .sv-meter > i {
+            background: @sv__level-low;
+        }
+
+        .level-out .sv-lvl {
+            color: @sv__level-out;
+        }
+
+        .level-out .sv-meter > i {
+            background: @sv__level-out;
+        }
+
+        .sv-skel {
+            display: inline-block;
+            width: 2ch;
+            height: .8em;
+            vertical-align: -.05em;
+            border-radius: 2px;
+            background: @sv__skeleton-bg;
+            background-image: linear-gradient(
+                90deg,
+                @sv__skeleton-bg 25%,
+                @sv__skeleton-hi 37%,
+                @sv__skeleton-bg 63%
+            );
+            background-size: 400% 100%;
+            animation: sv-shimmer 1.2s ease infinite;
+        }
+
+        .stock-visualizer-cta {
+            margin: @indent__xs @indent__s;
+        }
+
+        .stock-visualizer-cta.sv-cta-loading {
+            opacity: .7;
+            cursor: default;
+        }
+    }
+}
+
+@keyframes sv-shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .product-info-main .stock-visualizer.sva {
+        .sv-skel {
+            animation: none;
+        }
+
+        .sv-meter > i {
+            transition: none;
+        }
+
+        .sv-src {
+            transition: none;
+        }
+
+        .sv-loading .sv-meter {
+            animation: none;
+        }
+    }
+}

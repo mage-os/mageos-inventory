@@ -71,7 +71,8 @@ class Async
      */
     public function executeList(array $stockIds): void
     {
-        $stockIds = array_map('intval', $stockIds);
-        $this->publisher->publish(self::TOPIC_STOCK_INDEX, $stockIds);
+        foreach ($stockIds as $stockId) {
+            $this->publisher->publish(self::TOPIC_STOCK_INDEX, [(int)$stockId]);
+        }
     }
 }

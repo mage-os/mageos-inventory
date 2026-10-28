@@ -9,13 +9,20 @@
     <type name="Magento\Sales\Model\Order\ShipmentFactory">
         <plugin name="assign_source_code_to_shipment" type="Magento\InventoryShipping\Plugin\Sales\Shipment\AssignSourceCodeToShipmentPlugin"/>
     </type>
+    <type name="Magento\Sales\Model\Order\Validation\ShipOrderInterface">
+        <plugin name="validate_source_on_ship_order" type="Magento\InventoryShipping\Plugin\Sales\Order\Validation\ValidateSourceOnShipOrderPlugin"/>
+    </type>
     <type name="Magento\Sales\Model\ResourceModel\Order\Shipment">
+        <plugin name="ResolveSourceForShipment" type="Magento\InventoryShipping\Plugin\Sales\ResourceModel\Order\Shipment\ResolveSourceForShipmentPlugin"/>
         <plugin name="SaveSourceForShipment" type="Magento\InventoryShipping\Plugin\Sales\ResourceModel\Order\Shipment\SaveSourceForShipmentPlugin"/>
         <plugin name="LoadSourceForShipment" type="Magento\InventoryShipping\Plugin\Sales\ResourceModel\Order\Shipment\LoadSourceForShipmentPlugin"/>
         <plugin name="DeleteSourceForShipment" type="Magento\InventoryShipping\Plugin\Sales\ResourceModel\Order\Shipment\DeleteSourceForShipmentPlugin"/>
     </type>
     <type name="Magento\Sales\Api\ShipmentRepositoryInterface">
         <plugin name="GetListShipmentRepository" type="Magento\InventoryShipping\Plugin\Sales\Model\Order\GetListShipmentRepositoryPlugin"/>
+    </type>
+    <type name="Magento\InventoryShipping\Model\ResolveShipmentSourceCode">
+        <plugin name="prefer_allocated_source_on_resolve_shipment_source_code" type="Magento\InventoryShipping\Plugin\PreferAllocatedSourceOnResolveShipmentSourceCodePlugin"/>
     </type>
     <type name="Magento\InventoryApi\Model\SourceValidatorChain">
         <arguments>

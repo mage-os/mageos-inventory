@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Jeanmarcos Juarez
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="inventory.stockvisualizer.purge" is_synchronous="false" request="string">
+        <handler name="inventory.stockvisualizer.purge.handler"
+                 type="Magento\InventoryStockVisualizer\Model\Cache\PurgeConsumer" method="process"/>
+    </topic>
+</config>

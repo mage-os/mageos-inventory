@@ -7,6 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\InventoryCatalogFrontendUi\Model;
 
+use Magento\Framework\App\ObjectManager;
+use Magento\InventoryConfigurationApi\Api\GetStockItemConfigurationInterface;
+use Magento\InventoryConfigurationApi\Exception\SkuIsNotAssignedToStockException;
 use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
 
 /**
@@ -15,25 +18,37 @@ use Magento\InventorySalesApi\Api\GetProductSalableQtyInterface;
 class GetProductQtyLeft
 {
     /**
-     * @var IsSalableQtyAvailableForDisplaying
-     */
-    private $qtyLeftChecker;
-
-    /**
      * @var GetProductSalableQtyInterface
      */
-    private $getProductSalableQty;
+    private GetProductSalableQtyInterface $getProductSalableQty;
 
     /**
-     * @param IsSalableQtyAvailableForDisplaying $qtyLeftChecker
+     * @var IsSalableQtyThresholdReached
+     */
+    private IsSalableQtyThresholdReached $isSalableQtyThresholdReached;
+
+    /**
+     * @var GetStockItemConfigurationInterface
+     */
+    private GetStockItemConfigurationInterface $getStockItemConfig;
+
+    /**
+     * @param IsSalableQtyAvailableForDisplaying $qtyLeftChecker [Deprecated]
      * @param GetProductSalableQtyInterface $getProductSalableQty
+     * @param IsSalableQtyThresholdReached|null $isSalableQtyThresholdReached
+     * @param GetStockItemConfigurationInterface|null $getStockItemConfig
      */
     public function __construct(
         IsSalableQtyAvailableForDisplaying $qtyLeftChecker,
-        GetProductSalableQtyInterface $getProductSalableQty
+        GetProductSalableQtyInterface $getProductSalableQty,
+        ?IsSalableQtyThresholdReached $isSalableQtyThresholdReached = null,
+        ?GetStockItemConfigurationInterface $getStockItemConfig = null
     ) {
-        $this->qtyLeftChecker = $qtyLeftChecker;
         $this->getProductSalableQty = $getProductSalableQty;
+        $this->isSalableQtyThresholdReached = $isSalableQtyThresholdReached
+            ?? ObjectManager::getInstance()->get(IsSalableQtyThresholdReached::class);
+        $this->getStockItemConfig = $getStockItemConfig
+            ?? ObjectManager::getInstance()->get(GetStockItemConfigurationInterface::class);
     }
 
     /**
@@ -42,14 +57,15 @@ class GetProductQtyLeft
      * @param string $productSku
      * @param int $stockId
      * @return float
+     * @throws SkuIsNotAssignedToStockException
      */
     public function execute(string $productSku, int $stockId): float
     {
         $productSalableQty = $this->getProductSalableQty->execute($productSku, $stockId);
-        if ($this->qtyLeftChecker->execute((float)$productSalableQty)) {
-            return $productSalableQty;
-        }
+        $stockItemConfig = $this->getStockItemConfig->execute($productSku, $stockId);
 
-        return 0.0;
+        return $this->isSalableQtyThresholdReached->execute($productSalableQty, $stockItemConfig)
+            ? $productSalableQty
+            : 0;
     }
 }

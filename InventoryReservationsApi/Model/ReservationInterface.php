@@ -25,6 +25,8 @@ interface ReservationInterface
     public const SKU = 'sku';
     public const QUANTITY = 'quantity';
     public const METADATA = 'metadata';
+    public const SOURCE_CODE = 'source_code';
+    public const OBJECT_INCREMENT_ID = 'object_increment_id';
 
     /**
      * Get Reservation Id
@@ -68,4 +70,18 @@ interface ReservationInterface
      * @return string|null
      */
     public function getMetadata(): ?string;
+
+    /**
+     * Get Source Code
+     *
+     * @return string|null
+     */
+    public function getSourceCode(): ?string;
+
+    /**
+     * Get Sales Event Object Increment Id
+     *
+     * @return string|null
+     */
+    public function getObjectIncrementId(): ?string;
 }

@@ -1,0 +1,35 @@
+<?php
+/**
+ * Copyright 2026 Jeanmarcos Juarez
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ */
+declare(strict_types=1);
+
+namespace Magento\InventoryStockVisualizer\Model\Product\Attribute\Source;
+
+use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
+use Magento\InventoryStockVisualizer\Model\Config;
+
+/**
+ * Per-product level-basis options, including a "use config default" empty value.
+ */
+class LevelBasis extends AbstractSource
+{
+    /**
+     * @inheritdoc
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getAllOptions(): array
+    {
+        if ($this->_options === null) {
+            $this->_options = [
+                ['value' => '', 'label' => __('Use config default')],
+                ['value' => Config::LEVEL_BASIS_QUANTITY, 'label' => __('By quantity')],
+                ['value' => Config::LEVEL_BASIS_PERCENTAGE, 'label' => __('By percentage')],
+            ];
+        }
+
+        return $this->_options;
+    }
+}

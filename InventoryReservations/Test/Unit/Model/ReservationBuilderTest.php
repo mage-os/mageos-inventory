@@ -74,6 +74,8 @@ class ReservationBuilderTest extends TestCase
             ReservationInterface::SKU => 'somesku',
             ReservationInterface::QUANTITY => 11,
             ReservationInterface::METADATA => 'some meta data',
+            ReservationInterface::SOURCE_CODE => null,
+            ReservationInterface::OBJECT_INCREMENT_ID => null,
         ];
 
         $reservationMappedData = [
@@ -82,6 +84,8 @@ class ReservationBuilderTest extends TestCase
             'sku' => 'somesku',
             'quantity' => 11,
             'metadata' => 'some meta data',
+            'sourceCode' => null,
+            'objectIncrementId' => null,
         ];
 
         $this->snakeToCamelCaseConverter
@@ -105,6 +109,75 @@ class ReservationBuilderTest extends TestCase
             ->expects($this->once())
             ->method('isValid')
             ->willReturn(true);
+
+        $this->reservationBuilder->setStockId($reservationData[ReservationInterface::STOCK_ID]);
+        $this->reservationBuilder->setSku($reservationData[ReservationInterface::SKU]);
+        $this->reservationBuilder->setQuantity($reservationData[ReservationInterface::QUANTITY]);
+        $this->reservationBuilder->setMetadata($reservationData[ReservationInterface::METADATA]);
+
+        self::assertEquals($this->reservation, $this->reservationBuilder->build());
+    }
+
+    public function testBuildWithSourceCodeAndObjectIncrementId()
+    {
+        $reservationData = [
+            ReservationInterface::RESERVATION_ID => null,
+            ReservationInterface::STOCK_ID => 1,
+            ReservationInterface::SKU => 'somesku',
+            ReservationInterface::QUANTITY => -5,
+            ReservationInterface::METADATA => 'some meta data',
+            ReservationInterface::SOURCE_CODE => 'source-a',
+            ReservationInterface::OBJECT_INCREMENT_ID => '000000123',
+        ];
+
+        $reservationMappedData = [
+            'reservationId' => null,
+            'stockId' => 1,
+            'sku' => 'somesku',
+            'quantity' => -5,
+            'metadata' => 'some meta data',
+            'sourceCode' => 'source-a',
+            'objectIncrementId' => '000000123',
+        ];
+
+        $this->snakeToCamelCaseConverter
+            ->method('convert')
+            ->with(array_keys($reservationData))
+            ->willReturn(array_keys($reservationMappedData));
+
+        $expectedArguments = [
+            $reservationMappedData,
+            array_merge($reservationMappedData, ['sourceCode' => null, 'objectIncrementId' => null]),
+        ];
+        $createCall = 0;
+        $this->objectManager
+            ->expects($this->exactly(2))
+            ->method('create')
+            ->willReturnCallback(
+                function (string $type, array $arguments) use ($expectedArguments, &$createCall) {
+                    self::assertSame(ReservationInterface::class, $type);
+                    self::assertEquals($expectedArguments[$createCall++], $arguments);
+
+                    return $this->reservation;
+                }
+            );
+
+        $this->validationResultFactory
+            ->method('create')
+            ->willReturn($this->validationResult);
+
+        $this->validationResult
+            ->method('isValid')
+            ->willReturn(true);
+
+        $this->reservationBuilder->setStockId($reservationData[ReservationInterface::STOCK_ID]);
+        $this->reservationBuilder->setSku($reservationData[ReservationInterface::SKU]);
+        $this->reservationBuilder->setQuantity($reservationData[ReservationInterface::QUANTITY]);
+        $this->reservationBuilder->setMetadata($reservationData[ReservationInterface::METADATA]);
+        $this->reservationBuilder->setSourceCode($reservationData[ReservationInterface::SOURCE_CODE]);
+        $this->reservationBuilder->setObjectIncrementId($reservationData[ReservationInterface::OBJECT_INCREMENT_ID]);
+
+        self::assertEquals($this->reservation, $this->reservationBuilder->build());
 
         $this->reservationBuilder->setStockId($reservationData[ReservationInterface::STOCK_ID]);
         $this->reservationBuilder->setSku($reservationData[ReservationInterface::SKU]);

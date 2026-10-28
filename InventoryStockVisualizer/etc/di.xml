@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Jeanmarcos Juarez
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magento\InventoryStockVisualizer\Api\GetStockViewInterface"
+                type="Magento\InventoryStockVisualizer\Model\GetStockView"/>
+    <preference for="Magento\InventoryStockVisualizer\Api\Data\StockViewInterface"
+                type="Magento\InventoryStockVisualizer\Model\Data\StockView"/>
+    <preference for="Magento\InventoryStockVisualizer\Api\Data\SourceViewInterface"
+                type="Magento\InventoryStockVisualizer\Model\Data\SourceView"/>
+    <preference for="Magento\InventoryStockVisualizer\Api\Data\ChildViewInterface"
+                type="Magento\InventoryStockVisualizer\Model\Data\ChildView"/>
+    <type name="Magento\InventoryReservationsApi\Model\AppendReservationsInterface">
+        <plugin name="stock_visualizer_purge_cache"
+                type="Magento\InventoryStockVisualizer\Plugin\InventoryReservationsApi\PurgeStockVisualizerCachePlugin"/>
+    </type>
+    <type name="Magento\InventoryApi\Api\SourceItemsSaveInterface">
+        <plugin name="stock_visualizer_purge_on_source_items_save"
+                type="Magento\InventoryStockVisualizer\Plugin\InventoryApi\PurgeOnSourceItemsSave"/>
+    </type>
+    <type name="Magento\InventoryApi\Api\SourceItemsDeleteInterface">
+        <plugin name="stock_visualizer_purge_on_source_items_delete"
+                type="Magento\InventoryStockVisualizer\Plugin\InventoryApi\PurgeOnSourceItemsDelete"/>
+    </type>
+    <type name="Magento\InventoryIndexer\Indexer\Stock\SkuListsProcessor">
+        <arguments>
+            <argument name="saleabilityChangesProcessorsPool" xsi:type="array">
+                <item name="stockVisualizerCacheFlushProcessor" xsi:type="object">Magento\InventoryStockVisualizer\Model\Cache\SalabilityChangeProcessor</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

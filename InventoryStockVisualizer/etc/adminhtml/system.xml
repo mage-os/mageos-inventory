@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Jeanmarcos Juarez
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="cataloginventory">
+            <group id="stock_visualizer" translate="label" type="text" sortOrder="800" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Storefront Stock Visualizer</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Enable stock visualizer</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Show an availability panel on the product page.</comment>
+                </field>
+                <field id="display_type" translate="label" type="select" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Display type</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\DisplayType</source_model>
+                    <comment>Level shows a coarse semaphore and never exposes an exact quantity; exact quantity
+                        shows the number. Applies to every product type, on top of the per-type display below.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="mode" translate="label" type="select" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Delivery mode</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\Mode</source_model>
+                    <comment>For availability fetched over AJAX (exact quantity, and interactive composite types):
+                        on demand fetches on a button click; instant fetches on page load. Server-rendered
+                        availability is always shown on page load.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="ttl" translate="label" type="text" sortOrder="50" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Cache TTL (seconds)</label>
+                    <validate>validate-digits</validate>
+                    <comment>Public-cache lifetime for the AJAX availability fragments. 0 relies on tag purge only.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="level_basis" translate="label" type="select" sortOrder="60" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Level basis</label>
+                    <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\LevelBasis</source_model>
+                    <comment>By quantity compares the salable quantity to the thresholds; by percentage compares
+                        it to the per-product full quantity (falls back to quantity thresholds when unset).</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">level</field>
+                    </depends>
+                </field>
+                <field id="level_high" translate="label" type="text" sortOrder="70" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>High level threshold</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                    <comment>Above this the level is high (green). In percentage basis this is a percent.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">level</field>
+                    </depends>
+                </field>
+                <field id="level_low" translate="label" type="text" sortOrder="80" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Low level threshold</label>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                    <comment>Above this (and at or below High) the level is medium (amber); at or below it is
+                        low (red). In percentage basis this is a percent.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                        <field id="display_type">level</field>
+                    </depends>
+                </field>
+                <group id="single_sku" translate="label comment" type="text" sortOrder="150" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Per-source breakdown</label>
+                    <comment>Applies to single-SKU availability: simple, virtual, downloadable, and the selected
+                        configurable variant. Composite aggregate and per-component displays are unaffected.</comment>
+                    <field id="scope" translate="label" type="select" sortOrder="10" showInDefault="1"
+                           showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Display scope</label>
+                        <config_path>cataloginventory/stock_visualizer/scope</config_path>
+                        <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\Scope</source_model>
+                        <comment>Aggregate shows a single availability; per source breaks it down by source.</comment>
+                    </field>
+                    <field id="show_source_labels" translate="label" type="select" sortOrder="20" showInDefault="1"
+                           showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Show source labels</label>
+                        <config_path>cataloginventory/stock_visualizer/show_source_labels</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Display the source name for each per-source row.</comment>
+                        <depends>
+                            <field id="scope">per_source</field>
+                        </depends>
+                    </field>
+                    <field id="hide_empty_sources" translate="label" type="select" sortOrder="30" showInDefault="1"
+                           showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Hide empty sources</label>
+                        <config_path>cataloginventory/stock_visualizer/hide_empty_sources</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Omit out-of-stock sources from the per-source breakdown.</comment>
+                        <depends>
+                            <field id="scope">per_source</field>
+                        </depends>
+                    </field>
+                </group>
+                <group id="composite_types" translate="label" type="text" sortOrder="200" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Composite product types</label>
+                    <field id="composite_configurable_mode" translate="label" type="select" sortOrder="10"
+                           showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Configurable products display</label>
+                        <config_path>cataloginventory/stock_visualizer/composite_configurable_mode</config_path>
+                        <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\ConfigurableMode</source_model>
+                        <comment>Selected variant fetches the chosen variant's availability; per component lists
+                            every variant; aggregate status shows a single in-stock/out-of-stock word.</comment>
+                    </field>
+                    <field id="composite_bundle_mode" translate="label" type="select" sortOrder="20"
+                           showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Bundle products display</label>
+                        <config_path>cataloginventory/stock_visualizer/composite_bundle_mode</config_path>
+                        <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\BundleMode</source_model>
+                        <comment>Sellable bundles computes how many of the current selection can be ordered;
+                            per component lists each selection's stock.</comment>
+                    </field>
+                    <field id="composite_grouped_mode" translate="label" type="select" sortOrder="30"
+                           showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Grouped products display</label>
+                        <config_path>cataloginventory/stock_visualizer/composite_grouped_mode</config_path>
+                        <source_model>Magento\InventoryStockVisualizer\Model\Config\Source\CompositeMode</source_model>
+                        <comment>Per component lists each associated product's stock; aggregate status shows a
+                            single in-stock/out-of-stock word.</comment>
+                    </field>
+                    <field id="composite_grouped_sets_calculator" translate="label comment" type="select"
+                           sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Grouped complete-sets calculator</label>
+                        <config_path>cataloginventory/stock_visualizer/composite_grouped_sets_calculator</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>Show how many complete sets can be assembled, alongside the per-component list
+                            (grouped "Per component" display only).</comment>
+                        <depends>
+                            <field id="composite_grouped_mode">children</field>
+                        </depends>
+                    </field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

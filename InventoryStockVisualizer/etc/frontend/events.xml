@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Mage-OS
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="layout_generate_blocks_after">
+        <observer name="inventory_stock_visualizer_remove_core_stock_blocks"
+                  instance="Magento\InventoryStockVisualizer\Observer\RemoveCoreStockBlocks"/>
+    </event>
+</config>

@@ -5,10 +5,14 @@
       "stock_id": true,
       "sku": true,
       "quantity": true,
-      "metadata": true
+      "metadata": true,
+      "source_code": true,
+      "object_increment_id": true
     },
     "index": {
-      "INVENTORY_RESERVATION_STOCK_ID_SKU_QUANTITY": true
+      "INVENTORY_RESERVATION_STOCK_ID_SKU_QUANTITY": true,
+      "INVENTORY_RESERVATION_SOURCE_CODE_SKU_QUANTITY": true,
+      "INVENTORY_RESERVATION_OBJECT_INCREMENT_ID": true
     },
     "constraint": {
       "PRIMARY": true

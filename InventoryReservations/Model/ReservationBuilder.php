@@ -40,6 +40,16 @@ class ReservationBuilder implements ReservationBuilderInterface
     private $metadata;
 
     /**
+     * @var string|null
+     */
+    private $sourceCode;
+
+    /**
+     * @var string|null
+     */
+    private $objectIncrementId;
+
+    /**
      * @var ObjectManagerInterface
      */
     private $objectManager;
@@ -108,6 +118,24 @@ class ReservationBuilder implements ReservationBuilderInterface
     /**
      * @inheritdoc
      */
+    public function setSourceCode(?string $sourceCode = null): ReservationBuilderInterface
+    {
+        $this->sourceCode = $sourceCode;
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setObjectIncrementId(?string $objectIncrementId = null): ReservationBuilderInterface
+    {
+        $this->objectIncrementId = $objectIncrementId;
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function build(): ReservationInterface
     {
         /** @var ValidationResult $validationResult */
@@ -122,6 +150,8 @@ class ReservationBuilder implements ReservationBuilderInterface
             ReservationInterface::SKU => $this->sku,
             ReservationInterface::QUANTITY => $this->quantity,
             ReservationInterface::METADATA => $this->metadata,
+            ReservationInterface::SOURCE_CODE => $this->sourceCode,
+            ReservationInterface::OBJECT_INCREMENT_ID => $this->objectIncrementId,
         ];
 
         $arguments = $this->convertArrayKeysFromSnakeToCamelCase($data);
@@ -167,6 +197,8 @@ class ReservationBuilder implements ReservationBuilderInterface
         $this->sku = null;
         $this->quantity = null;
         $this->metadata = null;
+        $this->sourceCode = null;
+        $this->objectIncrementId = null;
     }
 
     /**

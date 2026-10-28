@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2026 Jeanmarcos Juarez
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <cataloginventory>
+            <stock_visualizer>
+                <enabled>0</enabled>
+                <display_type>level</display_type>
+                <scope>aggregate</scope>
+                <mode>on_demand</mode>
+                <ttl>0</ttl>
+                <level_basis>quantity</level_basis>
+                <level_high>10</level_high>
+                <level_low>3</level_low>
+                <show_source_labels>1</show_source_labels>
+                <hide_empty_sources>1</hide_empty_sources>
+                <composite_configurable_mode>variant</composite_configurable_mode>
+                <composite_bundle_mode>max</composite_bundle_mode>
+                <composite_grouped_mode>children</composite_grouped_mode>
+                <composite_grouped_sets_calculator>0</composite_grouped_sets_calculator>
+            </stock_visualizer>
+        </cataloginventory>
+    </default>
+</config>

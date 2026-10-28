@@ -10,14 +10,19 @@ namespace Magento\InventoryReservations\Model\ResourceModel;
 use Magento\Framework\App\ResourceConnection;
 use Magento\InventoryReservationsApi\Model\GetReservationsQuantityBySkuListInterface;
 use Magento\InventoryReservationsApi\Model\ReservationInterface;
+use Magento\InventoryReservationsApi\Model\SourceReservationsConfig;
 
 class GetReservationsQuantityBySkuList implements GetReservationsQuantityBySkuListInterface
 {
     /**
      * @param ResourceConnection $resource
+     * @param SourceReservationsConfig $sourceReservationsConfig
+     * @param GetSourceAggregatedReservationsQuantity $getSourceAggregatedReservationsQuantity
      */
     public function __construct(
-        private readonly ResourceConnection $resource
+        private readonly ResourceConnection $resource,
+        private readonly SourceReservationsConfig $sourceReservationsConfig,
+        private readonly GetSourceAggregatedReservationsQuantity $getSourceAggregatedReservationsQuantity
     ) {
     }
 
@@ -26,6 +31,10 @@ class GetReservationsQuantityBySkuList implements GetReservationsQuantityBySkuLi
      */
     public function execute(array $skus, int $stockId): array
     {
+        if ($this->sourceReservationsConfig->isEnabled()) {
+            return $this->getSourceAggregatedReservationsQuantity->execute($skus, $stockId);
+        }
+
         $connection = $this->resource->getConnection();
         $reservationTable = $this->resource->getTableName('inventory_reservation');
 

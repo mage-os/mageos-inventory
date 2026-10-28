@@ -10,6 +10,7 @@ namespace Magento\InventoryReservations\Model\ResourceModel;
 use Magento\Framework\App\ResourceConnection;
 use Magento\InventoryReservationsApi\Model\ReservationInterface;
 use Magento\InventoryReservationsApi\Model\GetReservationsQuantityInterface;
+use Magento\InventoryReservationsApi\Model\SourceReservationsConfig;
 
 /**
  * @inheritdoc
@@ -23,9 +24,13 @@ class GetReservationsQuantity implements GetReservationsQuantityInterface
 
     /**
      * @param ResourceConnection $resource
+     * @param SourceReservationsConfig $sourceReservationsConfig
+     * @param GetSourceAggregatedReservationsQuantity $getSourceAggregatedReservationsQuantity
      */
     public function __construct(
-        ResourceConnection $resource
+        ResourceConnection $resource,
+        private readonly SourceReservationsConfig $sourceReservationsConfig,
+        private readonly GetSourceAggregatedReservationsQuantity $getSourceAggregatedReservationsQuantity
     ) {
         $this->resource = $resource;
     }
@@ -35,6 +40,10 @@ class GetReservationsQuantity implements GetReservationsQuantityInterface
      */
     public function execute(string $sku, int $stockId): float
     {
+        if ($this->sourceReservationsConfig->isEnabled()) {
+            return $this->getSourceAggregatedReservationsQuantity->execute([$sku], $stockId)[$sku] ?? 0.0;
+        }
+
         $connection = $this->resource->getConnection();
         $reservationTable = $this->resource->getTableName('inventory_reservation');
 
