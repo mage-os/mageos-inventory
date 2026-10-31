@@ -85,6 +85,9 @@
     <type name="Magento\InventorySales\Model\SourceReservation\PlaceReservationsForSalesEventRouter">
         <plugin name="schedule_reservation_place" type="Magento\InventoryIndexer\Plugin\InventorySales\EnqueueAfterPlaceReservationsForSalesEvent"/>
     </type>
+    <type name="Magento\InventorySales\Model\SourceReservation\ReconcileOrderReservations">
+        <plugin name="schedule_reservation_reconcile" type="Magento\InventoryIndexer\Plugin\InventorySales\EnqueueAfterReconcileOrderReservations"/>
+    </type>
     <type name="Magento\InventoryIndexer\Model\ResourceModel\GetProductIdsByStockIds">
         <arguments>
             <argument name="productTableName" xsi:type="string">catalog_product_entity</argument>
